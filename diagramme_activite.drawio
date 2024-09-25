@@ -4,7 +4,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="evtHjDNTr2GFBzJeNFMd-1" value="Diagramme de cas d&#39;utilisation" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="evtHjDNTr2GFBzJeNFMd-1" value="Diagramme de cas d&#39;utilisation (V1)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="170" y="80" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="I4p1qM1zzy1uWlkFT4VS-1" value="Chercheur" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
