@@ -60,7 +60,7 @@ def search_by_author(author_name):
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
 
 # Exemple d'utilisation
-mot_cle = "cycloaddition"
+mot_cle = "carbon"
 search_by_keyword(mot_cle)
 
 author_name = "ammar"
