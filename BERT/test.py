@@ -5,7 +5,7 @@ import numpy as np  # NumPy pour manipuler les embeddings
 from sentence_transformers import SentenceTransformer, util
 
 # Charger le modèle pré-entraîné
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV
 df = pd.read_csv('Bibliographie.csv')
@@ -87,7 +87,7 @@ def search_by_author(author_name):
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
 
 # Exemple d'utilisation
-mot_cle = "voltammetry"
+mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
 search_by_keyword(mot_cle)
 
 author_name = "John F"
