@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV
-df = pd.read_csv('Bibliographie.csv')
+df = pd.read_csv('BERT/Bibliographie.csv')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
