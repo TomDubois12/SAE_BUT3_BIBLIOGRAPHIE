@@ -66,10 +66,10 @@ def search_by_keyword(mot_cle):
     # Trier les résultats par ordre décroissant de similarité
     similarities_with_title_abstracts.sort(key=lambda x: x[3], reverse=True)
 
-    # Afficher les 15 résultats les plus proches du mot clé avec leur Key, Titre et Abstract
-    print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
-    for key, title, abstract, score in similarities_with_title_abstracts[:15]:
-        print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
+    # Stocker les 15 résultats les plus proches du mot clé avec leur Key et la similarité
+    top_results = [(key, score) for key, title, abstract, score in similarities_with_title_abstracts[:15]]
+
+    return top_results
 
 # Fonction de recherche par auteur
 def search_by_author(author_name):
@@ -88,7 +88,12 @@ def search_by_author(author_name):
 
 # Exemple d'utilisation
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
-search_by_keyword(mot_cle)
+top_15_results = search_by_keyword(mot_cle)
+
+# Afficher les résultats
+print("Top 15 résultats:")
+for key, score in top_15_results:
+    print(f"Key: {key} - Similarité: {score:.4f}\n")
 
 author_name = "John F"
 search_by_author(author_name)
