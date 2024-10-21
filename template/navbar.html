@@ -4,17 +4,44 @@
         <img src="../img/logo.png" alt="logo de l'application" class="logo">
         <input type="search" id="site-search" name="q" minlength="4"
             placeholder="Ecrivez un mot ou encore un nom d'auteur" />
+        <button onclick="desactiverBouton('auteur', 'sujet')" id="auteur">Par auteur</button>
+        <button onclick="desactiverBouton('sujet', 'auteur')" id="sujet">Par sujet</button>
         <button id="search-btn">Rechercher</button>
         <a href="https://sae33a.atlassian.net/jira/software/projects/SDBB/boards/3/backlog">À propos</a>
     </nav>
-    
+
     <div id="result"></div>
 
     <script>
+        // Fonction pour désactiver un bouton et activer l'autre
+        function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
+            const boutonADesactiver = document.getElementById(idBoutonADesactiver);
+            const boutonAActiver = document.getElementById(idBoutonAActiver);
+
+            // Désactiver le bouton sélectionné
+            if (boutonADesactiver) {
+                boutonADesactiver.disabled = true;
+                boutonADesactiver.style.backgroundColor = "gray"; // Indique visuellement qu'il est désactivé
+            }
+
+            // Activer l'autre bouton
+            if (boutonAActiver) {
+                boutonAActiver.disabled = false;
+                boutonAActiver.style.backgroundColor = ""; // Restaure la couleur par défaut (ou définie dans le CSS)
+            }
+        }
+
         // Fonction pour afficher le résultat
         function afficherResultat() {
+            filtre = "";
+            if(document.getElementById('auteur').disabled == true){
+                filtre = "auteurs";
+            }
+            else{
+                filtre = "sujets";
+            }
             const inputValue = document.getElementById('site-search').value;
-            document.getElementById('result').innerHTML = "Résultat : " + inputValue;
+            document.getElementById('result').innerHTML = "Résultat sur les " + filtre + " :" + inputValue;
         }
 
         // Écouter le clic sur le bouton "Rechercher"

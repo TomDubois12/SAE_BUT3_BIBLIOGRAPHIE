@@ -13,10 +13,13 @@ nav{
     border-radius: 15vw 0vw 0vw 15vw;
 }
 
-nav button{
-    margin-right: 4vw;
+button{
     background-color: #166F7A;
     color: white;
+}
+
+#search-btn{
+    margin-right: 4vw;
     border-radius: 0vw 15vw 15vw 0vw;
 }
 
