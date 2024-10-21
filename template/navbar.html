@@ -21,13 +21,15 @@
             // Désactiver le bouton sélectionné
             if (boutonADesactiver) {
                 boutonADesactiver.disabled = true;
-                boutonADesactiver.style.backgroundColor = "gray"; // Indique visuellement qu'il est désactivé
+                boutonADesactiver.style.backgroundColor = "white"; // Indique visuellement qu'il est désactivé
+                boutonADesactiver.style.color = "#166F7A"; // Indique visuellement qu'il est désactivé
             }
 
             // Activer l'autre bouton
             if (boutonAActiver) {
                 boutonAActiver.disabled = false;
-                boutonAActiver.style.backgroundColor = ""; // Restaure la couleur par défaut (ou définie dans le CSS)
+                boutonAActiver.style.backgroundColor = "#166F7A"; // Indique visuellement qu'il est désactivé
+                boutonAActiver.style.color = "white"; // Indique visuellement qu'il est désactivé
             }
         }
 
