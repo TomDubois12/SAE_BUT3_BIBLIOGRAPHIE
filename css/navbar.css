@@ -1,0 +1,28 @@
+nav{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.logo{
+    max-width: 20vh;
+    margin-right: 2vw;
+}
+
+#site-search{
+    flex-grow: 0.9;
+    border-radius: 15vw 0vw 0vw 15vw;
+}
+
+nav button{
+    margin-right: 4vw;
+    background-color: #166F7A;
+    color: white;
+    border-radius: 0vw 15vw 15vw 0vw;
+}
+
+nav a{
+    flex-grow: 0.1;
+    margin: auto;
+    text-decoration: none;
+    margin-right: 0vw;
+}
