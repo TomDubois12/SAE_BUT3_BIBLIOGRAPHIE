@@ -34,3 +34,5 @@ npm run make
 
 
 voir ça https://www.youtube.com/watch?v=2inAo5aa_AU
+
+npm install python-shell

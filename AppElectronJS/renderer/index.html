@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>Hello from Electron renderer!</title>
-  </head>
-  <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p>👋</p>
-    <p id="info"></p>
-  </body>
-  <script src="./renderer.js"></script>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electron Search App</title>
+</head>
+<body>
+  <h1>Search App</h1>
+  <input type="text" id="searchInput" placeholder="Enter search query">
+  <button id="search">Search</button>
+
+  <h3>Search Result:</h3>
+  <p id="result">Type something to search...</p>
+
+  <script>
+    document.getElementById('search').addEventListener('click', async () => {
+        const query = document.getElementById('searchInput').value; // Récupère le contenu de la barre de recherche
+        const output = await window.api.callFunctionSearch(query);  // Assurez-vous que l'appel utilise 'callFunctionSearch'
+        document.getElementById('result').innerText = output; // Affiche le résultat
+    });
+  </script>
+  
+</body>
 </html>
+ 
