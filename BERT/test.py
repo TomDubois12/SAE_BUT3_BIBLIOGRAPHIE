@@ -69,7 +69,7 @@ def search_by_keyword(mot_cle):
     print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
     for key, title, abstract, score in similarities_with_title_abstracts[:15]:
         print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
-    return [(t[0], t[3]) for t in similarities_with_title_abstracts[:5]]
+    return [(t[0], t[3]) for t in similarities_with_title_abstracts[:15]]
 
 # Fonction de recherche par mot clé avec calcul de la similarité entre les résultats
 def search_by_keyword_and_compare(mot_cle):

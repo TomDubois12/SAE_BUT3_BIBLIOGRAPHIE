@@ -72,7 +72,7 @@ def show_graphique(liste_key):
     #    G.add_edges_from((group[i], group[j]) for i in range(len(group)) for j in range(i + 1, len(group)))
 
     # Visualiser avec PyVis
-    nt = Network('500px', '500px', notebook=True)
+    nt = Network('100vh', '100vw', notebook=True)
     nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
