@@ -1,0 +1,170 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100vw;
+                 height: 100vh;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "red", "id": "H887U8PG", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Kang, E. T.; Neoh, K. G.; Tan, K. L.; Tan, B. T. G.\"}", "label": "H887U8PG", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "blue", "id": "HK3IZZDD", "infos": "{\"Item Type\": \"book\", \"Publication Year\": 2003.0, \"Author\": \"Zanello, Piero\"}", "label": "HK3IZZDD", "shape": "dot", "size": 10, "year": 2003.0}, {"color": "red", "id": "REP9MBAI", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2009.0, \"Author\": \"Pardieu, Elodie; Cheap, Helene; Vedrine, Christophe; Lazerges, Mathieu; Lattach, Youssef; Garnier, Francis; Remita, Samy; Pernelle, Christine\"}", "label": "REP9MBAI", "shape": "dot", "size": 10, "year": 2009.0}, {"color": "blue", "id": "95UPVHUD", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2006.0, \"Author\": \"Devaraj, Neal K.; Decreau, Richard A.; Ebina, Wataru; Collman, James P.; Chidsey, Christopher E. D.\"}", "label": "95UPVHUD", "shape": "dot", "size": 10, "year": 2006.0}, {"color": "blue", "id": "2UUQAEYV", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2006.0, \"Author\": \"Devaraj, Neal K.; Decreau, Richard A.; Ebina, Wataru; Collman, James P.; Chidsey, Christopher E. D.\"}", "label": "2UUQAEYV", "shape": "dot", "size": 10, "year": 2006.0}, {"color": "blue", "id": "B6C8NP64", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1999.0, \"Author\": \"Yang, Hseuh-Hui; McCreery, R. L.\"}", "label": "B6C8NP64", "shape": "dot", "size": 10, "year": 1999.0}, {"color": "red", "id": "CC5R38XF", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2012.0, \"Author\": \"Wang, Yie-Hsiang; Chang, Chia-Ming; Liu, Ying-Ling\"}", "label": "CC5R38XF", "shape": "dot", "size": 10, "year": 2012.0}, {"color": "blue", "id": "N5JXSQZH", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2007.0, \"Author\": \"Hayden, Hugh; Gun\u0027ko, Yuril K.; Perova, Tatiana S.\"}", "label": "N5JXSQZH", "shape": "dot", "size": 10, "year": 2007.0}, {"color": "blue", "id": "STWIUZGW", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"Sakellariou, Georgios; Ji, Haining; Mays, Jimmy W.; Baskaran, Durairaj\"}", "label": "STWIUZGW", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "blue", "id": "B7J8G8NR", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2013.0, \"Author\": \"Zhao, Zhiyuan; Yang, Zhanhong; Hu, Youwang; Li, Jianping; Fan, Xinming\"}", "label": "B7J8G8NR", "shape": "dot", "size": 10, "year": 2013.0}, {"color": "blue", "id": "Z7KB5HII", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2001.0, \"Author\": \"Bahr, Jeffrey L.; Yang, Jiping; Kosynkin, Dmitry V.; Bronikowski, Michael J.; Smalley, Richard E.; Tour, James M.\"}", "label": "Z7KB5HII", "shape": "dot", "size": 10, "year": 2001.0}, {"color": "blue", "id": "NRN99JUR", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2001.0, \"Author\": \"Bahr, Jeffrey L.; Yang, Jiping; Kosynkin, Dmitry V.; Bronikowski, Michael J.; Smalley, Richard E.; Tour, James M.\"}", "label": "NRN99JUR", "shape": "dot", "size": 10, "year": 2001.0}, {"color": "red", "id": "WZTYDKMK", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1984.0, \"Author\": \"Gorton, Lo; Torstensson, Arne; Jaegfeldt, Hans; Johansson, Gillis\"}", "label": "WZTYDKMK", "shape": "dot", "size": 10, "year": 1984.0}, {"color": "blue", "id": "KFQDN8WE", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2009.0, \"Author\": \"Lin, Wei-Jhih; Liao, Chien-Shiun; Jhang, Jia-Hao; Tsai, Yu-Chen\"}", "label": "KFQDN8WE", "shape": "dot", "size": 10, "year": 2009.0}, {"color": "blue", "id": "4FQUV4JA", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Hossain, M. S.; Tryk, D.; Yeager, E.\"}", "label": "4FQUV4JA", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "blue", "id": "QB4KR2IB", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2018.0, \"Author\": \"Pally, David; Bertagna, Val\u00e9rie; Cagnon, Beno\u00eet; Alaaeddine, Moslem; Benoit, Roland; Podvorica, Fetah I.; Vautrin-Ul, Christine\"}", "label": "QB4KR2IB", "shape": "dot", "size": 10, "year": 2018.0}, {"color": "blue", "id": "RJFEHX2G", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2012.0, \"Author\": \"Patel, Anisha N.; Collignon, Manon Guille; O\u2019Connell, Michael A.; Hung, Wendy O. Y.; McKelvey, Kim; Macpherson, Julie V.; Unwin, Patrick R.\"}", "label": "RJFEHX2G", "shape": "dot", "size": 10, "year": 2012.0}, {"color": "blue", "id": "TA7CJ7WN", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2003.0, \"Author\": \"Solak, Ali Osman; Eichorst, Laura R.; Clark, William J.; McCreery, Richard L.\"}", "label": "TA7CJ7WN", "shape": "dot", "size": 10, "year": 2003.0}, {"color": "red", "id": "HMS9IWCV", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2017.0, \"Author\": \"Bouden, Sarra; Pinson, Jean; Vautrin-Ul, Christine\"}", "label": "HMS9IWCV", "shape": "dot", "size": 10, "year": 2017.0}, {"color": "blue", "id": "FBNK92R7", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2014.0, \"Author\": \"Bouden, Sarra; Bellakhal, Nizar; Chauss\u00e9, Annie; Dachraoui, Mohamed; Vautrin-Ul, Christine\"}", "label": "FBNK92R7", "shape": "dot", "size": 10, "year": 2014.0}, {"color": "blue", "id": "ZESQDYS9", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2015.0, \"Author\": \"Mooste, Marek; Kibena, Elo; Kozlova, Jekaterina; Marandi, Margus; Matisen, Leonard; Niilisk, Ahti; Sammelselg, V\u00e4ino; Tammeveski, Kaido\"}", "label": "ZESQDYS9", "shape": "dot", "size": 10, "year": 2015.0}, {"color": "blue", "id": "64SHMCRF", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1999.0, \"Author\": \"DuVall, Stacy Hunt; McCreery, Richard L.\"}", "label": "64SHMCRF", "shape": "dot", "size": 10, "year": 1999.0}, {"color": "red", "id": "PEHBA4EM", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2015.0, \"Author\": \"Li, Xiao; He, Yanfen; Zhao, Fan; Zhang, Weiying; Ye, Zhuoliang\"}", "label": "PEHBA4EM", "shape": "dot", "size": 10, "year": 2015.0}, {"color": "red", "id": "DT78C3TD", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2003.0, \"Author\": \"Shoji, Reo; Takeuchi, Toshifumi; Kubo, Izumi\"}", "label": "DT78C3TD", "shape": "dot", "size": 10, "year": 2003.0}, {"color": "blue", "id": "NDFNI6VJ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2019.0, \"Author\": \"Che Lah, Nuur Fahanis; Ahmad, Abdul Latif; Low, Siew Chun; Shoparwe, Noor Fazliani\"}", "label": "NDFNI6VJ", "shape": "dot", "size": 10, "year": 2019.0}, {"color": "blue", "id": "F6SNPVPQ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2002.0, \"Author\": \"Piletsky, Sergey A.; Turner, Anthony P. F.\"}", "label": "F6SNPVPQ", "shape": "dot", "size": 10, "year": 2002.0}, {"color": "red", "id": "5HF4F9HT", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2010.0, \"Author\": \"Liu, Renyong; Guan, Guijian; Wang, Suhua; Zhang, Zhongping\"}", "label": "5HF4F9HT", "shape": "dot", "size": 10, "year": 2010.0}, {"color": "red", "id": "NW66GDEL", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2013.0, \"Author\": \"Lakshmi, Dhana; Akbulut, Meshude; Ivanova-Mitseva, Petya K.; Whitcombe, Michael J.; Piletska, Elena V.; Karim, Kal; G\u00fcven, Olgun; Piletsky, Sergey A.\"}", "label": "NW66GDEL", "shape": "dot", "size": 10, "year": 2013.0}, {"color": "blue", "id": "6TPZG594", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2019.0, \"Author\": \"BelBruno, Joseph J.\"}", "label": "6TPZG594", "shape": "dot", "size": 10, "year": 2019.0}, {"color": "red", "id": "I96NDUDA", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2004.0, \"Author\": \"Corso, M; Auwarter, W; Muntwiler, M; Tamai, A; Greber, T; Osterwalder, J\"}", "label": "I96NDUDA", "shape": "dot", "size": 10, "year": 2004.0}, {"color": "blue", "id": "G9DJDM8S", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"Pacil\u00e9, D.; Meyer, J. C.; Girit, \u00c7 \u00d6; Zettl, A.\"}", "label": "G9DJDM8S", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "blue", "id": "34W59U5E", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2011.0, \"Author\": \"Xue, Jiamin; Sanchez-Yamagishi, Javier; Bulmash, Danny; Jacquod, Philippe; Deshpande, Aparna; Watanabe, K.; Taniguchi, T.; Jarillo-Herrero, Pablo; LeRoy, Brian J.\"}", "label": "34W59U5E", "shape": "dot", "size": 10, "year": 2011.0}, {"color": "blue", "id": "NI3FU2E3", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2007.0, \"Author\": \"Giovannetti, Gianluca; Khomyakov, Petr A.; Brocks, Geert; Kelly, Paul J.; van den Brink, Jeroen\"}", "label": "NI3FU2E3", "shape": "dot", "size": 10, "year": 2007.0}, {"color": "blue", "id": "ZRNCVUIQ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2010.0, \"Author\": \"Dean, C. R.; Young, A. F.; Meric, I.; Lee, C.; Wang, L.; Sorgenfrei, S.; Watanabe, K.; Taniguchi, T.; Kim, P.; Shepard, K. L.; Hone, J.\"}", "label": "ZRNCVUIQ", "shape": "dot", "size": 10, "year": 2010.0}, {"color": "blue", "id": "TG6B4RIL", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2010.0, \"Author\": \"Dean, C. R.; Young, A. F.; Meric, I.; Lee, C.; Wang, L.; Sorgenfrei, S.; Watanabe, K.; Taniguchi, T.; Kim, P.; Shepard, K. L.; Hone, J.\"}", "label": "TG6B4RIL", "shape": "dot", "size": 10, "year": 2010.0}, {"color": "red", "id": "HDTGUP8A", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1992.0, \"Author\": \"Delamar, Michel; Hitmi, Rachid; Pinson, Jean; Saveant, Jean Michel\"}", "label": "HDTGUP8A", "shape": "dot", "size": 10, "year": 1992.0}, {"color": "blue", "id": "QT4VF5TQ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1995.0, \"Author\": \"Fryling, Mark A.; Zhao, Jun.; McCreery, Richard L.\"}", "label": "QT4VF5TQ", "shape": "dot", "size": 10, "year": 1995.0}, {"color": "blue", "id": "54CZPQ6E", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"McCreery, Richard L.\"}", "label": "54CZPQ6E", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "blue", "id": "TNZMA7V4", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1985.0, \"Author\": \"Cabaniss, George E.; Diamantis, A. A.; Murphy, W. Rorer; Linton, R. W.; Meyer, T. J.\"}", "label": "TNZMA7V4", "shape": "dot", "size": 10, "year": 1985.0}, {"color": "blue", "id": "9EHH24XD", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1995.0, \"Author\": \"Chen, Piehong.; Fryling, Mark A.; McCreery, Richard L.\"}", "label": "9EHH24XD", "shape": "dot", "size": 10, "year": 1995.0}, {"color": "blue", "id": "TSG2QXNJ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1992.0, \"Author\": \"McDermott, Mark T.; Kneten, Kristin; McCreery, Richard L.\"}", "label": "TSG2QXNJ", "shape": "dot", "size": 10, "year": 1992.0}, {"color": "red", "id": "9XUENC2X", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2007.0, \"Author\": \"Sakellariou, Georgios; Ji, Haining; Mays, Jimmy W.; Hadjichristidis, Nikos; Baskaran, Durairaj\"}", "label": "9XUENC2X", "shape": "dot", "size": 10, "year": 2007.0}, {"color": "blue", "id": "9ZAJS8BE", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2004.0, \"Author\": \"Katz, Eugenii; Willner, Itamar\"}", "label": "9ZAJS8BE", "shape": "dot", "size": 10, "year": 2004.0}, {"color": "blue", "id": "T3T7FHUC", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2001.0, \"Author\": \"Bahr, Jeffrey L.; Tour, James M.\"}", "label": "T3T7FHUC", "shape": "dot", "size": 10, "year": 2001.0}, {"color": "blue", "id": "G98JRHBI", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2006.0, \"Author\": \"Tasis, Dimitrios; Tagmatarchis, Nikos; Bianco, Alberto; Prato, Maurizio\"}", "label": "G98JRHBI", "shape": "dot", "size": 10, "year": 2006.0}, {"color": "blue", "id": "MWAE359I", "infos": "{\"Item Type\": \"patent\", \"Publication Year\": 2013.0, \"Author\": \"Cambedouzou, Julien; Grandjean, Agn\u00e8s; Kaper, Helena; Nicolle, Jimmy\"}", "label": "MWAE359I", "shape": "dot", "size": 10, "year": 2013.0}, {"color": "blue", "id": "IGA3DVH9", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2005.0, \"Author\": \"McGuire, K.; Gothard, N.; Gai, P.L.; Dresselhaus, M.S.; Sumanasekera, G.; Rao, A.M.\"}", "label": "IGA3DVH9", "shape": "dot", "size": 10, "year": 2005.0}, {"color": "red", "id": "DNWDIPN9", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2009.0, \"Author\": \"Wang, Hongming; Xu, Jingshi\"}", "label": "DNWDIPN9", "shape": "dot", "size": 10, "year": 2009.0}, {"color": "blue", "id": "NPGM43GF", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2009.0, \"Author\": \"Schmidt, Gr\u00e9gory; Gallon, Salom\u00e9; Esnouf, St\u00e9phane; Bourgoin, Jean-Philippe; Chenevier, Pascale\"}", "label": "NPGM43GF", "shape": "dot", "size": 10, "year": 2009.0}, {"color": "blue", "id": "JT7ZKTU5", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2003.0, \"Author\": \"Strano, Michael S.; Dyke, Christopher A.; Usrey, Monica L.; Barone, Paul W.; Allen, Mathew J.; Shan, Hongwei; Kittrell, Carter; Hauge, Robert H.; Tour, James M.; Smalley, Richard E.\"}", "label": "JT7ZKTU5", "shape": "dot", "size": 10, "year": 2003.0}, {"color": "blue", "id": "M4AUQ4T9", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2013.0, \"Author\": \"Beheshtian, Javad; Peyghan, Ali Ahmadi; Bagheri, Zargham\"}", "label": "M4AUQ4T9", "shape": "dot", "size": 10, "year": 2013.0}, {"color": "red", "id": "9GML8PBE", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1996.0, \"Author\": \"Britto, P. J.; Santhanam, K. S. V.; Ajayan, P. M.\"}", "label": "9GML8PBE", "shape": "dot", "size": 10, "year": 1996.0}, {"color": "blue", "id": "GQTF77MT", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"Cruz\u2005Moraes, Fernando; Cabral, Murilo F.; Machado, Sergio A. S.; Mascaro, Lucia H.\"}", "label": "GQTF77MT", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "blue", "id": "VLFN4WLW", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1997.0, \"Author\": \"Davis, Jason J.; Coles, Richard J.; Allen, H.; Hill, O.\"}", "label": "VLFN4WLW", "shape": "dot", "size": 10, "year": 1997.0}, {"color": "blue", "id": "NPBWGFQG", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2010.0, \"Author\": \"Henstridge, Martin C.; Dickinson, Edmund J. F.; Aslanoglu, Mehmet; Batchelor-McAuley, Christopher; Compton, Richard G.\"}", "label": "NPBWGFQG", "shape": "dot", "size": 10, "year": 2010.0}, {"color": "blue", "id": "HTP4PLRU", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2017.0, \"Author\": \"Lin, Chuhong; Chen, Lifu; Tanner, Eden E. L.; Compton, Richard G.\"}", "label": "HTP4PLRU", "shape": "dot", "size": 10, "year": 2017.0}, {"color": "blue", "id": "K5PNLE3R", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2002.0, \"Author\": \"Wang, Gang; Xu, Jing-Juan; Chen, Hong-Yuan\"}", "label": "K5PNLE3R", "shape": "dot", "size": 10, "year": 2002.0}, {"color": "blue", "id": "ZSPGWQYU", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"Sergeyeva, T. A.; Piletska, O. V.; Piletsky, S. A.; Sergeeva, L. M.; Brovko, O. O.; El\u0027ska, G. V.\"}", "label": "ZSPGWQYU", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "red", "id": "LDKRMUUV", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1993.0, \"Author\": \"Waltman, R. J.; Pacansky, J.; Bates, C. W.\"}", "label": "LDKRMUUV", "shape": "dot", "size": 10, "year": 1993.0}, {"color": "blue", "id": "7ZUPWYM3", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1993.0, \"Author\": \"Waltman, R. J.; Pacansky, J.; Bates, C. W.\"}", "label": "7ZUPWYM3", "shape": "dot", "size": 10, "year": 1993.0}, {"color": "blue", "id": "D579LSTZ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1981.0, \"Author\": \"Briggs, D.\"}", "label": "D579LSTZ", "shape": "dot", "size": 10, "year": 1981.0}, {"color": "blue", "id": "PI9YNLUT", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1984.0, \"Author\": \"Pfluger, P.; Street, G. B.\"}", "label": "PI9YNLUT", "shape": "dot", "size": 10, "year": 1984.0}, {"color": "blue", "id": "2CI6E9MS", "infos": "{\"Item Type\": \"webpage\", \"Publication Year\": NaN, \"Author\": NaN}", "label": "2CI6E9MS", "shape": "dot", "size": 10, "year": NaN}]);
+                  edges = new vis.DataSet([{"color": "000000", "from": "H887U8PG", "to": "HK3IZZDD", "width": 1}, {"color": "000000", "from": "H887U8PG", "to": "REP9MBAI", "width": 1}, {"color": "000000", "from": "H887U8PG", "to": "95UPVHUD", "width": 1}, {"color": "000000", "from": "H887U8PG", "to": "2UUQAEYV", "width": 1}, {"color": "000000", "from": "H887U8PG", "to": "B6C8NP64", "width": 1}, {"color": "000000", "from": "CC5R38XF", "to": "N5JXSQZH", "width": 1}, {"color": "000000", "from": "CC5R38XF", "to": "STWIUZGW", "width": 1}, {"color": "000000", "from": "CC5R38XF", "to": "B7J8G8NR", "width": 1}, {"color": "000000", "from": "CC5R38XF", "to": "Z7KB5HII", "width": 1}, {"color": "000000", "from": "CC5R38XF", "to": "NRN99JUR", "width": 1}, {"color": "000000", "from": "WZTYDKMK", "to": "KFQDN8WE", "width": 1}, {"color": "000000", "from": "WZTYDKMK", "to": "4FQUV4JA", "width": 1}, {"color": "000000", "from": "WZTYDKMK", "to": "QB4KR2IB", "width": 1}, {"color": "000000", "from": "WZTYDKMK", "to": "RJFEHX2G", "width": 1}, {"color": "000000", "from": "WZTYDKMK", "to": "TA7CJ7WN", "width": 1}, {"color": "000000", "from": "HMS9IWCV", "to": "FBNK92R7", "width": 1}, {"color": "000000", "from": "HMS9IWCV", "to": "ZESQDYS9", "width": 1}, {"color": "000000", "from": "HMS9IWCV", "to": "QB4KR2IB", "width": 1}, {"color": "000000", "from": "HMS9IWCV", "to": "64SHMCRF", "width": 1}, {"color": "000000", "from": "HMS9IWCV", "to": "HK3IZZDD", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "REP9MBAI", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "DT78C3TD", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "NDFNI6VJ", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "F6SNPVPQ", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "5HF4F9HT", "width": 1}, {"color": "000000", "from": "PEHBA4EM", "to": "NW66GDEL", "width": 1}, {"color": "000000", "from": "5HF4F9HT", "to": "DT78C3TD", "width": 1}, {"color": "000000", "from": "5HF4F9HT", "to": "REP9MBAI", "width": 1}, {"color": "000000", "from": "5HF4F9HT", "to": "F6SNPVPQ", "width": 1}, {"color": "000000", "from": "5HF4F9HT", "to": "6TPZG594", "width": 1}, {"color": "000000", "from": "5HF4F9HT", "to": "NW66GDEL", "width": 1}, {"color": "000000", "from": "I96NDUDA", "to": "G9DJDM8S", "width": 1}, {"color": "000000", "from": "I96NDUDA", "to": "34W59U5E", "width": 1}, {"color": "000000", "from": "I96NDUDA", "to": "NI3FU2E3", "width": 1}, {"color": "000000", "from": "I96NDUDA", "to": "ZRNCVUIQ", "width": 1}, {"color": "000000", "from": "I96NDUDA", "to": "TG6B4RIL", "width": 1}, {"color": "000000", "from": "HDTGUP8A", "to": "QT4VF5TQ", "width": 1}, {"color": "000000", "from": "HDTGUP8A", "to": "54CZPQ6E", "width": 1}, {"color": "000000", "from": "HDTGUP8A", "to": "TNZMA7V4", "width": 1}, {"color": "000000", "from": "HDTGUP8A", "to": "9EHH24XD", "width": 1}, {"color": "000000", "from": "HDTGUP8A", "to": "TSG2QXNJ", "width": 1}, {"color": "000000", "from": "DT78C3TD", "to": "NDFNI6VJ", "width": 1}, {"color": "000000", "from": "DT78C3TD", "to": "REP9MBAI", "width": 1}, {"color": "000000", "from": "DT78C3TD", "to": "F6SNPVPQ", "width": 1}, {"color": "000000", "from": "REP9MBAI", "to": "NDFNI6VJ", "width": 1}, {"color": "000000", "from": "REP9MBAI", "to": "F6SNPVPQ", "width": 1}, {"color": "000000", "from": "9XUENC2X", "to": "9ZAJS8BE", "width": 1}, {"color": "000000", "from": "9XUENC2X", "to": "T3T7FHUC", "width": 1}, {"color": "000000", "from": "9XUENC2X", "to": "G98JRHBI", "width": 1}, {"color": "000000", "from": "9XUENC2X", "to": "MWAE359I", "width": 1}, {"color": "000000", "from": "9XUENC2X", "to": "IGA3DVH9", "width": 1}, {"color": "000000", "from": "DNWDIPN9", "to": "NPGM43GF", "width": 1}, {"color": "000000", "from": "DNWDIPN9", "to": "Z7KB5HII", "width": 1}, {"color": "000000", "from": "DNWDIPN9", "to": "NRN99JUR", "width": 1}, {"color": "000000", "from": "DNWDIPN9", "to": "JT7ZKTU5", "width": 1}, {"color": "000000", "from": "DNWDIPN9", "to": "M4AUQ4T9", "width": 1}, {"color": "000000", "from": "9GML8PBE", "to": "GQTF77MT", "width": 1}, {"color": "000000", "from": "9GML8PBE", "to": "VLFN4WLW", "width": 1}, {"color": "000000", "from": "9GML8PBE", "to": "NPBWGFQG", "width": 1}, {"color": "000000", "from": "9GML8PBE", "to": "HTP4PLRU", "width": 1}, {"color": "000000", "from": "9GML8PBE", "to": "K5PNLE3R", "width": 1}, {"color": "000000", "from": "NW66GDEL", "to": "ZSPGWQYU", "width": 1}, {"color": "000000", "from": "NW66GDEL", "to": "6TPZG594", "width": 1}, {"color": "000000", "from": "NW66GDEL", "to": "NDFNI6VJ", "width": 1}, {"color": "000000", "from": "LDKRMUUV", "to": "7ZUPWYM3", "width": 1}, {"color": "000000", "from": "LDKRMUUV", "to": "D579LSTZ", "width": 1}, {"color": "000000", "from": "LDKRMUUV", "to": "PI9YNLUT", "width": 1}, {"color": "000000", "from": "LDKRMUUV", "to": "2CI6E9MS", "width": 1}, {"color": "000000", "from": "LDKRMUUV", "to": "QT4VF5TQ", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

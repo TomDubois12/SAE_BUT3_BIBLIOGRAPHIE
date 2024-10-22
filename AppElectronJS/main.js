@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
 const { spawn } = require('child_process');
-const { PythonShell } = require('python-shell');
 
 const isDev = process.env.NODE_ENv !== 'production';
 const isMac = process.platfrom === 'darwin';
@@ -20,14 +19,14 @@ const createWindow = () => {
     win.webContents.openDevTools();
   }
 
-  win.loadFile('./renderer/index.html')
+  win.loadFile('renderer/index.html')
 }
 
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
     return new Promise((resolve, reject) => {
         // On appelle ici le script Python avec les paramètres fournis
-        const pythonProcess = spawn('python', [path.join(__dirname, 'search.py'), ...params]);
+        const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
         console.log(params)
         pythonProcess.stdout.on('data', (data) => {
             resolve(data.toString());
