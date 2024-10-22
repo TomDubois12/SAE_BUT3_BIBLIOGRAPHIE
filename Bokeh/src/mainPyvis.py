@@ -66,7 +66,7 @@ def show_graphique(liste_key):
     # print(grouped_by_annee)
     for key, keys in liste_key:
         list_tuple_cles = [(key, t) for t in keys]
-        G.add_edges_from(list_tuple_cles)
+        G.add_edges_from(list_tuple_cles, color="000000")
 
     # for group in grouped_by_annee:
     #    G.add_edges_from((group[i], group[j]) for i in range(len(group)) for j in range(i + 1, len(group)))
