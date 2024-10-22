@@ -53,6 +53,25 @@ abstract_embeddings = np.array(abstract_embeddings, dtype=np.float32)  # Convers
 # Pondérer les embeddings
 combined_embeddings = title_weight * title_embeddings + abstract_weight * abstract_embeddings
 
+# Fonction de recherche par mot clé
+def search_by_keyword(mot_cle):
+    mot_cle_embedding = model.encode(mot_cle)
+
+    # Calculer la similarité entre le mot clé et chaque combinaison titre + abstract
+    similarities = util.cos_sim(mot_cle_embedding, combined_embeddings)
+
+    # Associer les similarités aux articles
+    similarities_with_title_abstracts = list(zip(keys, titles, abstracts, similarities[0].tolist()))
+
+    # Trier les résultats par ordre décroissant de similarité
+    similarities_with_title_abstracts.sort(key=lambda x: x[3], reverse=True)
+
+    # Afficher les 15 résultats les plus proches du mot clé avec leur Key, Titre et Abstract
+    print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
+    for key, title, abstract, score in similarities_with_title_abstracts[:15]:
+        print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
+
+
 # Fonction de recherche par mot clé avec calcul de la similarité entre les résultats
 def search_by_keyword_and_compare(mot_cle):
     mot_cle_embedding = model.encode(mot_cle)
@@ -95,6 +114,33 @@ def search_by_keyword_and_compare(mot_cle):
 
     return similarities_list
 
+
+# Fonction pour trouver les x articles les plus similaires à un article donné par sa clé
+def find_similar_articles(key, x=5):
+    # Trouver l'index de l'article correspondant à la clé donnée
+    if key not in keys:
+        print(f"Aucun article trouvé avec la clé '{key}'.")
+        return []
+
+    article_index = keys.index(key)
+    article_embedding = combined_embeddings[article_index]
+
+    # Calculer la similarité entre l'article donné et tous les autres articles
+    similarities = util.cos_sim(article_embedding, combined_embeddings)
+
+    # Associer chaque article à son score de similarité
+    similarities_with_keys = list(zip(keys, similarities[0].tolist()))
+
+    # Trier les articles par ordre décroissant de similarité, sauf l'article lui-même (index != article_index)
+    similarities_with_keys = sorted(similarities_with_keys, key=lambda x: x[1], reverse=True)
+
+    # Retirer l'article lui-même de la liste
+    similarities_with_keys = [item for item in similarities_with_keys if item[0] != key]
+
+    # Retourner les x articles les plus similaires sous forme de liste
+    return similarities_with_keys[:x]
+
+
 # Fonction de recherche par auteur
 def search_by_author(author_name):
     # Mettre l'auteur en minuscules pour une recherche insensible à la casse
@@ -110,9 +156,15 @@ def search_by_author(author_name):
     else:
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
 
+
 # Exemple d'utilisation
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
 similarities = search_by_keyword_and_compare(mot_cle)
+
+# Exemple d'utilisation
+article_key = "KMC3NK6D"  # Remplace par la clé de l'article à comparer
+similar_articles = find_similar_articles(article_key, x=5)  # Trouver les 5 articles les plus similaires
+print(similar_articles)
 
 author_name = "John F"
 search_by_author(author_name)
