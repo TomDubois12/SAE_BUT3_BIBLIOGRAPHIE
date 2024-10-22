@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV
-df = pd.read_csv('BERT/Bibliographie.csv')
+df = pd.read_csv('Bibliographie.csv')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
@@ -53,23 +53,47 @@ abstract_embeddings = np.array(abstract_embeddings, dtype=np.float32)  # Convers
 # Pondérer les embeddings
 combined_embeddings = title_weight * title_embeddings + abstract_weight * abstract_embeddings
 
-# Fonction de recherche par mot clé
-def search_by_keyword(mot_cle):
+# Fonction de recherche par mot clé avec calcul de la similarité entre les résultats
+def search_by_keyword_and_compare(mot_cle):
     mot_cle_embedding = model.encode(mot_cle)
 
     # Calculer la similarité entre le mot clé et chaque combinaison titre + abstract
     similarities = util.cos_sim(mot_cle_embedding, combined_embeddings)
 
     # Associer les similarités aux articles
-    similarities_with_title_abstracts = list(zip(keys, titles, abstracts, similarities[0].tolist()))
+    similarities_with_title_abstracts = list(zip(keys, titles, abstracts, combined_embeddings, similarities[0].tolist()))
 
     # Trier les résultats par ordre décroissant de similarité
-    similarities_with_title_abstracts.sort(key=lambda x: x[3], reverse=True)
+    similarities_with_title_abstracts.sort(key=lambda x: x[4], reverse=True)
 
-    # Stocker les 15 résultats les plus proches du mot clé avec leur Key et la similarité
-    top_results = [(key, score) for key, title, abstract, score in similarities_with_title_abstracts[:15]]
+    # Extraire les embeddings et keys des 15 articles les plus proches du mot clé
+    top_15_results = similarities_with_title_abstracts[:15]
+    embeddings_top_15 = [embedding for _, _, _, embedding, _ in top_15_results]
+    top_15_keys = [key for key, _, _, _, _ in top_15_results]
 
-    return top_results
+    # Calculer la similarité entre les articles du top 15
+    similarity_matrix = util.cos_sim(embeddings_top_15, embeddings_top_15)
+
+    # Créer une liste pour stocker les similarités entre les articles
+    similarities_list = []
+
+    # Ajouter les similarités sous forme (key1, key2, similarité)
+    for i in range(len(similarity_matrix)):
+        for j in range(i + 1, len(similarity_matrix)):  # Eviter la redondance des comparaisons
+            similarities_list.append((top_15_keys[i], top_15_keys[j], similarity_matrix[i][j].item()))
+
+    # Afficher les 15 résultats les plus proches du mot clé
+    print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
+    for idx, (key, title, abstract, _, score) in enumerate(top_15_results, 1):
+        print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
+
+    # Afficher la liste des similarités entre les articles du top 15 avec les indices (i, j)
+    print("\nListe des similarités entre les articles du top 15 :")
+    for i in range(len(similarity_matrix)):
+        for j in range(i + 1, len(similarity_matrix)):
+            print(f"Similarité entre {top_15_keys[i]} (article {i+1}) et {top_15_keys[j]} (article {j+1}): {similarity_matrix[i][j]:.4f}")
+
+    return similarities_list
 
 # Fonction de recherche par auteur
 def search_by_author(author_name):
@@ -88,12 +112,7 @@ def search_by_author(author_name):
 
 # Exemple d'utilisation
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
-top_15_results = search_by_keyword(mot_cle)
-
-# Afficher les résultats
-print("Top 15 résultats:")
-for key, score in top_15_results:
-    print(f"Key: {key} - Similarité: {score:.4f}\n")
+similarities = search_by_keyword_and_compare(mot_cle)
 
 author_name = "John F"
 search_by_author(author_name)
