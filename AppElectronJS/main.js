@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('node:path');
 const { spawn } = require('child_process');
 
@@ -23,6 +23,9 @@ const createWindow = () => {
   }
 
   mainWindow.loadFile('Bokeh/template/search.html');
+
+  const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
+  Menu.setApplicationMenu(mainMenu)
 }
 
 // Fonction pour exécuter le script Python
@@ -69,3 +72,41 @@ app.on('window-all-closed', () => {
     app.quit(); 
   }
 });
+
+const mainMenuTemplates = [
+  {
+    label: 'File',
+    submenu:[
+      {
+        label:'Quit',
+        accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+        click(){
+          app.quit();
+        }
+      }
+    ]
+  }
+];
+
+
+if (process.platform == 'darwin'){
+  mainMenuTemplates.unshift({});
+}
+
+if (isDev){
+  mainMenuTemplates.push({
+    label:'Developer Tools',
+    submenu:[
+      {
+        label:'Toggle devTools',
+        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+        click(item, focusedWindow){
+          focusedWindow.toggleDevTools();
+        }
+      },
+      {
+        role:'reload'
+      }
+    ]
+  });
+}
