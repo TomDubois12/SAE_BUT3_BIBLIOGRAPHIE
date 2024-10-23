@@ -91,9 +91,7 @@ def show_graphique(liste_key):
     }
     """
 
-    # Associer le script JavaScript au graphe (événements interactifs)
-    nt.show_buttons(filter_=['interaction'])
-    nt.add_event("click", js_click_event)
+
     nt.show('Bokeh/bin/nx.html')
 
 print("-" * 50)

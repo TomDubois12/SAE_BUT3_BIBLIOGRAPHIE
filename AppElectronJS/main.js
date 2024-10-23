@@ -22,7 +22,7 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('renderer/index.html');
+  mainWindow.loadFile('Bokeh/template/search.html');
 }
 
 // Fonction pour exécuter le script Python
@@ -47,7 +47,6 @@ ipcMain.handle('callFunctionSearch', async (event, query) => {
 
         // Une fois la fonction Python terminée, on charge la nouvelle page HTML
         
-        mainWindow.loadFile('Bokeh/bin/nx.html'); // Charger une nouve
         return output;
     } catch (error) {
     
