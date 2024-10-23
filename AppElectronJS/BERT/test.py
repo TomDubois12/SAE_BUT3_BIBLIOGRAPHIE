@@ -1,13 +1,16 @@
+import sys
 import pandas as pd
 import os
 import json
 import numpy as np  # NumPy pour manipuler les embeddings
 from sentence_transformers import SentenceTransformer, util
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddings.json', title_weight=0.3, abstract_weight=0.7):
     if os.path.exists(embedding_file):
         print("Chargement des embeddings depuis le fichier JSON...")
-        with open(embedding_file, 'r') as f:
+        with open(embedding_file, 'r', encoding='utf-8') as f:
             embeddings_data = json.load(f)
             title_embeddings = embeddings_data['title_embeddings']
             abstract_embeddings = embeddings_data['abstract_embeddings']
@@ -18,7 +21,7 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
         abstract_embeddings = model.encode(abstracts).tolist()
 
         # Stocker les embeddings dans un fichier JSON
-        with open(embedding_file, 'w') as f:
+        with open(embedding_file, 'w', encoding='utf-8') as f:
             json.dump({
                 'title_embeddings': title_embeddings,
                 'abstract_embeddings': abstract_embeddings
@@ -37,7 +40,7 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV
-df = pd.read_csv('BERT/Bibliographie.csv')
+df = pd.read_csv('BERT/Bibliographie.csv', encoding='utf-8')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
@@ -145,16 +148,23 @@ def search_by_author(author_name):
     # Mettre l'auteur en minuscules pour une recherche insensible à la casse
     author_name = author_name.lower()
     
-    # Trouver les keys des articles écrits par l'auteur
-    author_keys = [key for key, author in zip(keys, authors) if author_name in author.lower()]
-
-    if author_keys:
+    # Trouver les indices des articles écrits par l'auteur
+    author_indices = [i for i, author in enumerate(authors) if author_name in author.lower()]
+    
+    if author_indices:
         print(f"Articles écrits par '{author_name}':\n")
-        for key in author_keys:
-            print(f"Key: {key}")
+        results = []
+        for index in author_indices:
+            key = keys[index]
+            title = titles[index]
+            author = authors[index]  # Récupérer le nom de l'auteur
+            results.append((key, title, author))
+            print(f"Key: {key} - Title: {title} - Author: {author}")
+        # Retourner uniquement les clés des articles
+        return [key for key, _, _ in results]
     else:
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
-
+        return []
 
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
 similarities = search_by_keyword_and_compare(mot_cle)
@@ -168,8 +178,9 @@ print(f"Les {x} articles les plus proches de l'article {article_key}")
 print(similar_articles)
 print("--------------------------------------------")
 
-
-author_name = "John F"
+# Utilisation de la fonction
+author_name = "Richard L."
 print("--------------------------------------------")
-search_by_author(author_name)
+author_articles = search_by_author(author_name)
 print("--------------------------------------------")
+#Richard D.
