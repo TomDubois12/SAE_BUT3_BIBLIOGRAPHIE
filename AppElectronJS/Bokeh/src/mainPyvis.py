@@ -178,3 +178,8 @@ if __name__ == "__main__":
         liste_final = get_list_xSimilaritie(liste_final, 5)
         show_graphique(liste_final)
 
+#python3 -m Bokeh.src.mainPyvis "carbon" "False"
+#Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
+
+#python3 -m Bokeh.src.mainPyvis "richard l." "True"
+#Recherche par auteur.
