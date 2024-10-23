@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme } = require('electron')
 const path = require('node:path');
 const { spawn } = require('child_process');
 
@@ -22,7 +22,7 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('Bokeh/template/search.html');
+  mainWindow.loadFile('renderer/search.html');
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
   Menu.setApplicationMenu(mainMenu)
@@ -73,6 +73,7 @@ app.on('window-all-closed', () => {
   }
 });
 
+
 const mainMenuTemplates = [
   {
     label: 'File',
@@ -82,6 +83,23 @@ const mainMenuTemplates = [
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
         click(){
           app.quit();
+        }
+      }
+    ]
+  },
+  {
+    label:'Settings',
+    submenu:[
+      {
+        label:'Switch Dark Mode',
+        accelerator: process.platform == 'darwin' ? 'Command+M' : 'Ctrl+M',
+        click(){
+          if (nativeTheme.shouldUseDarkColors) {
+            nativeTheme.themeSource = 'light';
+        } else {
+            nativeTheme.themeSource = 'dark';
+        }
+        return nativeTheme.shouldUseDarkColors;
         }
       }
     ]
