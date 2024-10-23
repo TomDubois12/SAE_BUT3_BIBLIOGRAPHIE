@@ -166,5 +166,20 @@
               }
               drawGraph();
         </script>
+    
+    <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
+    <script type="text/javascript">
+        function onNodeClick(params) {
+            if (params.nodes.length > 0) {
+                let clickedNodeId = params.nodes[0];
+                console.log("Clicked node:", clickedNodeId);
+                // Envoie la clé à Python ou fais quelque chose avec.
+                // Par exemple, si tu utilises une fonction AJAX, tu pourrais faire :
+                // sendNodeIdToPython(clickedNodeId);
+                // Dans ce cas, tu devrais définir la fonction sendNodeIdToPython.
+            }
+        }
+        network.on("click", onNodeClick);
+    </script>
     </body>
 </html>
