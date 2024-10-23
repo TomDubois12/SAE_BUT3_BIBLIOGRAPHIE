@@ -20,7 +20,8 @@
     <script>
         document.getElementById('search-btn').addEventListener('click', async () => {
             const query = document.getElementById('site-search').value; // Récupère le contenu de la barre de recherche
-            const output = await window.api.callFunctionSearch([query, document.getElementById('auteur').disabled == true]);  // Assurez-vous que l'appel utilise 'callFunctionSearch'
+            const param2 = document.getElementById('auteur').disabled ? "True" : "False";
+            const output = await window.api.callFunctionSearch([query,param2]);  // Assurez-vous que l'appel utilise 'callFunctionSearch'
         });
     </script> 
     <script>

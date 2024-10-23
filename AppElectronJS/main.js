@@ -29,7 +29,7 @@ const createWindow = () => {
 function runPythonFunction(params) {
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
-        console.log(params);
+        console.log(...params);
         pythonProcess.stdout.on('data', (data) => {
             resolve(data.toString());
         });
@@ -47,9 +47,11 @@ ipcMain.handle('callFunctionSearch', async (event, query) => {
 
         // Une fois la fonction Python terminée, on charge la nouvelle page HTML
         
+        mainWindow.loadFile('Bokeh/bin/nx.html'); // Charger une nouve
+        console.log("blabla");
         return output;
     } catch (error) {
-    
+        console.log(error);
         return `Error: ${error}`;
     }
 });

@@ -40,7 +40,7 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV
-df = pd.read_csv('Bibliographie.csv', encoding='utf-8')
+df = pd.read_csv('BERT/Bibliographie.csv', encoding='utf-8')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
