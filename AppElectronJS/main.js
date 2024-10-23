@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme } = require('electron')
 const path = require('node:path');
 const { spawn } = require('child_process');
 
@@ -22,7 +22,7 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('Bokeh/template/search.html');
+  mainWindow.loadFile('renderer/search.html');
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
   Menu.setApplicationMenu(mainMenu)
@@ -67,12 +67,14 @@ app.whenReady().then(() => {
   });
 });
 
+//For mac users, close app 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit(); 
   }
 });
 
+// Change the global menu
 const mainMenuTemplates = [
   {
     label: 'File',
@@ -85,14 +87,37 @@ const mainMenuTemplates = [
         }
       }
     ]
+  },
+  {
+    label:'Settings',
+    submenu:[
+      {
+        // Switch entre Dark mode et Light mode
+        label:'Switch Dark Mode',
+        accelerator: process.platform == 'darwin' ? 'Command+M' : 'Ctrl+M',
+        click(){
+
+          // Looking for actual theme
+          if (nativeTheme.shouldUseDarkColors) {
+            nativeTheme.themeSource = 'light';
+        } else {
+            nativeTheme.themeSource = 'dark';
+        }
+
+        return nativeTheme.shouldUseDarkColors;
+        }
+      }
+    ]
   }
 ];
 
 
+// For mac user
 if (process.platform == 'darwin'){
   mainMenuTemplates.unshift({});
 }
 
+// For product environement, add devTool menu and accelerator
 if (isDev){
   mainMenuTemplates.push({
     label:'Developer Tools',
