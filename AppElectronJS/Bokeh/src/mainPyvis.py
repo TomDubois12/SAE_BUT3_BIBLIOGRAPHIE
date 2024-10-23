@@ -167,7 +167,7 @@ if __name__ == "__main__":
     
     query = sys.argv[1]
     mot_cle = query
-    if len(sys.argv) >= 2 and sys.argv[2] == "True":  # Vérification du second argument
+    if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
         liste_final = search_by_author(mot_cle)
         show_graphique_author(liste_final,mot_cle)
     else:
@@ -178,8 +178,8 @@ if __name__ == "__main__":
         liste_final = get_list_xSimilaritie(liste_final, 5)
         show_graphique(liste_final)
 
-#python3 -m Bokeh.src.mainPyvis "carbon" "False"
+#python3 -m Bokeh.src.mainPyvis "carbon" "false"
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
 
-#python3 -m Bokeh.src.mainPyvis "richard l." "True"
+#python3 -m Bokeh.src.mainPyvis "richard l." "true"
 #Recherche par auteur.
