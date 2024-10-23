@@ -4,14 +4,14 @@
         <img src="../img/logo.png" alt="logo de l'application" class="logo">
     </div>
     <div class="text">
-        <p>Explorez vos propre données sous forme de graphique !</p>
-        <p>Pour commencer, entrer votre première recherche à partir d'un nom d'auteur ou d'un mot clé</p>
+        <p>Explorez vos propres données sous forme de graphique !</p>
+        <p>Pour commencer, entrez votre première recherche à partir d'un nom d'auteur ou d'un mot clé</p>
     </div>
     <nav class="navbar">
         <input class="input" type="search" id="site-search" name="q" minlength="4"
             placeholder="Entrez votre recherche" 
         />
-        <button onclick="desactiverBouton('auteur', 'sujet')" id="auteur">Par auteur</button>
+        <button onclick="desactiverBouton('auteur', 'sujet')" id="auteur" class="active">Par auteur</button>
         <button onclick="desactiverBouton('sujet', 'auteur')" id="sujet">Par sujet</button>
         <button id="search-btn">Rechercher</button>
     </nav>
@@ -34,22 +34,22 @@
             // Activer l'autre bouton
             if (boutonAActiver) {
                 boutonAActiver.disabled = false;
-                boutonAActiver.style.backgroundColor = "#166F7A"; // Indique visuellement qu'il est désactivé
-                boutonAActiver.style.color = "white"; // Indique visuellement qu'il est désactivé
+                boutonAActiver.style.backgroundColor = "#166F7A"; // Indique visuellement qu'il est actif
+                boutonAActiver.style.color = "white"; // Indique visuellement qu'il est actif
             }
         }
 
         // Fonction pour afficher le résultat
         function afficherResultat() {
-            filtre = "";
+            let filtre = "";
             if(document.getElementById('auteur').disabled == true){
-                filtre = "auteurs";
-            }
-            else{
                 filtre = "sujets";
             }
+            else{
+                filtre = "auteurs";
+            }
             const inputValue = document.getElementById('site-search').value;
-            document.getElementById('result').innerHTML = "Résultat sur les " + filtre + " :" + inputValue;
+            document.getElementById('result').innerHTML = "Résultat sur les " + filtre + " : " + inputValue;
         }
 
         // Écouter le clic sur le bouton "Rechercher"
@@ -62,5 +62,10 @@
                 afficherResultat();
             }
         });
+
+        // Activer le bouton "Par auteur" par défaut
+        window.onload = function() {
+            desactiverBouton('sujet', 'auteur'); // Appelle la fonction pour désactiver le bouton "sujet"
+        };
     </script>
 </html>
