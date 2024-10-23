@@ -82,6 +82,18 @@ def show_graphique(liste_key):
     for node in G.nodes(data=True):
         nt.get_node(node[0])['color'] = node[1]['color']
 
+    js_click_event = """
+    function clickNode(params) {
+        if (params.nodes.length > 0) {
+            var clickedNode = params.nodes[0];
+            alert('Node clicked: ' + clickedNode);
+        }
+    }
+    """
+
+    # Associer le script JavaScript au graphe (événements interactifs)
+    nt.show_buttons(filter_=['interaction'])
+    nt.add_event("click", js_click_event)
     nt.show('Bokeh/bin/nx.html')
 
 print("-" * 50)

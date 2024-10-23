@@ -86,7 +86,7 @@ def search_by_keyword_and_compare(mot_cle):
 
     # Extraire les embeddings et keys des 15 articles les plus proches du mot clé
     top_15_results = similarities_with_title_abstracts[:15]
-    embeddings_top_15 = [embedding for _, _, _, embedding, _ in top_15_results]
+    embeddings_top_15 = np.array([embedding for _, _, _, embedding, _ in top_15_results])
     top_15_keys = [key for key, _, _, _, _ in top_15_results]
 
     # Calculer la similarité entre les articles du top 15
