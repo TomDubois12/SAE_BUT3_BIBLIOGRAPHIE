@@ -11,6 +11,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: isDev ? 1000 : 500,
     height: 600,
+    icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
     webPreferences: {
         nodeIntegration: false,
         contextIsolation: true, // Important pour la sécurité
