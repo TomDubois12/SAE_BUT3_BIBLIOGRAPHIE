@@ -3,11 +3,15 @@ import os
 import json
 import numpy as np  # NumPy pour manipuler les embeddings
 from sentence_transformers import SentenceTransformer, util
+import sys
+
+# Configurer la sortie de la console pour utiliser l'UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
 
 def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddings.json', title_weight=0.3, abstract_weight=0.7):
     if os.path.exists(embedding_file):
         print("Chargement des embeddings depuis le fichier JSON...")
-        with open(embedding_file, 'r') as f:
+        with open(embedding_file, 'r', encoding='utf-8') as f:  # Lire avec encodage UTF-8
             embeddings_data = json.load(f)
             title_embeddings = embeddings_data['title_embeddings']
             abstract_embeddings = embeddings_data['abstract_embeddings']
@@ -17,8 +21,8 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
         title_embeddings = model.encode(titles).tolist()  # Convertir en liste pour pouvoir les stocker en JSON
         abstract_embeddings = model.encode(abstracts).tolist()
 
-        # Stocker les embeddings dans un fichier JSON
-        with open(embedding_file, 'w') as f:
+        # Stocker les embeddings dans un fichier JSON avec encodage UTF-8
+        with open(embedding_file, 'w', encoding='utf-8') as f:
             json.dump({
                 'title_embeddings': title_embeddings,
                 'abstract_embeddings': abstract_embeddings
@@ -36,8 +40,8 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
 # Charger le modèle pré-entraîné
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
-# Charger le fichier CSV
-df = pd.read_csv('BERT/Bibliographie.csv')
+# Charger le fichier CSV avec encodage UTF-8
+df = pd.read_csv('BERT/Bibliographie.csv', encoding='utf-8')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
@@ -50,7 +54,6 @@ authors = df['Author'].fillna('').tolist()  # Remplir les valeurs manquantes par
 
 # Utiliser la fonction pour charger ou calculer les embeddings
 combined_embeddings = load_or_compute_embeddings(model, titles, abstracts)
-
 
 # Fonction de recherche par mot clé
 def search_by_keyword(mot_cle):
@@ -113,7 +116,6 @@ def search_by_keyword_and_compare(mot_cle):
 
     return similarities_list
 
-
 # Fonction pour trouver les x articles les plus similaires à un article donné par sa clé
 def find_similar_articles(key, x=5):
     # Trouver l'index de l'article correspondant à la clé donnée
@@ -139,7 +141,6 @@ def find_similar_articles(key, x=5):
     # Retourner les x articles les plus similaires sous forme de liste
     return similarities_with_keys[:x]
 
-
 # Fonction de recherche par auteur
 def search_by_author(author_name):
     # Mettre l'auteur en minuscules pour une recherche insensible à la casse
@@ -155,10 +156,8 @@ def search_by_author(author_name):
     else:
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
 
-
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
 similarities = search_by_keyword_and_compare(mot_cle)
-
 
 article_key = "Z7PHWZU3"
 x = 5
@@ -167,7 +166,6 @@ print("--------------------------------------------")
 print(f"Les {x} articles les plus proches de l'article {article_key}")
 print(similar_articles)
 print("--------------------------------------------")
-
 
 author_name = "John F"
 print("--------------------------------------------")
