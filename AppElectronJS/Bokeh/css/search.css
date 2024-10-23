@@ -1,0 +1,44 @@
+nav{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo{
+    max-width: 20vh;
+    margin-right: 2vw;
+}
+
+.text{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 8vh;
+    margin-bottom: 8vh;
+}
+
+.text p{
+    font-size: 25px;
+}
+
+.input{
+    padding: 2vh 1vw 2vh 1vw;
+}
+
+#site-search{
+    flex-grow: 0.9;
+    border-radius: 15vw 0vw 0vw 15vw;
+}
+
+.navbar button{
+    background-color: #166F7A;
+    color: white;
+    padding: 2vh 1vw 2vh 1vw;
+}
+
+#search-btn{
+    margin-right: 4vw;
+    border-radius: 0vw 15vw 15vw 0vw;
+}
