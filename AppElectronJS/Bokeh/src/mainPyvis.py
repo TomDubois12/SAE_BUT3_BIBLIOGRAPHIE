@@ -5,6 +5,7 @@ import networkx as nx
 from pyvis.network import Network
 from BERT.test import search_by_author, find_similar_articles, search_by_keyword, search_by_keyword_and_compare
 import sys
+from bs4 import BeautifulSoup
     
 
 def get_list_xSimilaritie(listeKey, x=5):
@@ -275,6 +276,44 @@ if __name__ == "__main__":
         liste_final = get_list_xSimilaritie(liste_final, 5)
         show_graphique(liste_final)
 
+
+    with open("Bokeh/bin/nx.html", "r", encoding="utf-8") as source_file:
+        source_content = source_file.read()
+
+    # Parse le contenu du fichier source avec BeautifulSoup
+    source_soup = BeautifulSoup(source_content, "html.parser")
+
+    # Récupère toutes les balises <div> et <script>
+    div_tags = source_soup.find_all("div")
+    script_tags = source_soup.find_all("script")
+
+    # Ouvre le fichier HTML existant dans lequel on va ajouter les balises
+    with open("renderer/test.html", "r", encoding="utf-8") as target_file:
+        target_content = target_file.read()
+
+    # Parse le contenu du fichier cible avec BeautifulSoup
+    target_soup = BeautifulSoup(target_content, "html.parser")
+    target_div = target_soup.find("div", class_="TargetDiv")
+    # Trouve le <body> dans le fichier cible
+
+    if target_div:
+        # Vide le contenu existant de la balise <div>
+        target_div.clear()
+
+        # Ajoute les nouvelles balises <div> à l'intérieur
+        for div in div_tags:
+            target_div.append(div)
+
+        for script in script_tags:
+            target_div.append(script)
+
+        print("Le contenu de la balise <div> avec la classe 'saluttoi' a été remplacé.")
+
+    # Écrit les changements dans le fichier cible
+    with open("renderer/test.html", "w", encoding="utf-8") as modified_file:
+        modified_file.write(str(target_soup))
+
+    print("Les balises <div> et <script> ont été ajoutées à 'fichier_cible.html'")
 #python3 -m Bokeh.src.mainPyvis "carbon" "false"
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
 
