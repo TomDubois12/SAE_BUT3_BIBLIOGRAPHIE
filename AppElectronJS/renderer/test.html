@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PyVis Graph in Electron</title>
+<link href="CSS/themeDarkLight.css" rel="stylesheet" type="text/css"/>
+<link href="CSS/search.css" rel="stylesheet"/>
+<style type="text/css">
+            #mynetwork {
+                width: 100vw;
+                height: 100vh;
+                background-color: #ffffff;
+                border: 1px solid lightgray;
+                position: relative;
+                float: left;
+            }
+            #config {
+                float: left;
+                width: 400px;
+                height: 600px;
+            }
+        </style>
+</head>
+<body>
+<div class="logo">
+<img alt="logo de l'application" class="logo" src="images/logo.png"/>
+</div>
+<nav class="navbar">
+<input class="input" id="site-search" minlength="4" name="q" placeholder="Entrez votre recherche" type="search"/>
+<button class="active" id="auteur" onclick="desactiverBouton('auteur', 'sujet')">Par auteur</button>
+<button id="sujet" onclick="desactiverBouton('sujet', 'auteur')">Par sujet</button>
+<button id="search-btn">Rechercher</button>
+</nav>
+<div id="result"></div>
+<script src="js/renderer.js"></script>
+<!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
+    Elle stocke mon graphe grâce à un script python
+-->
+<div class="TargetDiv"><div class="card" style="width: 100%">
+
+</div><div class="card-body" id="mynetwork"></div><div id="config"></div><script src="lib/bindings/utils.js"></script><script crossorigin="anonymous" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script><script crossorigin="anonymous" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script><script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "red", "id": "AVYWBTL6", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Bowling, Robert J.; McCreery, Richard L.; Pharr, Christine M.; Engstrom, Royce C.\"}", "label": "AVYWBTL6", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "red", "id": "NTM55NR7", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1991.0, \"Author\": \"Robinson, R. S.; Sternitzke, Kent; McDermott, Mark T.; McCreery, Richard L.\"}", "label": "NTM55NR7", "shape": "dot", "size": 10, "year": 1991.0}, {"color": "red", "id": "9V9KP3XN", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Bowling, Robert J.; Packard, Richard T.; McCreery, Richard L.\"}", "label": "9V9KP3XN", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "red", "id": "KTPRRNSQ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1992.0, \"Author\": \"Kneten, Kristin R.; McCreery, Richard L.\"}", "label": "KTPRRNSQ", "shape": "dot", "size": 10, "year": 1992.0}, {"color": "red", "id": "3F5FJXV4", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1994.0, \"Author\": \"Cline, K. K.; McDermott, Mark T.; McCreery, Richard L.\"}", "label": "3F5FJXV4", "shape": "dot", "size": 10, "year": 1994.0}, {"color": "red", "id": "GBGXB2US", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Rice, Ronald J.; McCreery, Richard L.\"}", "label": "GBGXB2US", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "red", "id": "I9NVBJNU", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2000.0, \"Author\": \"DuVall, Stacy H.; McCreery, Richard L.\"}", "label": "I9NVBJNU", "shape": "dot", "size": 10, "year": 2000.0}, {"color": "red", "id": "64SHMCRF", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1999.0, \"Author\": \"DuVall, Stacy Hunt; McCreery, Richard L.\"}", "label": "64SHMCRF", "shape": "dot", "size": 10, "year": 1999.0}, {"color": "red", "id": "TA7CJ7WN", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2003.0, \"Author\": \"Solak, Ali Osman; Eichorst, Laura R.; Clark, William J.; McCreery, Richard L.\"}", "label": "TA7CJ7WN", "shape": "dot", "size": 10, "year": 2003.0}, {"color": "red", "id": "ZFQQPH9W", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1996.0, \"Author\": \"Chen, Peihong; McCreery, Richard L.\"}", "label": "ZFQQPH9W", "shape": "dot", "size": 10, "year": 1996.0}, {"color": "red", "id": "6BMNNT92", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2001.0, \"Author\": \"Ranganathan, Srikanth; McCreery, Richard L.\"}", "label": "6BMNNT92", "shape": "dot", "size": 10, "year": 2001.0}, {"color": "red", "id": "C3UIDGQV", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1990.0, \"Author\": \"Rice, Ronald J.; Pontikos, Nicholas M.; McCreery, Richard L.\"}", "label": "C3UIDGQV", "shape": "dot", "size": 10, "year": 1990.0}, {"color": "red", "id": "9EHH24XD", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1995.0, \"Author\": \"Chen, Piehong.; Fryling, Mark A.; McCreery, Richard L.\"}", "label": "9EHH24XD", "shape": "dot", "size": 10, "year": 1995.0}, {"color": "red", "id": "TSG2QXNJ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1992.0, \"Author\": \"McDermott, Mark T.; Kneten, Kristin; McCreery, Richard L.\"}", "label": "TSG2QXNJ", "shape": "dot", "size": 10, "year": 1992.0}, {"color": "red", "id": "WR77HG7I", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1990.0, \"Author\": \"Wang, Yan; Alsmeyer, Daniel C.; McCreery, Richard L.\"}", "label": "WR77HG7I", "shape": "dot", "size": 10, "year": 1990.0}, {"color": "red", "id": "QT4VF5TQ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1995.0, \"Author\": \"Fryling, Mark A.; Zhao, Jun.; McCreery, Richard L.\"}", "label": "QT4VF5TQ", "shape": "dot", "size": 10, "year": 1995.0}, {"color": "red", "id": "AQVC4XKB", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1995.0, \"Author\": \"Liu, Yi-Chun; McCreery, Richard L.\"}", "label": "AQVC4XKB", "shape": "dot", "size": 10, "year": 1995.0}, {"color": "red", "id": "54CZPQ6E", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 2008.0, \"Author\": \"McCreery, Richard L.\"}", "label": "54CZPQ6E", "shape": "dot", "size": 10, "year": 2008.0}, {"color": "red", "id": "WHTSANQG", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"McCreery, Richard L.; Packard, Richard T.\"}", "label": "WHTSANQG", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "red", "id": "BAHII6XW", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1989.0, \"Author\": \"Bowling, Robert; Packard, Richard T.; McCreery, Richard L.\"}", "label": "BAHII6XW", "shape": "dot", "size": 10, "year": 1989.0}, {"color": "red", "id": "K8K4S3MJ", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1994.0, \"Author\": \"McDermott, Mark T.; McCreery, Richard L.\"}", "label": "K8K4S3MJ", "shape": "dot", "size": 10, "year": 1994.0}, {"color": "red", "id": "S38UQ8CL", "infos": "{\"Item Type\": \"journalArticle\", \"Publication Year\": 1992.0, \"Author\": \"Pontikos, Nicholas M.; McCreery, Richard L.\"}", "label": "S38UQ8CL", "shape": "dot", "size": 10, "year": 1992.0}]);
+                  edges = new vis.DataSet([{"color": "000000", "from": "AVYWBTL6", "to": "NTM55NR7", "width": 1}, {"color": "000000", "from": "AVYWBTL6", "to": "9V9KP3XN", "width": 1}, {"color": "000000", "from": "9V9KP3XN", "to": "KTPRRNSQ", "width": 1}, {"color": "000000", "from": "9V9KP3XN", "to": "NTM55NR7", "width": 1}, {"color": "000000", "from": "9V9KP3XN", "to": "3F5FJXV4", "width": 1}, {"color": "000000", "from": "9V9KP3XN", "to": "GBGXB2US", "width": 1}, {"color": "000000", "from": "I9NVBJNU", "to": "64SHMCRF", "width": 1}, {"color": "000000", "from": "I9NVBJNU", "to": "TA7CJ7WN", "width": 1}, {"color": "000000", "from": "ZFQQPH9W", "to": "64SHMCRF", "width": 1}, {"color": "000000", "from": "ZFQQPH9W", "to": "TA7CJ7WN", "width": 1}, {"color": "000000", "from": "ZFQQPH9W", "to": "6BMNNT92", "width": 1}, {"color": "000000", "from": "KTPRRNSQ", "to": "C3UIDGQV", "width": 1}, {"color": "000000", "from": "KTPRRNSQ", "to": "GBGXB2US", "width": 1}, {"color": "000000", "from": "KTPRRNSQ", "to": "3F5FJXV4", "width": 1}, {"color": "000000", "from": "KTPRRNSQ", "to": "9EHH24XD", "width": 1}, {"color": "000000", "from": "KTPRRNSQ", "to": "TSG2QXNJ", "width": 1}, {"color": "000000", "from": "GBGXB2US", "to": "C3UIDGQV", "width": 1}, {"color": "000000", "from": "WR77HG7I", "to": "QT4VF5TQ", "width": 1}, {"color": "000000", "from": "WR77HG7I", "to": "AQVC4XKB", "width": 1}, {"color": "000000", "from": "C3UIDGQV", "to": "9EHH24XD", "width": 1}, {"color": "000000", "from": "QT4VF5TQ", "to": "AQVC4XKB", "width": 1}, {"color": "000000", "from": "QT4VF5TQ", "to": "54CZPQ6E", "width": 1}, {"color": "000000", "from": "QT4VF5TQ", "to": "WHTSANQG", "width": 1}, {"color": "000000", "from": "3F5FJXV4", "to": "9EHH24XD", "width": 1}, {"color": "000000", "from": "3F5FJXV4", "to": "TSG2QXNJ", "width": 1}, {"color": "000000", "from": "6BMNNT92", "to": "TA7CJ7WN", "width": 1}, {"color": "000000", "from": "BAHII6XW", "to": "NTM55NR7", "width": 1}, {"color": "000000", "from": "64SHMCRF", "to": "TA7CJ7WN", "width": 1}, {"color": "000000", "from": "TSG2QXNJ", "to": "K8K4S3MJ", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script></div>
+</body>
+</html>

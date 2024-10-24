@@ -58,7 +58,7 @@ ipcMain.handle('callFunctionSearch', (event, query) => {
   return runPythonFunction(query)
       .then((output) => {
           // Une fois le processus Python terminé, charger la nouvelle page HTML
-          mainWindow.loadFile('Bokeh/bin/nx.html'); 
+          mainWindow.loadFile('renderer/test.html'); 
           return output;  // Renvoyer la sortie du script Python
       })
       .catch((error) => {
