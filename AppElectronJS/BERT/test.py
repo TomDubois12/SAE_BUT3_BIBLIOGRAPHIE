@@ -1,11 +1,11 @@
+import sys
 import pandas as pd
 import os
 import json
 import numpy as np  # NumPy pour manipuler les embeddings
 from sentence_transformers import SentenceTransformer, util
-import sys
-
 # Configurer la sortie de la console pour utiliser l'UTF-8
+
 sys.stdout.reconfigure(encoding='utf-8')
 
 def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddings.json', title_weight=0.3, abstract_weight=0.7):
@@ -89,7 +89,7 @@ def search_by_keyword_and_compare(mot_cle):
 
     # Extraire les embeddings et keys des 15 articles les plus proches du mot clé
     top_15_results = similarities_with_title_abstracts[:15]
-    embeddings_top_15 = [embedding for _, _, _, embedding, _ in top_15_results]
+    embeddings_top_15 = np.array([embedding for _, _, _, embedding, _ in top_15_results])
     top_15_keys = [key for key, _, _, _, _ in top_15_results]
 
     # Calculer la similarité entre les articles du top 15
@@ -146,15 +146,23 @@ def search_by_author(author_name):
     # Mettre l'auteur en minuscules pour une recherche insensible à la casse
     author_name = author_name.lower()
     
-    # Trouver les keys des articles écrits par l'auteur
-    author_keys = [key for key, author in zip(keys, authors) if author_name in author.lower()]
-
-    if author_keys:
+    # Trouver les indices des articles écrits par l'auteur
+    author_indices = [i for i, author in enumerate(authors) if author_name in author.lower()]
+    
+    if author_indices:
         print(f"Articles écrits par '{author_name}':\n")
-        for key in author_keys:
-            print(f"Key: {key}")
+        results = []
+        for index in author_indices:
+            key = keys[index]
+            title = titles[index]
+            author = authors[index]  # Récupérer le nom de l'auteur
+            results.append((key, title, author))
+            print(f"Key: {key} - Title: {title} - Author: {author}")
+        # Retourner uniquement les clés des articles
+        return [key for key, _, _ in results]
     else:
         print(f"Aucun article trouvé pour l'auteur '{author_name}'.")
+        return []
 
 mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
 similarities = search_by_keyword_and_compare(mot_cle)
@@ -167,7 +175,9 @@ print(f"Les {x} articles les plus proches de l'article {article_key}")
 print(similar_articles)
 print("--------------------------------------------")
 
-author_name = "John F"
+# Utilisation de la fonction
+author_name = "Richard L."
 print("--------------------------------------------")
-search_by_author(author_name)
+author_articles = search_by_author(author_name)
 print("--------------------------------------------")
+#Richard D.
