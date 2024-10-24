@@ -394,7 +394,8 @@ if __name__ == "__main__":
         show_graphique(liste_final)
 
 
-    with open("Bokeh/bin/nx.html", "r", encoding="utf-8") as source_file:
+    with open("Bokeh/bin/nx.html", "r", encoding="utf-8", errors='ignore') as source_file:
+        print(source_file)
         source_content = source_file.read()
 
     # Parse le contenu du fichier source avec BeautifulSoup
