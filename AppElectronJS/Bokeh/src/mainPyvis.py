@@ -253,12 +253,127 @@ def show_graphique_author(liste_key, mot_cle):
             if elem[0] in liste_key:
                 liste_cle1_cle2.append((key,elem[0]))
     G.add_edges_from(liste_cle1_cle2, color="000000")
-    # for key in liste_key:
-    #     list_tuple_cles = [(key, t) for t in keys]
-    #     G.add_edges_from(list_tuple_cles, color="000000")
 
-    # for group in grouped_by_annee:
-    #    G.add_edges_from((group[i], group[j]) for i in range(len(group)) for j in range(i + 1, len(group)))
+
+         # Visualiser avec PyVis
+    nt = Network('50vh', '50vw', notebook=True)
+    nt.show_buttons(filter_=['physics'])
+    nt.from_nx(G)
+
+    # Set the color of the nodes in Pyvis
+    for node in G.nodes(data=True):
+        nt.get_node(node[0])['color'] = node[1]['color']
+        
+    nt.show('Bokeh/bin/nx.html')
+
+    # Create the HTML file
+    html_file_path = 'Bokeh/bin/nx.html'
+    nt.save_graph(html_file_path)
+
+    # Manually modify the HTML to include the JavaScript functionality
+    with open(html_file_path, 'r') as f:
+        html_content = f.read()
+
+    # Add custom script for handling node clicks and displaying the publication title
+    custom_script = """
+    <div id="result"></div>
+    <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
+    <script type="text/javascript">
+        function onNodeInteraction(params) {
+            const className = 'generated-div';
+            const nodeId = params.nodes[0];
+            
+            // Retrieve the title from the node attributes
+            const node = network.body.data.nodes.get(nodeId);
+
+            // Check for existing aside element by ID
+            const existingIdenticalElement = document.getElementById(nodeId);
+            
+            // If the existing aside is found, remove it
+            if (existingIdenticalElement) {
+                existingIdenticalElement.remove();
+            } else {
+                const existingElements = document.getElementsByClassName(className);
+                // Remove the first existing element if it exists
+                if (existingElements.length > 0) {
+                    existingElements[0].remove();
+                }
+
+                // Create a new aside element
+                const aside = document.createElement("aside");
+
+                // Add content to the aside, including the title
+                const titre = document.createElement("h1");
+                titre.textContent = `Titre de la publication : ${node.title}`;
+                aside.appendChild(titre);
+                
+                const year = document.createElement("p");
+                year.textContent = `Année de publication : ${node.year}`;
+                aside.appendChild(year);
+                
+                const author = document.createElement("p");
+                author.textContent = `Auteurs : ${node.author}`;
+                aside.appendChild(author);
+                
+                const abstract = document.createElement("p");
+                abstract.textContent = `Abstract : ${node.abstract}`;
+                aside.appendChild(abstract);
+                
+                const doi = document.createElement("a");
+                doi.textContent = `DOI : ${node.doi}`;
+                doi.href = node.doi;  // Set the URL for the link
+                doi.target = "_blank";  // Open the link in a new tab
+                doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
+                aside.appendChild(doi);
+     
+                aside.classList.add(className); // Add class for styling
+                aside.id = nodeId; // Assign unique ID
+
+                // Append the aside to the DOM
+                document.body.appendChild(aside);
+                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${title} publié en "${year}".`);
+            }
+
+            if (params.nodes.length > 0) {
+                console.log("Clicked node:", nodeId);
+                // Here you can add more functionality, like fetching data no
+            }
+        }
+        
+        network.on("click", onNodeInteraction);
+        network.on("hoverNode", onNodeInteraction);
+    </script>      
+    <style>
+        body{
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        
+        .generated-div {
+            background-color: lightgray;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid black;
+            margin-left: 75vw;
+        }
+        
+        .card{
+            width: 75vw;
+            height: 100vh;
+        }
+        
+        .card-body{
+            flex-grow: 1;
+        }
+    </style>
+    """
+    
+    # Insert the custom script just before the closing </body> tag
+    html_content = html_content.replace('</body>', custom_script + '</body>')
+
+    # Write the modified content back to the file
+    with open(html_file_path, 'w') as f:
+        f.write(html_content)
 
 if __name__ == "__main__":
     print("-" * 50)
@@ -266,11 +381,13 @@ if __name__ == "__main__":
     query = sys.argv[1]
     mot_cle = query
     if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
+        print("lalalalalallalalalallalallalalalal"*10)
         liste_final = search_by_author(mot_cle)
+        print(liste_final)
         show_graphique_author(liste_final,mot_cle)
     else:
         # Exécution de la recherche par mot clé
-        
+        print("lalalalalallalalalallalallalalalal")
         similarities = search_by_keyword(mot_cle)
         liste_final = [t[0] for t in similarities]
         liste_final = get_list_xSimilaritie(liste_final, 5)
