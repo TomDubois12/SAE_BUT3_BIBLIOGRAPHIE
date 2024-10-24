@@ -67,6 +67,15 @@ def show_graphique(liste_key):
     nt = Network('25vh', '25vw', notebook=True)
     #nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
+    
+    # Autorize hover on nodes
+    nt.set_options("""
+    var options = {
+        interaction: {
+            hover: true  // Activer le survol
+        }
+    };
+    """)
 
     # Set the color of the nodes in Pyvis
     for node in G.nodes(data=True):
@@ -85,7 +94,7 @@ def show_graphique(liste_key):
     <div id="result"></div>
     <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
     <script type="text/javascript">
-        function onNodeClick(params) {
+        function onNodeInteraction(params) {
             const className = 'generated-div';
             const nodeId = params.nodes[0];
             
@@ -118,7 +127,7 @@ def show_graphique(liste_key):
                 aside.appendChild(year);
                 
                 const author = document.createElement("p");
-                year.textContent = `Auteurs : ${node.author}`;
+                author.textContent = `Auteurs : ${node.author}`;
                 aside.appendChild(author);
                 
                 const abstract = document.createElement("p");
@@ -142,12 +151,19 @@ def show_graphique(liste_key):
 
             if (params.nodes.length > 0) {
                 console.log("Clicked node:", nodeId);
-                // Here you can add more functionality, like fetching data
+                // Here you can add more functionality, like fetching data no
             }
         }
-        network.on("click", onNodeClick);
+        
+        network.on("click", onNodeInteraction);
+        network.on("hoverNode", onNodeInteraction);
     </script>      
     <style>
+        body{
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        
         .generated-div {
             background-color: lightgray;
             padding: 10px;
@@ -158,6 +174,7 @@ def show_graphique(liste_key):
         
         .card{
             width: 75vw;
+            height: 100vh;
         }
         
         .card-body{
