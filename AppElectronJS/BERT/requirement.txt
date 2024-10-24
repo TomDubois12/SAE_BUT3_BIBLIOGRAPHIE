@@ -4,3 +4,4 @@ sentence_transformers
 pandas
 pyvis
 bs4
+scholarly
