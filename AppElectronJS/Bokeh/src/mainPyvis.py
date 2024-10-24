@@ -74,20 +74,10 @@ def show_graphique(liste_key):
         list_tuple_cles = [(key, t) for t in keys]
         G.add_edges_from(list_tuple_cles, color="000000")
     
-    # Autorize hover on nodes
-    nt.set_options("""
-    var options = {
-        interaction: {
-            hover: true  // Activer le survol
-        }
-    };
-    """)
-    
         # Visualiser avec PyVis
-    nt = Network('100vh', '100vw', notebook=True)
+    nt = Network('50vh', '50vw', notebook=True)
     nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
-    
 
     # Set the color of the nodes in Pyvis
     for node in G.nodes(data=True):
@@ -268,18 +258,6 @@ def show_graphique_author(liste_key, mot_cle):
 
     # for group in grouped_by_annee:
     #    G.add_edges_from((group[i], group[j]) for i in range(len(group)) for j in range(i + 1, len(group)))
-
-    # Visualiser avec PyVis
-    nt = Network('100vh', '100vw', notebook=True)
-    nt.show_buttons(filter_=['physics'])
-    nt.from_nx(G)
-
-    # Définir la couleur des nœuds dans Pyvis
-    for node in G.nodes(data=True):
-        nt.get_node(node[0])['color'] = node[1]['color']
-        
-    nt.show('Bokeh/bin/nx.html')
-
 
 if __name__ == "__main__":
     print("-" * 50)
