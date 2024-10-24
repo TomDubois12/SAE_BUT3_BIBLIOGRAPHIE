@@ -1,5 +1,0 @@
-torch
-transformers
-sentence_transformers
-pandas
-scholarly
