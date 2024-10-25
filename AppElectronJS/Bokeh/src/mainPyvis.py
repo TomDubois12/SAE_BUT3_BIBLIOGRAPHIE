@@ -6,6 +6,9 @@ from pyvis.network import Network
 from BERT.test import search_by_author, find_similar_articles, search_by_keyword, search_by_keyword_and_compare
 import sys
 from bs4 import BeautifulSoup
+from scholarly import scholarly
+import collections.abc
+import math
 
 def ajout_script(node, network):
     # Add custom script for handling node clicks and displaying the publication title
@@ -103,6 +106,54 @@ def ajout_script(node, network):
     """
     return custom_script
 
+from scholarly import scholarly
+import collections.abc
+
+def google_scholar_research(title, abstract, author, doi, year):
+    search_query4 = scholarly.search_pubs(doi)
+    num_citations = 0
+    url_citations = ""
+    print(f"Type de search_query4 : {type(search_query4)}")
+
+    # Vérifier si search_query4 est un itérateur ou un générateur
+    if isinstance(search_query4, collections.abc.Iterator):
+        # Cas où search_query4 est un itérateur
+        try:
+            for i, result in enumerate(search_query4):
+                print(f"Résultat {i+1} trouvé avec un itérateur :\n")
+
+                # Filtrer les clés bib, citedby_url et num_citations
+                keys_of_interest = ["bib", "citedby_url", "num_citations"]
+                filtered_result = {key: result.get(key, 'Clé non trouvée') for key in keys_of_interest}
+
+                # Afficher les résultats filtrés
+                for key, value in filtered_result.items():
+                    print(f"{key} : {value}\n")
+                    if(key == "num_citations"):
+                        num_citations = value
+                    if(key == "citedby_url"):
+                        url_citations = value
+                    if(key == "bib" and not title):
+                        title = value['title']
+                    if(key == "bib" and not abstract):
+                        abstract = value['abstract']
+                    if(key == "bib" and not author):
+                        author = value['author']
+                    if(key == "bib" and not year):
+                        year = int(value['year'])              
+                
+                break  # Sortir après le premier résultat pour éviter une surcharge de sortie
+
+        except StopIteration:
+            print("Aucun résultat trouvé dans l'itérateur.")
+            
+    else:
+        print("search_query4 n'est ni un itérateur ni un générateur.")
+        result = None
+    return title, abstract, author, doi, year, num_citations, url_citations
+
+
+
 def recuperate_data(data, noms, infos):
     
     # Create a dictionary of information for the nodes, including the title
@@ -113,9 +164,16 @@ def recuperate_data(data, noms, infos):
     node_title = dict(zip(noms, data['Title']))
     node_abstract = dict(zip(noms, data['Abstract Note']))
     node_author = dict(zip(noms, data['Author']))
-    node_doi = dict(zip(noms, data['Url']))
+    node_doi = dict(zip(noms, data['DOI']))
     node_year = dict(zip(noms, data['Publication Year']))
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year
+    
+    
+    if math.isnan(node_doi):
+        node_doi = dict(zip(noms, data['Url']))
+    else:
+        node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = google_scholar_research(math.isnan(node_title),math.isnan(node_abstract),math.isnan(node_author),math.isnan(node_doi),math.isnan(node_year))
+        
+    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations
 
     
 
