@@ -62,6 +62,10 @@ def ajout_script(node, network):
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
+                
+                const nb_citation = document.createElement("p");
+                nb_citation.textContent = `Nombre de citations : ${node.nb_citation}`;
+                aside.appendChild(nb_citation);
      
                 aside.classList.add(className); // Add class for styling
                 aside.id = nodeId; // Assign unique ID
@@ -106,78 +110,70 @@ def ajout_script(node, network):
     """
     return custom_script
 
-from scholarly import scholarly
-import collections.abc
+import time
 
-def google_scholar_research(title, abstract, author, doi, year):
-    search_query4 = scholarly.search_pubs(doi)
-    num_citations = 0
-    url_citations = ""
-    print(f"Type de search_query4 : {type(search_query4)}")
+def google_scholar_research(title=None, abstract=None, author=None, doi=None, year=None):
+    num_citations = None
+    url_citations = None
 
-    # Vérifier si search_query4 est un itérateur ou un générateur
-    if isinstance(search_query4, collections.abc.Iterator):
-        # Cas où search_query4 est un itérateur
-        try:
-            for i, result in enumerate(search_query4):
-                print(f"Résultat {i+1} trouvé avec un itérateur :\n")
-
-                # Filtrer les clés bib, citedby_url et num_citations
-                keys_of_interest = ["bib", "citedby_url", "num_citations"]
-                filtered_result = {key: result.get(key, 'Clé non trouvée') for key in keys_of_interest}
-
-                # Afficher les résultats filtrés
-                for key, value in filtered_result.items():
-                    print(f"{key} : {value}\n")
-                    if(key == "num_citations"):
-                        num_citations = value
-                    if(key == "citedby_url"):
-                        url_citations = value
-                    if(key == "bib" and not title):
-                        title = value['title']
-                    if(key == "bib" and not abstract):
-                        abstract = value['abstract']
-                    if(key == "bib" and not author):
-                        author = value['author']
-                    if(key == "bib" and not year):
-                        year = int(value['year'])              
-                
-                break  # Sortir après le premier résultat pour éviter une surcharge de sortie
-
-        except StopIteration:
-            print("Aucun résultat trouvé dans l'itérateur.")
-            
+    if doi and isinstance(doi, str):
+        search_query = scholarly.search_pubs(doi)
+    elif title and isinstance(title, str):
+        search_query = scholarly.search_pubs(title)
     else:
-        print("search_query4 n'est ni un itérateur ni un générateur.")
-        result = None
+        return title, abstract, author, doi, year, num_citations, url_citations
+
+    try:
+        result = next(search_query)
+        title = result.get("bib", {}).get("title", title)
+        abstract = result.get("bib", {}).get("abstract", abstract)
+        author = result.get("bib", {}).get("author", author)
+        doi = result.get("bib", {}).get("doi", doi)
+        year = result.get("bib", {}).get("pub_year", year)
+        num_citations = result.get("num_citations", None)
+        url_citations = result.get("url_citations", None)
+    except StopIteration:
+        pass
+
+    # Délai avant de faire une nouvelle requête
+    time.sleep(2)  # Attendre 2 secondes
+
     return title, abstract, author, doi, year, num_citations, url_citations
 
 
-
 def recuperate_data(data, noms, infos):
-    
-    # Create a dictionary of information for the nodes, including the title
     node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
-    #node_year = dict(zip(noms, annees_data.reindex(noms)))  # Reindex years to match the keys/names
-
-    # Add title as a node attribute for each publication
     node_title = dict(zip(noms, data['Title']))
     node_abstract = dict(zip(noms, data['Abstract Note']))
     node_author = dict(zip(noms, data['Author']))
     node_doi = dict(zip(noms, data['DOI']))
     node_year = dict(zip(noms, data['Publication Year']))
     
-    
-    if math.isnan(node_doi):
-        node_doi = dict(zip(noms, data['Url']))
-    else:
-        node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = google_scholar_research(math.isnan(node_title),math.isnan(node_abstract),math.isnan(node_author),math.isnan(node_doi),math.isnan(node_year))
+    # Ajout des dictionnaires pour stocker le nombre de citations et les URLs
+    node_num_citations = {}
+    node_url_citations = {}
         
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations
+    for nom in noms:
+        title, abstract, author, doi, year = node_title[nom], node_abstract[nom], node_author[nom], node_doi[nom], node_year[nom]
+        print(node_doi[nom])
+        if node_doi[nom] != '' or node_doi[nom] != None:
+            title, abstract, author, doi, year, num_citations, url_citations = google_scholar_research(
+                title if pd.notna(title) else None,
+                abstract if pd.notna(abstract) else None,
+                author if pd.notna(author) else None,
+                doi if pd.notna(doi) else None,
+                year if pd.notna(year) else None
+        )
+        
+        # Mise à jour des dictionnaires après récupération
+        node_title[nom], node_abstract[nom], node_author[nom], node_doi[nom], node_year[nom] = title, abstract, author, doi, year
+        node_num_citations[nom] = num_citations
+        node_url_citations[nom] = url_citations
 
-    
+    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
 
-def get_list_xSimilaritie(listeKey, x=5):
+
+def get_list_xSimilaritie(listeKey, x=1):
     """
     Take a liste of key, for exemple 15 key similar from the keyWords and return a list of x similar article for each key.
     return a list of list with 2 element, first: the key. second: a list of key of x article similar 
@@ -218,7 +214,7 @@ def show_graphique(liste_key):
     noms = dfFinal.index  # Use the index (the keys)
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year = recuperate_data(dfFinal, noms, infos)
+    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -229,14 +225,14 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Add the edges
     for key, keys in liste_key:
         list_tuple_cles = [(key, t) for t in keys]
         G.add_edges_from(list_tuple_cles, color="000000")
     
-        # Visualiser avec PyVis
+    # Visualiser avec PyVis
     nt = Network('50vh', '50vw', notebook=True)
     nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
