@@ -1,0 +1,39 @@
+body {
+    background-color: white;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.texttitle {
+    font-size: 25px;
+    margin: 0;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #166F7A;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+
+.contenerButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 5vh;
+}
