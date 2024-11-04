@@ -131,12 +131,12 @@ def get_list_xSimilaritie(listeKey, x=5):
     return liste_final
 
 def show_graphique(liste_key):
-    file = 'Bokeh/data/Bibliographie.csv'
+    file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
     data = data2.iloc[:, :12]
 
     # Définir la colonne "Key" comme index
-    data.set_index("Key", inplace=True)
+    data.set_index("DOI", inplace=True)
 
     # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
     # data = data.dropna(subset=["Publication Year"])
@@ -205,12 +205,12 @@ def show_graphique(liste_key):
         f.write(html_content)
 
 def show_graphique_author(liste_key, mot_cle):
-    file = 'Bokeh/data/Bibliographie.csv'
+    file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
     data = data2.iloc[:, :12]
 
     # Définir la colonne "Key" comme index
-    data.set_index("Key", inplace=True)
+    data.set_index("DOI", inplace=True)
 
     # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
     # data = data.dropna(subset=["Publication Year"])
