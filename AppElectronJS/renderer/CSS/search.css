@@ -1,4 +1,30 @@
 /* Style de base pour la navigation */
+
+body {
+    background-color: white;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.title {
+    font-size: 35px;
+    font-weight: bold;
+}
+
+.textsearch {
+    font-size: 25px;
+}
+
 .navbar {
     display: flex;
     justify-content: center;
@@ -20,6 +46,12 @@
     border-color: #0A4A54;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 122, 139, 0.5);
+}
+
+.input::placeholder {
+    font-size: 15.8px;
+    color: #888;
+    opacity: 1;
 }
 
 /* Style de base pour les boutons */
@@ -81,4 +113,55 @@ body.dark button:active {
 body.dark button:disabled {
     background-color: #1E1E1E;
     color: #A0A0A0;
+}
+
+
+
+.textIcons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.textIcons p {
+    font-size: 25px;
+}
+
+.groupIcons {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+}
+
+.groupIcons div {
+    margin-left: 5vw;
+    margin-right: 5vw;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.groupIcons li{
+    flex-grow: 1;
+}
+
+.groupIcons li div p {
+    font-size: 20px;
+}
+
+.text-auteur p{
+    margin-top: 0vw;
+    padding-top: 0vw;
+    margin-bottom: 0vw;
+    padding-bottom: 0vw;
+}
+
+.key, .file, .user {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 2vh;
 }
