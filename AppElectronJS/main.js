@@ -1,8 +1,18 @@
 const { app, BrowserWindow, ipcMain, Menu ,nativeTheme } = require('electron')
 const path = require('node:path');
 const { spawn } = require('child_process');
+const fs = require("fs");
+
 
 let mainWindow;
+
+const webPref = {
+  preload: path.join(__dirname, 'preload.js'),  // Chemin vers votre script de preload
+  contextIsolation: true,  // Active l'isolation de contexte pour la sécurité
+  enableRemoteModule: false, // Désactive le module remote par sécurité
+  nodeIntegration: true, // Active Node.js dans le script de preload
+  sandbox: false  // Ajoutez sandbox: false pour éviter des problèmes de compatibilité
+}
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
@@ -12,11 +22,7 @@ const createWindow = () => {
     width: isDev ? 1000 : 500,
     height: 600,
     icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-    webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true, // Important pour la sécurité
-        preload: path.join(__dirname, 'preload.js')
-    }
+    webPreferences: webPref,
   });
 
   if (isDev) {
@@ -52,6 +58,8 @@ function runPythonFunction(params) {
         });
     });
 }
+
+
 
 ipcMain.handle('callFunctionSearch', (event, query) => {
   // Appel de la fonction Python avec les paramètres fournis
@@ -116,6 +124,20 @@ const mainMenuTemplates = [
 
         return nativeTheme.shouldUseDarkColors;
         }
+      },
+      {
+        label: 'Gerer les couleurs',
+        // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
+        click(){
+          // Une fenêtre pour gerer les couleurs des noeuds 
+          const fenetre = new BrowserWindow({
+            width: 800,
+            height: 600,
+            icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+            webPreferences: webPref
+        });
+        fenetre.loadFile('./renderer/colorSettings.html');
+        }
       }
     ]
   }
@@ -149,3 +171,4 @@ if (isDev){
 ipcMain.on('load-search-page', () => {
   mainWindow.loadFile('renderer/search.html');
 });
+

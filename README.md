@@ -22,6 +22,8 @@ npm init
 npm install electron --save-dev
 
 
+npm install --save @electron/remote
+
 https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging
 
 npm install --save-dev @electron-forge/cli
