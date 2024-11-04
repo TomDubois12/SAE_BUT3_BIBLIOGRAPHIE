@@ -5,3 +5,7 @@ contextBridge.exposeInMainWorld('api', {
         return await ipcRenderer.invoke('callFunctionSearch', query);  // Notez 'callFunctionSearch'
     }
 });
+
+contextBridge.exposeInMainWorld('electronAPI', {
+    accessBiblioLectio: () => ipcRenderer.send('load-search-page')
+});
