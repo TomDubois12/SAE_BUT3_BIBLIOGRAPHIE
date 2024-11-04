@@ -20,6 +20,11 @@ body {
     margin: 0;
 }
 
+.texttitle2 {
+    font-size: 25px;
+    margin-bottom: 5vh;
+}
+
 button {
     padding: 10px 20px;
     background-color: #166F7A;
@@ -35,5 +40,7 @@ button {
 .contenerButton {
     display: flex;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     margin-top: 5vh;
 }
