@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld('api', {
 });
 
 
-  
+contextBridge.exposeInMainWorld('electronAPI', {
+    accessBiblioLectio: () => ipcRenderer.send('load-search-page')
+});
+

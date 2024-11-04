@@ -29,7 +29,7 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('renderer/search.html');
+  mainWindow.loadFile('renderer/loadcsv.html');
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
   Menu.setApplicationMenu(mainMenu)
@@ -167,4 +167,8 @@ if (isDev){
     ]
   });
 }
+
+ipcMain.on('load-search-page', () => {
+  mainWindow.loadFile('renderer/search.html');
+});
 
