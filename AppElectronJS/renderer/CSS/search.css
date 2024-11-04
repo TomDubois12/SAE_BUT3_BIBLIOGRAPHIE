@@ -25,13 +25,6 @@ body {
     font-size: 25px;
 }
 
-.navbar {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-}
-
 /* Style pour l'input de recherche */
 .input {
     padding: 10px;
@@ -164,4 +157,29 @@ body.dark button:disabled {
     width: 60px;
     height: 60px;
     margin-bottom: 2vh;
+}
+
+
+
+.contenerNavbar {
+    display: flex;
+}
+
+.logoNavbar img{
+    max-width: 15vw;
+    height: 10vh;
+    margin-bottom: 10vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+
+
+.navbar button, .navbar input, .logoNavbar img{
+    flex-basis: 30%;
+    margin: 0.5vw 1vw 0.5vw 1vw;
 }
