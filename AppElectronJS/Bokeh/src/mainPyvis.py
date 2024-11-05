@@ -137,7 +137,7 @@ def show_graphique(liste_key):
     # Rechercher par mot clé
     # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
     # res = search_by_keyword_and_compare(mot_cle)
-    # Extraire les clés de la recherche
+    # Extraire les clés de la recherchea
     # liste_cles = [(cle, cle2) for cle, cle2, valeur in res if valeur > 0.5]
     # Reindexer le DataFrame selon les clés trouvées
     all_key1 = [t[0] for t in liste_key]
@@ -157,7 +157,7 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=20+node_citation[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size=20+node_citation[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
 
     # Add the edges
     for key, keys in liste_key:
