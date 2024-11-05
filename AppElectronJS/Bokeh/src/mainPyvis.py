@@ -115,7 +115,8 @@ def recuperate_data(data, noms, infos):
     node_author = dict(zip(noms, data['Author']))
     node_doi = dict(zip(noms, data['Url']))
     node_year = dict(zip(noms, data['Publication Year']))
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year
+    node_citation = dict(zip(noms, data["nbCitation"]))
+    return node_info, node_title, node_abstract, node_author, node_doi, node_year,node_citation
 
     
 
@@ -134,12 +135,11 @@ def show_graphique(liste_key):
 
     file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
-    data = data2.iloc[:, :12]
-
+    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
     # Définir la colonne "Key" comme index
     data.set_index("DOI", inplace=True)
-    print(liste_key)
 
+    
     # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
     # data = data.dropna(subset=["Publication Year"])
 
@@ -159,10 +159,8 @@ def show_graphique(liste_key):
     dfFinal = data.reindex(all_key1 + all_key2)
 
     noms = dfFinal.index  # Use the index (the keys)
-    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
-    
-    node_info, node_title, node_abstract, node_author, node_doi, node_year = recuperate_data(dfFinal, noms, infos)
-
+    infos = dfFinal.iloc[:, [0,1,2,3,-1]]  # Take the columns that contain the information
+    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citation = recuperate_data(dfFinal, noms, infos)
     # Create the graph
     G = nx.Graph()
 
@@ -172,7 +170,7 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size=node_citation[nom]/10, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
 
     # Add the edges
     for key, keys in liste_key:
@@ -209,7 +207,8 @@ def show_graphique(liste_key):
 def show_graphique_author(liste_key, mot_cle):
     file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
-    data = data2.iloc[:, :12]
+    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
+
 
     # Définir la colonne "Key" comme index
     data.set_index("DOI", inplace=True)
@@ -235,7 +234,7 @@ def show_graphique_author(liste_key, mot_cle):
     noms = dfFinal.index  # Utiliser l'index (les clés)
     infos = dfFinal.iloc[:, 0:3]  # Prendre les colonnes qui contiennent les informations
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year = recuperate_data(dfFinal, noms, infos)
+    node_info, node_title, node_abstract, node_author, node_doi, node_year,node_citation = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -246,7 +245,7 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size= 20+node_citation[nom]/10, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
 
     # Déterminer les 15 nœuds d'origine
 
