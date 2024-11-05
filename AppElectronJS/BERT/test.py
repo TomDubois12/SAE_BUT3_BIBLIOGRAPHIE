@@ -41,13 +41,13 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 # Charger le fichier CSV avec encodage UTF-8
-df = pd.read_csv('BERT/Bibliographie.csv', encoding='utf-8')
+df = pd.read_csv('BERT/Bibliographie_sans_doublon.csv', encoding='utf-8')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())
 
 # Extraire les colonnes 'Key', 'Title', 'Abstract Note' et 'Author'
-keys = df['Key'].dropna().tolist()
+keys = df['DOI'].tolist()
 titles = df['Title'].fillna('').tolist()  # Remplir les valeurs manquantes par des chaînes vides
 abstracts = df['Abstract Note'].fillna('').tolist()
 authors = df['Author'].fillna('').tolist()  # Remplir les valeurs manquantes par des chaînes vides
@@ -69,9 +69,9 @@ def search_by_keyword(mot_cle):
     similarities_with_title_abstracts.sort(key=lambda x: x[3], reverse=True)
 
     # Afficher les 15 résultats les plus proches du mot clé avec leur Key, Titre et Abstract
-    print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
-    for key, title, abstract, score in similarities_with_title_abstracts[:15]:
-        print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
+    # print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
+    # for key, title, abstract, score in similarities_with_title_abstracts[:15]:
+    #     print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
     return [(t[0], t[3]) for t in similarities_with_title_abstracts[:15]]
 
 # Fonction de recherche par mot clé avec calcul de la similarité entre les résultats
@@ -104,9 +104,9 @@ def search_by_keyword_and_compare(mot_cle):
             similarities_list.append((top_15_keys[i], top_15_keys[j], similarity_matrix[i][j].item()))
 
     # Afficher les 15 résultats les plus proches du mot clé
-    print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
-    for idx, (key, title, abstract, _, score) in enumerate(top_15_results, 1):
-        print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
+    # print(f"Top 15 résultats pour le mot clé '{mot_cle}':\n")
+    # for idx, (key, title, abstract, _, score) in enumerate(top_15_results, 1):
+    #     print(f"Key: {key} \nTitle: {title} \nAbstract: {abstract} \nSimilarité: {score:.4f}\n")
 
     # Afficher la liste des similarités entre les articles du top 15 avec les indices (i, j)
     print("\nListe des similarités entre les articles du top 15 :")
@@ -169,15 +169,15 @@ similarities = search_by_keyword_and_compare(mot_cle)
 
 article_key = "Z7PHWZU3"
 x = 5
-similar_articles = find_similar_articles(article_key, x)  # Trouver les 5 articles les plus similaires
-print("--------------------------------------------")
-print(f"Les {x} articles les plus proches de l'article {article_key}")
-print(similar_articles)
-print("--------------------------------------------")
+# similar_articles = find_similar_articles(article_key, x)  # Trouver les 5 articles les plus similaires
+# print("--------------------------------------------")
+# print(f"Les {x} articles les plus proches de l'article {article_key}")
+# print(similar_articles)
+# print("--------------------------------------------")
 
-# Utilisation de la fonction
-author_name = "Richard L."
-print("--------------------------------------------")
-author_articles = search_by_author(author_name)
-print("--------------------------------------------")
-#Richard D.
+# # Utilisation de la fonction
+# author_name = "Richard L."
+# print("--------------------------------------------")
+# author_articles = search_by_author(author_name)
+# print("--------------------------------------------")
+# #Richard D.

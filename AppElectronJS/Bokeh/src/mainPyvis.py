@@ -15,11 +15,12 @@ def ajout_script(node, network):
     <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
     <script type="text/javascript">
         function onNodeInteraction(params) {
+            const canva = document.getElementsByClassName('contenerCanvaAside')[0]; // Accès au premier élément
             const className = 'generated-div';
             const nodeId = params.nodes[0];
             
             // Retrieve the title from the node attributes
-            const node = network.body.data.nodes.get(nodeId);
+            const nodeData = network.body.data.nodes.get(nodeId); // Utiliser un autre nom pour éviter la confusion
 
             // Check for existing aside element by ID
             const existingIdenticalElement = document.getElementById(nodeId);
@@ -33,30 +34,39 @@ def ajout_script(node, network):
                 if (existingElements.length > 0) {
                     existingElements[0].remove();
                 }
+                
+                if (!nodeId) {
+                    existingElements[0].remove();
+                }
 
                 // Create a new aside element
                 const aside = document.createElement("aside");
 
                 // Add content to the aside, including the title
                 const titre = document.createElement("h1");
-                titre.textContent = `Titre de la publication : ${node.title}`;
+                titre.classList.add("pTitle");
+                titre.textContent = `Titre de la publication : ${nodeData.title || "Titre non disponible"}`;
                 aside.appendChild(titre);
                 
-                const year = document.createElement("p");
-                year.textContent = `Année de publication : ${node.year}`;
-                aside.appendChild(year);
-                
                 const author = document.createElement("p");
-                author.textContent = `Auteurs : ${node.author}`;
+                author.classList.add("pAuthor");
+                author.textContent = `Auteur(s), co-auteur(s) : ${nodeData.author || "Auteur(s) non disponible"}`;
                 aside.appendChild(author);
-                
+            
+                const year = document.createElement("p");
+                year.classList.add("pYear");
+                year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
+                aside.appendChild(year);
+            
                 const abstract = document.createElement("p");
-                abstract.textContent = `Abstract : ${node.abstract}`;
+                abstract.classList.add("pAbstract");
+                abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
                 aside.appendChild(abstract);
                 
                 const doi = document.createElement("a");
-                doi.textContent = `DOI : ${node.doi}`;
-                doi.href = node.doi;  // Set the URL for the link
+                doi.classList.add("pDOI");
+                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
+                doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
@@ -69,8 +79,8 @@ def ajout_script(node, network):
                 aside.id = nodeId; // Assign unique ID
 
                 // Append the aside to the DOM
-                document.body.appendChild(aside);
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${node.title}" publié en "${node.year}".`);
+                canva.appendChild(aside);
+                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title || "Titre non disponible"}" publié en "${nodeData.year || "Année non disponible"}".`);
             }
 
             if (params.nodes.length > 0) {
@@ -82,29 +92,6 @@ def ajout_script(node, network):
         network.on("click", onNodeInteraction);
         network.on("hoverNode", onNodeInteraction);
     </script>      
-    <style>
-        body{
-            display: flex;
-            flex-wrap: nowrap;
-        }
-        
-        .generated-div {
-            background-color: lightgray;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid black;
-            margin-left: 75vw;
-        }
-        
-        .card{
-            width: 75vw;
-            height: 100vh;
-        }
-        
-        .card-body{
-            flex-grow: 1;
-        }
-    </style>
     """
     return custom_script
 
@@ -184,17 +171,18 @@ def get_list_xSimilaritie(listeKey, x=1):
     liste_final = []
     for key in listeKey:
         listeSimiliarities = find_similar_articles(key, x)
-        liste_final += [[key, [t[0] for t in listeSimiliarities]]]
+        liste_final += [[key, [(t[0],t[1]) for t in listeSimiliarities]]]
     return liste_final
 
 def show_graphique(liste_key):
-    file = 'Bokeh/data/Bibliographie.csv'
+
+    file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
-    data = data2.iloc[:, :12]
-
+    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
     # Définir la colonne "Key" comme index
-    data.set_index("Key", inplace=True)
+    data.set_index("DOI", inplace=True)
 
+    
     # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
     # data = data.dropna(subset=["Publication Year"])
 
@@ -205,13 +193,12 @@ def show_graphique(liste_key):
     # Rechercher par mot clé
     # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
     # res = search_by_keyword_and_compare(mot_cle)
-    # Extraire les clés de la recherche
+    # Extraire les clés de la recherchea
     # liste_cles = [(cle, cle2) for cle, cle2, valeur in res if valeur > 0.5]
     # Reindexer le DataFrame selon les clés trouvées
     all_key1 = [t[0] for t in liste_key]
     all_key2 = [t[1] for t in liste_key]
-    all_key2 = [t[i] for t in all_key2 for i in range(len(t))]
-
+    all_key2 = [t[0] for _t in all_key2 for t in _t]
     dfFinal = data.reindex(all_key1 + all_key2)
 
     noms = dfFinal.index  # Use the index (the keys)
@@ -228,16 +215,17 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Add the edges
     for key, keys in liste_key:
-        list_tuple_cles = [(key, t) for t in keys]
-        G.add_edges_from(list_tuple_cles, color="000000")
+        for key2 in keys:
+            print(key, key2)
+            G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color="000000")
     
-    # Visualiser avec PyVis
-    nt = Network('50vh', '50vw', notebook=True)
-    nt.show_buttons(filter_=['physics'])
+        # Visualiser avec PyVis
+    nt = Network('100vh', '100vw', notebook=True)
+    # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
     # Set the color of the nodes in Pyvis
@@ -262,12 +250,13 @@ def show_graphique(liste_key):
         f.write(html_content)
 
 def show_graphique_author(liste_key, mot_cle):
-    file = 'Bokeh/data/Bibliographie.csv'
+    file = 'BERT/Bibliographie_sans_doublon.csv'
     data2 = pd.read_csv(file)
-    data = data2.iloc[:, :12]
+    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
+
 
     # Définir la colonne "Key" comme index
-    data.set_index("Key", inplace=True)
+    data.set_index("DOI", inplace=True)
 
     # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
     # data = data.dropna(subset=["Publication Year"])
@@ -301,7 +290,7 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        G.add_node(nom,size= 20+node_citations[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Déterminer les 15 nœuds d'origine
 
@@ -310,20 +299,22 @@ def show_graphique_author(liste_key, mot_cle):
         for j in range(i,len(liste_key)):
             list_tuple_cles.append((liste_key[i],liste_key[j]))
     
-
-    liste_cle1_cle2 = []
+    print("****"*100)
+    liste_cle1_cle2 = []    
     for key in liste_key:
         articles_similaire = find_similar_articles(key, 3)
         for elem in articles_similaire:
-            print(elem, key)
+           
             if elem[0] in liste_key:
+                print(elem, key)
                 liste_cle1_cle2.append((key,elem[0]))
-    G.add_edges_from(liste_cle1_cle2, color="000000")
+                G.add_edge(key,elem[0],color="000000", length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
+    #G.add_edges_from(liste_cle1_cle2, color="000000")
 
 
          # Visualiser avec PyVis
-    nt = Network('50vh', '50vw', notebook=True)
-    nt.show_buttons(filter_=['physics'])
+    nt = Network('100vh', '100vw', notebook=True)
+    # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
     # Set the color of the nodes in Pyvis

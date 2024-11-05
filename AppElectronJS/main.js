@@ -1,29 +1,53 @@
 const { app, BrowserWindow, ipcMain, Menu ,nativeTheme } = require('electron')
 const path = require('node:path');
 const { spawn } = require('child_process');
+const fs = require("fs");
+
 
 let mainWindow;
+
+const webPref = {
+  preload: path.join(__dirname, 'preload.js'),  // Chemin vers votre script de preload
+  contextIsolation: true,  // Active l'isolation de contexte pour la sécurité
+  enableRemoteModule: false, // Désactive le module remote par sécurité
+  nodeIntegration: true, // Active Node.js dans le script de preload
+  sandbox: false  // Ajoutez sandbox: false pour éviter des problèmes de compatibilité
+}
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
-const createWindow = () => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: isDev ? 1000 : 500,
     height: 600,
     icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-    webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true, // Important pour la sécurité
-        preload: path.join(__dirname, 'preload.js')
-    }
+    webPreferences: webPref,
   });
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('renderer/search.html');
+  try {
+    // Utilisation de fs.promises.readFile pour lire le fichier de manière asynchrone
+    const data = await fs.promises.readFile('./renderer/json/userSettings.json', 'utf-8');
+    const parsedData = JSON.parse(data); // Analyse JSON
+
+    // Vérifie si le chemin CSV existe dans le JSON
+    const pathCSV = parsedData.CSVChoose;
+    
+    if (pathCSV && fs.existsSync(`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`)) {
+        mainWindow.loadFile('renderer/search.html');
+    } else {
+        mainWindow.loadFile('renderer/loadcsv.html');
+    }
+} catch (error) {
+    console.error("Erreur de lecture ou d'analyse du fichier JSON :", error);
+    mainWindow.loadFile('renderer/loadcsv.html'); // En cas d'erreur, charge une page de secours
+}
+
+
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
   Menu.setApplicationMenu(mainMenu)
@@ -52,6 +76,8 @@ function runPythonFunction(params) {
         });
     });
 }
+
+
 
 ipcMain.handle('callFunctionSearch', (event, query) => {
   // Appel de la fonction Python avec les paramètres fournis
@@ -95,6 +121,12 @@ const mainMenuTemplates = [
         click(){
           app.quit();
         }
+      },
+      {
+        label:'Open other CSV',
+        click(){
+          mainWindow.loadFile('./renderer/loadcsv.html'); 
+        }
       }
     ]
   },
@@ -116,6 +148,20 @@ const mainMenuTemplates = [
 
         return nativeTheme.shouldUseDarkColors;
         }
+      },
+      {
+        label: 'Gerer les couleurs',
+        // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
+        click(){
+          // Une fenêtre pour gerer les couleurs des noeuds 
+          const fenetre = new BrowserWindow({
+            width: 800,
+            height: 600,
+            icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+            webPreferences: webPref
+        });
+        fenetre.loadFile('./renderer/colorSettings.html');
+        }
       }
     ]
   }
@@ -124,24 +170,29 @@ const mainMenuTemplates = [
 
 // For mac user
 if (process.platform == 'darwin'){
-  mainMenuTemplates.unshift({});
+  mainMenuTemplates.unshift({}); 
 }
 
 // For product environement, add devTool menu and accelerator
 if (isDev){
   mainMenuTemplates.push({
-    label:'Developer Tools',
+    label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
     submenu:[
       {
         label:'Toggle devTools',
-        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
         click(item, focusedWindow){
           focusedWindow.toggleDevTools();
         }
       },
       {
-        role:'reload'
+        role:'reload'  // permet de refresh l'app
       }
     ]
   });
 }
+
+ipcMain.on('load-search-page', () => {
+  mainWindow.loadFile('renderer/search.html');
+});
+

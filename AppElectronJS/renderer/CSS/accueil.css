@@ -1,0 +1,198 @@
+/* Style de base pour la navigation */
+
+body {
+    background-color: white;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.title {
+    font-size: 35px;
+    font-weight: bold;
+}
+
+.textsearch {
+    font-size: 25px;
+}
+
+/* Style pour l'input de recherche */
+.input {
+    padding: 10px;
+    border: 2px solid #166F7A;
+    border-radius: 25px;
+    font-size: 16px;
+    width: 300px;
+    transition: all 0.3s ease;
+}
+
+.input:focus {
+    border-color: #0A4A54;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 122, 139, 0.5);
+}
+
+.input::placeholder {
+    font-size: 15.8px;
+    color: #888;
+    opacity: 1;
+}
+
+/* Style de base pour les boutons */
+button {
+    padding: 10px 20px;
+    background-color: #166F7A;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+
+/* Effet hover pour les boutons */
+button:hover {
+    background-color: #0A4A54;
+    box-shadow: 0 5px 15px rgba(0, 122, 139, 0.3);
+}
+
+/* Effet de clic pour les boutons */
+button:active {
+    background-color: #094045;
+    box-shadow: 0 3px 8px rgba(0, 122, 139, 0.2);
+}
+
+/* Style des boutons désactivés */
+button:disabled {
+    background-color: white;
+    color: #166F7A;
+    border: 2px solid #166F7A;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Active button styling */
+button.active {
+    background-color: #0A4A54;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 122, 139, 0.2);
+}
+
+/* Adaptation pour le mode sombre */
+body.dark button {
+    background-color: #3A3A3A;
+    color: white;
+}
+
+body.dark button:hover {
+    background-color: #505050;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+body.dark button:active {
+    background-color: #2E2E2E;
+}
+
+body.dark button:disabled {
+    background-color: #1E1E1E;
+    color: #A0A0A0;
+}
+
+
+
+.textIcons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.textIcons p {
+    font-size: 25px;
+}
+
+.groupIcons {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+}
+
+.groupIcons div {
+    margin-left: 5vw;
+    margin-right: 5vw;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.groupIcons li{
+    flex-grow: 1;
+}
+
+.groupIcons li div p {
+    font-size: 20px;
+}
+
+.text-auteur p{
+    margin-top: 0vw;
+    padding-top: 0vw;
+    margin-bottom: 0vw;
+    padding-bottom: 0vw;
+}
+
+.key, .file, .user {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 2vh;
+}
+
+
+
+.contenerNavbar {
+    display: flex;
+}
+
+.logoNavbar img{
+    max-width: 15vw;
+    height: 10vh;
+    margin-bottom: 10vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+
+.navbar input {
+    flex-basis: 70%;
+    margin: 0.5vw 1vw 0.5vw 1vw; 
+}
+
+
+.navbar button, .logoNavbar img{
+    flex-basis: 30%;
+    margin: 0.5vw 1vw 0.5vw 1vw;
+}
+
+#mynetwork {
+    width: 98.7vw;
+    height: 100vh;
+    background-color: #ffffff;
+    border: 1px solid lightgray;
+    position: relative;
+}

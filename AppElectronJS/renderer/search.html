@@ -3,28 +3,67 @@
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
         <link rel="stylesheet" type="text/css" href="CSS/themeDarkLight.css">
-        <link rel="stylesheet" href="CSS/search.css">
-
+        <link rel="stylesheet" href="CSS/accueil.css">
     </head>
     <body>
         <div class="logo">
             <img src="images/logo.png" alt="logo de l'application" class="logo">
-        </div>
+        </div> 
         <div class="text">
-            <p>Explorez vos propres données sous forme de graphique !</p>
-            <p>Pour commencer, entrez votre première recherche à partir d'un nom d'auteur ou d'un mot clé</p>
+            <p class="title">Explorez les articles connectés sous forme de graphe</p>
+            <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
         </div>
 
         <nav class="navbar">
-            <input class="input" type="search" id="site-search" name="q" minlength="4"
-                placeholder="Entrez votre recherche" 
+            <input class="input" type="search" id="site-search" name="q" minlength="1"
+                placeholder="Indiquez un mot clé, un nom d’auteur"  
             />
             <button onclick="desactiverBouton('auteur', 'sujet')" id="auteur" class="active">Par auteur</button>
             <button onclick="desactiverBouton('sujet', 'auteur')" id="sujet">Par sujet</button>
             <button id="search-btn">Rechercher</button>
         </nav>
+        
+        <div class="textIcons">
+            <p>Dans cette barre de recherche, vous pouvez essayer avec :</p>
+        </div>
+        <ul class="groupIcons">
+            <li>
+                <div>
+                    <img src="images/Key_alt.png" alt="Un T" class="key">
+                    <div class="text-auteur">
+                        <p>
+                            Un ou plusieurs mots clés
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <img src="images/File_alt.png" alt="Un fichier" class="file">
+                    <div class="text-auteur">
+                        <p>
+                            Un titre d'article ou un DOI
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <img src="images/User_alt.png" alt="Un utilisateur" class="user">
+                    <div class="text-auteur">
+                        <p>
+                            Un nom d'auteur
+                        </p>
+                        <p>
+                            ou un identifiant ORCID
+                        </p>
+                    </div>
+                </div>
+            </li>
+        </ul>
     
         <div id="result"></div>
-    <script src="js/renderer.js"></script>
+        <script src="js/renderer.js"></script>
+    
     </body>
 </html>
