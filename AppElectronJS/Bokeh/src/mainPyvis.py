@@ -290,7 +290,7 @@ def show_graphique_author(liste_key, mot_cle):
     noms = dfFinal.index  # Utiliser l'index (les clés)
     infos = dfFinal.iloc[:, 0:3]  # Prendre les colonnes qui contiennent les informations
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year = recuperate_data(dfFinal, noms, infos)
+    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -301,7 +301,7 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Déterminer les 15 nœuds d'origine
 
