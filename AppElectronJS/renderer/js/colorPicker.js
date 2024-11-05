@@ -45,6 +45,36 @@ function readFile(){
                 
                 divLiaison.appendChild(li);
             });
+
+        /////////////////////////////////
+        // La partie pour les nbNoeuds //
+        /////////////////////////////////
+        const divNoeuds = document.getElementById('listeNbNoeuds');
+        data.ListeNoeudSettings.forEach(element => {
+            const li = document.createElement('li');
+            li.className = "color-item";
+            const divColor = document.createElement('div');
+            divColor.className = 'color-box';
+            divColor.style.backgroundColor = element.color;
+            divColor.id = element.NoeudsName;
+
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'select';
+            input.value = element.NoeudsName;
+            input.id = "idB:"+element.NoeudsName;
+
+            const p = document.createElement('p')
+            p.textContent = element.NoeudsName;
+
+            li.appendChild(p);
+            li.appendChild(input);
+            li.appendChild(divColor);
+                    
+            divNoeuds.appendChild(li);
+       
+        });
             
             const colorItems = document.querySelectorAll('.color-item');
             console.log(colorItems)
@@ -53,7 +83,6 @@ function readFile(){
                 item.addEventListener('click', () => {
                     // Trouver le bouton radio dans cet élément <li> et le cocher
                     const radioButton = item.querySelector('input[type="radio"]');
-                    console.log(radioButton);
                     if (radioButton) {
                         radioButton.checked = true; // Coche le bouton radio
                     }
@@ -83,19 +112,17 @@ function getSelectedRadioButton(){
 
 
 
-const selectedObject = document.getElementById('selected-object');
 function writeFile(){
-
     // On récupère les settings 
     var data = null;
     window.api.readFile('renderer/json/userSettings.json', (err, fileData) => {
         data = JSON.parse(fileData);
         if (data) {
+            console.log(getSelectedRadioButton());
             // On modifie la couleur de l'element selectioné par la valeur de colorPicker
             data.ColorPickerSettings.forEach(element => {
                 if(element.liaisonName === getSelectedRadioButton()){
 
-                    selectedObject.textContent = " Selected object : " + element.liaisonName;
                     element.color = colorPicker.value;
                     const col = document.getElementById(element.liaisonName);
                     col.style.backgroundColor = element.color
@@ -109,7 +136,23 @@ function writeFile(){
                     });
                 }
             });
-            
+            data.ListeNoeudSettings.forEach(element => {
+                if(element.NoeudsName === getSelectedRadioButton()){
+
+                    console.log(element);
+                    element.color = colorPicker.value;
+                    const col = document.getElementById(element.NoeudsName);
+                    col.style.backgroundColor = element.color
+
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        } else {
+                        console.log('Écriture réussie');
+                        }
+                    });
+                }
+            });
         }
     }); 
 }

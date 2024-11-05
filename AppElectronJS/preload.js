@@ -6,7 +6,9 @@ contextBridge.exposeInMainWorld('api', {
     callFunctionSearch: async (query) => {
         return await ipcRenderer.invoke('callFunctionSearch', query);
     },
-    
+    openWindoColor: async () => {
+        return await ipcRenderer.invoke('openWindoColor');
+    },
     readFile: (path, callback) => fs.readFile(path, 'utf-8', callback),
     writeFile: (path, data, callback) => fs.writeFile(path, data, callback),
 });
@@ -14,7 +16,6 @@ contextBridge.exposeInMainWorld('api', {
 
 contextBridge.exposeInMainWorld('electronAPI', {
     accessBiblioLectio: () => ipcRenderer.send('load-search-page'),
-
     saveCSVPath: async (file) => {
         
         try {
