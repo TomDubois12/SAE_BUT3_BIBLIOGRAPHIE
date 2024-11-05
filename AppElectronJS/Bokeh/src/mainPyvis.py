@@ -43,24 +43,29 @@ def ajout_script(node, network):
 
                 // Add content to the aside, including the title
                 const titre = document.createElement("h1");
-                titre.textContent = `Titre de la publication : ${nodeData.title}`;
+                titre.classList.add("pTitle");
+                titre.textContent = `Titre de la publication : ${nodeData.title || "Titre non disponible"}`;
                 aside.appendChild(titre);
                 
-                const year = document.createElement("p");
-                year.textContent = `Année de publication : ${nodeData.year}`;
-                aside.appendChild(year);
-                
                 const author = document.createElement("p");
-                author.textContent = `Auteurs : ${nodeData.author}`;
+                author.classList.add("pAuthor");
+                author.textContent = `Auteur(s), co-auteur(s) : ${nodeData.author || "Auteur(s) non disponible"}`;
                 aside.appendChild(author);
-                
+            
+                const year = document.createElement("p");
+                year.classList.add("pYear");
+                year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
+                aside.appendChild(year);
+            
                 const abstract = document.createElement("p");
-                abstract.textContent = `Abstract : ${nodeData.abstract}`;
+                abstract.classList.add("pAbstract");
+                abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
                 aside.appendChild(abstract);
                 
                 const doi = document.createElement("a");
-                doi.textContent = `DOI : ${nodeData.doi}`;
-                doi.href = nodeData.doi;  // Set the URL for the link
+                doi.classList.add("pDOI");
+                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
+                doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
@@ -70,9 +75,7 @@ def ajout_script(node, network):
 
                 // Append the aside to the DOM
                 canva.appendChild(aside);
-                // Optionnel : ne pas ajouter l'aside au body, juste à canva
-                // document.body.appendChild(aside); 
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title}" publié en "${nodeData.year}".`);
+                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title || "Titre non disponible"}" publié en "${nodeData.year || "Année non disponible"}".`);
             }
 
             if (params.nodes.length > 0) {

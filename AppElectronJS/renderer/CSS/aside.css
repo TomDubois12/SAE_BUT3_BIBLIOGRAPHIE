@@ -1,1 +1,48 @@
 /* aside  */
+
+.contenerCanvaAside {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    width: 100%;
+    height: 100vh;
+}
+
+.TargetDiv {
+    width: 100%;
+    height: 100%;
+}
+
+.generated-div {
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgray;
+    z-index: 10;
+    height: 100%;
+    max-width: 25%;
+    top: 0;
+    right: 0;
+    overflow-y: auto;  /* Ajout pour activer le défilement vertical */
+    overflow-x: hidden; /* Optionnel : empêche le défilement horizontal */
+}
+
+/* Styles pour le contenu à l'intérieur de generated-div, si nécessaire */
+.pTitle, .pYear, .pAuthor, .pAbstract {
+    margin-left: 0.5vw;
+}
+
+.pDOI {
+    padding-left: 0.5vw;
+}
+
+.pTitle {
+    font-size: 32px;
+}
+
+.pYear, .pAuthor, .pAbstract, .pDOI {
+    font-size: 20px;
+}
+
+.pDOI {
+    display: block;
+}
