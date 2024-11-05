@@ -38,3 +38,22 @@ npm run make
 voir ça https://www.youtube.com/watch?v=2inAo5aa_AU
 
 npm install python-shell
+
+
+
+
+{"userName":"Nathan",
+"ColorPickerSettings":
+[
+    {"liaisonName":"Similarité","color":"#3f0808","check":"false"},
+    {"liaisonName":"Citation","color":"#071c83","check":"true"},
+    {"liaisonName":"Nom de conférence","color":"#ab1212","check":"false"},
+    {"liaisonName":"Date de publication","color":"#6fff47","check":"true"}
+],
+"ListeNoeudSettings":
+[
+    {"NoeudsName":"nbOriginNodes","color":"#3f0808","value":"15"},
+    {"NoeudsName":"nbEnvironnentNodes","color":"#071c83","value":"3"}
+],
+"pathDirectoryCSV":"./Data",
+"CSVChoose":"Bibliographie.csv"}
