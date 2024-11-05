@@ -26,7 +26,7 @@ const createWindow = async () => {
   });
 
   if (isDev) {
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   }
 
   try {
@@ -166,6 +166,17 @@ const mainMenuTemplates = [
     ]
   }
 ];
+
+
+ipcMain.handle('openWindoColor', (event) => {
+    const fenetre = new BrowserWindow({
+      width: 800,
+      height: 600,
+      icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+      webPreferences: webPref
+  });
+  fenetre.loadFile('./renderer/colorSettings.html');
+});
 
 
 // For mac user

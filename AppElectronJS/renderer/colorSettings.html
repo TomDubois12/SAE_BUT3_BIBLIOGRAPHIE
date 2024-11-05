@@ -3,7 +3,6 @@
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
         <link rel="stylesheet" type="text/css" href="CSS/themeDarkLight.css">
-        <link rel="stylesheet" href="CSS/search.css">
         <link rel="stylesheet" href="CSS/changeColor.css">
     </head>
     <body>
@@ -18,13 +17,11 @@
 
 
         <div>
-            <ul id="list-liaison" class="color-list" >
+            <ul id="listeNbNoeuds"></ul>
 
-            </ul>
+            <ul id="list-liaison" class="color-list" ></ul>
         </div>
-
-        <p id="selected-object" data-value="none"> Selected object : </p>
-        
+                
         <button onclick=writeFile()> Push Changed</button>
     <script src="js/colorPicker.js"></script>
 
