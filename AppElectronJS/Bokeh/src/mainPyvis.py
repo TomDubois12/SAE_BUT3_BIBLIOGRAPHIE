@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.test import search_by_author, find_similar_articles, search_by_keyword, search_by_keyword_and_compare
+import requests
+from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
 
@@ -69,6 +70,10 @@ def ajout_script(node, network):
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
+                
+                const nb_citation = document.createElement("p");
+                nb_citation.textContent = `Nombre de citations : ${node.nb_citations}`;
+                aside.appendChild(nb_citation);
      
                 aside.classList.add(className); // Add class for styling
                 aside.id = nodeId; // Assign unique ID
@@ -90,24 +95,75 @@ def ajout_script(node, network):
     """
     return custom_script
 
-def recuperate_data(data, noms, infos):
-    
-    # Create a dictionary of information for the nodes, including the title
-    node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
-    #node_year = dict(zip(noms, annees_data.reindex(noms)))  # Reindex years to match the keys/names
+def semantic_scholar_research(doi=None, title=None):
+    """
+    Utilise l'API de Semantic Scholar pour récupérer les informations sur une publication.
+    """
+    base_url = "https://api.semanticscholar.org/v1/paper/"
+    if doi:
+        response = requests.get(f"{base_url}{doi}")
+    elif title:
+        search_url = "https://api.semanticscholar.org/v1/paper/search"
+        params = {"query": title}
+        response = requests.get(search_url, params=params)
+        if response.ok:
+            search_results = response.json()
+            if search_results['data']:
+                paper_id = search_results['data'][0]['paperId']
+                response = requests.get(f"{base_url}{paper_id}")
+            else:
+                return None, None, None, None, None, None, None
+        else:
+            return None, None, None, None, None, None, None
+    else:
+        return None, None, None, None, None, None, None
 
-    # Add title as a node attribute for each publication
+    if response.ok:
+        data = response.json()
+        print("Data retrieved from API:", len(data.get('citations', None)))  # Ajoutez ceci pour déboguer
+        title = data.get('title', None)
+        abstract = data.get('abstract', None)
+        authors = ', '.join([author['name'] for author in data.get('authors', [])])
+        doi = data.get('doi', None)
+        year = data.get('year', None)
+        num_citations = len(data.get('citations', None))
+        url_citations = data.get('url', None)
+
+        # Retournez toujours 7 valeurs
+        return title, abstract, authors, doi, year, num_citations, url_citations
+    else:
+        return None, None, None, None, None, None, None
+
+def recuperate_data(data, noms, infos):
+    node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
     node_title = dict(zip(noms, data['Title']))
     node_abstract = dict(zip(noms, data['Abstract Note']))
     node_author = dict(zip(noms, data['Author']))
-    node_doi = dict(zip(noms, data['Url']))
+    node_doi = dict(zip(noms, data['DOI']))
     node_year = dict(zip(noms, data['Publication Year']))
-    node_citation = dict(zip(noms, data["nbCitation"]))
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year,node_citation
-
     
+    # Ajout des dictionnaires pour stocker le nombre de citations et les URLs
+    node_num_citations = {}
+    node_url_citations = {}
+        
+    for nom in noms:
+        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
+            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+        )
+        
+        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
+        node_title[nom] = title or node_title[nom] or "Titre inconnu"
+        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
+        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
+        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
+        node_year[nom] = year or node_year[nom] or "Année inconnue"
+        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+        node_url_citations[nom] = url_citations or "URL indisponible"
 
-def get_list_xSimilaritie(listeKey, x=5):
+    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
+
+def get_list_xSimilaritie(listeKey, x=1):
     """
     Take a liste of key, for exemple 15 key similar from the keyWords and return a list of x similar article for each key.
     return a list of list with 2 element, first: the key. second: a list of key of x article similar 
@@ -146,8 +202,10 @@ def show_graphique(liste_key):
     dfFinal = data.reindex(all_key1 + all_key2)
 
     noms = dfFinal.index  # Use the index (the keys)
-    infos = dfFinal.iloc[:, [0,1,2,3,-1]]  # Take the columns that contain the information
-    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citation = recuperate_data(dfFinal, noms, infos)
+    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
+    
+    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+
     # Create the graph
     G = nx.Graph()
 
@@ -157,7 +215,7 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=20+node_citation[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Add the edges
     for key, keys in liste_key:
@@ -221,7 +279,7 @@ def show_graphique_author(liste_key, mot_cle):
     noms = dfFinal.index  # Utiliser l'index (les clés)
     infos = dfFinal.iloc[:, 0:3]  # Prendre les colonnes qui contiennent les informations
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year,node_citation = recuperate_data(dfFinal, noms, infos)
+    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -232,7 +290,7 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size= 20+node_citation[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size= 20+node_citations[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Déterminer les 15 nœuds d'origine
 
