@@ -170,7 +170,7 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=node_citation[nom]/10, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size=20+node_citation[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
 
     # Add the edges
     for key, keys in liste_key:
@@ -245,7 +245,7 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size= 20+node_citation[nom]/10, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
+        G.add_node(nom,size= 20+node_citation[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color)
 
     # Déterminer les 15 nœuds d'origine
 
@@ -263,7 +263,7 @@ def show_graphique_author(liste_key, mot_cle):
             if elem[0] in liste_key:
                 print(elem, key)
                 liste_cle1_cle2.append((key,elem[0]))
-                G.add_edge(key,elem[0], length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
+                G.add_edge(key,elem[0],color="000000", length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
     #G.add_edges_from(liste_cle1_cle2, color="000000")
 
 
