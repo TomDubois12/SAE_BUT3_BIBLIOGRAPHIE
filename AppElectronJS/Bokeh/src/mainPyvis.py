@@ -146,20 +146,20 @@ def recuperate_data(data, noms, infos):
     node_num_citations = {}
     node_url_citations = {}
         
-    for nom in noms:
-        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
-            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
-            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
-        )
+    # for nom in noms:
+    #     title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
+    #         doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+    #         title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+    #     )
         
-        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
-        node_title[nom] = title or node_title[nom] or "Titre inconnu"
-        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
-        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
-        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
-        node_year[nom] = year or node_year[nom] or "Année inconnue"
-        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
-        node_url_citations[nom] = url_citations or "URL indisponible"
+    #     # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
+    #     node_title[nom] = title or node_title[nom] or "Titre inconnu"
+    #     node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
+    #     node_author[nom] = author or node_author[nom] or "Auteur inconnu"
+    #     node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
+    #     node_year[nom] = year or node_year[nom] or "Année inconnue"
+    #     node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+    #     node_url_citations[nom] = url_citations or "URL indisponible"
 
     return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
 
@@ -215,12 +215,13 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
+        
+        #G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
     # Add the edges
     for key, keys in liste_key:
         for key2 in keys:
-            print(key, key2)
             G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color="000000")
     
         # Visualiser avec PyVis
@@ -299,14 +300,12 @@ def show_graphique_author(liste_key, mot_cle):
         for j in range(i,len(liste_key)):
             list_tuple_cles.append((liste_key[i],liste_key[j]))
     
-    print("****"*100)
     liste_cle1_cle2 = []    
     for key in liste_key:
         articles_similaire = find_similar_articles(key, 3)
         for elem in articles_similaire:
            
             if elem[0] in liste_key:
-                print(elem, key)
                 liste_cle1_cle2.append((key,elem[0]))
                 G.add_edge(key,elem[0],color="000000", length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
     #G.add_edges_from(liste_cle1_cle2, color="000000")
@@ -338,27 +337,10 @@ def show_graphique_author(liste_key, mot_cle):
     with open(html_file_path, 'w') as f:
         f.write(html_content)
 
-if __name__ == "__main__":
-    print("-" * 50)
-    
-    query = sys.argv[1]
-    mot_cle = query
-    if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
-        print("lalalalalallalalalallalallalalalal"*10)
-        liste_final = search_by_author(mot_cle)
-        print(liste_final)
-        show_graphique_author(liste_final,mot_cle)
-    else:
-        # Exécution de la recherche par mot clé
-        print("lalalalalallalalalallalallalalalal")
-        similarities = search_by_keyword(mot_cle)
-        liste_final = [t[0] for t in similarities]
-        liste_final = get_list_xSimilaritie(liste_final, 5)
-        show_graphique(liste_final)
 
+def readGraph_and_write(fileGraph, outputFile):
 
-    with open("Bokeh/bin/nx.html", "r", encoding="utf-8", errors='ignore') as source_file:
-        print(source_file)
+    with open(fileGraph, "r", encoding="utf-8", errors='ignore') as source_file:
         source_content = source_file.read()
 
     # Parse le contenu du fichier source avec BeautifulSoup
@@ -369,32 +351,58 @@ if __name__ == "__main__":
     script_tags = source_soup.find_all("script")
 
     # Ouvre le fichier HTML existant dans lequel on va ajouter les balises
-    with open("renderer/test.html", "r", encoding="utf-8") as target_file:
+    with open(outputFile, "r", encoding="utf-8") as target_file:
         target_content = target_file.read()
 
-    # Parse le contenu du fichier cible avec BeautifulSoup
+    # Parse le contenu du fichier cible avec BeautifulSoup et récupère la div "TargetDiv"
     target_soup = BeautifulSoup(target_content, "html.parser")
     target_div = target_soup.find("div", class_="TargetDiv")
-    # Trouve le <body> dans le fichier cible
+
 
     if target_div:
-        # Vide le contenu existant de la balise <div>
         target_div.clear()
 
-        # Ajoute les nouvelles balises <div> à l'intérieur
         for div in div_tags:
             target_div.append(div)
 
         for script in script_tags:
             target_div.append(script)
 
-        print("Le contenu de la balise <div> avec la classe 'saluttoi' a été remplacé.")
-
-    # Écrit les changements dans le fichier cible
-    with open("renderer/test.html", "w", encoding="utf-8") as modified_file:
+    #Write the html of the graph generated by pyvis in the div with the class "TargetDiv in the file renderer/test.html"
+    with open(outputFile, "w", encoding="utf-8") as modified_file:
         modified_file.write(str(target_soup))
 
-    print("Les balises <div> et <script> ont été ajoutées à 'fichier_cible.html'")
+
+
+if __name__ == "__main__":
+    if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
+        mot_cle = sys.argv[1]
+
+        if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
+            liste_final = search_by_author(mot_cle)
+            show_graphique_author(liste_final,mot_cle)
+        else:
+            # Exécution de la recherche par mot clé
+            similarities = search_by_keyword(mot_cle)
+            liste_final = [t[0] for t in similarities]
+            liste_final = get_list_xSimilaritie(liste_final, 5)
+            show_graphique(liste_final)
+        
+        readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
+
+    else:
+        raise ValueError("valeur nul, il doit y avoir une valeur")
+
+    
+
+
+    
+
+
+
+
+
+
 #python3 -m Bokeh.src.mainPyvis "carbon" "false"
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
 

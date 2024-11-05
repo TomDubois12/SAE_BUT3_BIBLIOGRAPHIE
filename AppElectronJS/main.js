@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu ,nativeTheme } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog } = require('electron')
 const path = require('node:path');
 const { spawn } = require('child_process');
 const fs = require("fs");
@@ -55,26 +55,35 @@ const createWindow = async () => {
 
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
-    return new Promise((resolve, reject) => {
-        const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
-        console.log(...params);
-        let output = '';
-        pythonProcess.stdout.on('data', (data) => {
-            data += data.toString();
-        });
+    err = new Promise((resolve, reject) => {
+      const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
+      console.log(...params);
+      let output = '';
+      pythonProcess.stdout.on('data', (data) => {
+          data += data.toString();
+      });
 
-        pythonProcess.stderr.on('data', (data) => {
-            reject(data.toString());
-        });
+      pythonProcess.stderr.on('data', (data) => {
+          reject(data.toString());
+      });
 
-        pythonProcess.on('close', (code) => {
-          if (code === 0) {
-            resolve(output); // Processus terminé avec succès
-          } else {
-            reject(`Processus terminé avec un code d'erreur : ${code}`);
-          }
-        });
-    });
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve(output); // Processus terminé avec succès
+        } else {
+          dialog.showMessageBox({
+            type: 'error',
+            title: 'Erreur',
+            message: 'Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche',
+          });
+          reject(`Processus terminé avec un code d'erreur : ${code}`);
+        }
+      });
+  });
+
+    
+
+  return err;
 }
 
 
