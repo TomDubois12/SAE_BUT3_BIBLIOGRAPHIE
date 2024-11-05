@@ -15,6 +15,7 @@
             console.log('Fichier sélectionné:', file); // Débogage
             if (file) {
                 fileName = file.name;  // Récupérer le nom du fichier
+                window.electronAPI.saveCSVPath(file);
                 console.log('Nom du fichier enregistré:', fileName); // Débogage
                 displayFileName(); // Afficher le contenu de la seconde page
             } else {
@@ -51,7 +52,7 @@
         <p class="texttitle">pour commencer</p>
         <input type="file" id="csv-input" accept=".csv" style="display: none;" onchange="importCSV();" />
         <div class="contenerButton">
-            <button id="import-btn" onclick="document.getElementById('csv-input').click();">Importer</button>
+            <button id="import-btn" onclick="document.getElementById('csv-input').click();">Ouvrir un fichier CSV</button>
         </div>
     </div>
 
