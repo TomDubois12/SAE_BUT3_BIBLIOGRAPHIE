@@ -59,7 +59,7 @@ def ajout_script(node, network):
                 aside.appendChild(year);
                 
                 const nb_citation = document.createElement("p");
-                nb_citation..add("pCitation");
+                nb_citation.classList.add("pCitation");
                 nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations || "Nombre de citation non disponible"}`;
                 aside.appendChild(nb_citation);
             
