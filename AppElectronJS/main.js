@@ -169,7 +169,7 @@ const mainMenuTemplates = [
             icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
             webPreferences: webPref
         });
-        fenetre.loadFile('./renderer/colorPicker.html');
+        fenetre.loadFile('./renderer/colorSettings.html');
         }
       }
     ]
