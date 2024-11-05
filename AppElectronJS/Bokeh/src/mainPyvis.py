@@ -3,12 +3,10 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.test import search_by_author, find_similar_articles, search_by_keyword, search_by_keyword_and_compare
+import requests
+from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
-from scholarly import scholarly
-import collections.abc
-import math
 
 def ajout_script(node, network):
     # Add custom script for handling node clicks and displaying the publication title
@@ -64,7 +62,7 @@ def ajout_script(node, network):
                 aside.appendChild(doi);
                 
                 const nb_citation = document.createElement("p");
-                nb_citation.textContent = `Nombre de citations : ${node.nb_citation}`;
+                nb_citation.textContent = `Nombre de citations : ${node.nb_citations}`;
                 aside.appendChild(nb_citation);
      
                 aside.classList.add(className); // Add class for styling
@@ -72,12 +70,12 @@ def ajout_script(node, network):
 
                 // Append the aside to the DOM
                 document.body.appendChild(aside);
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${title} publié en "${year}".`);
+                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${node.title}" publié en "${node.year}".`);
             }
 
             if (params.nodes.length > 0) {
                 console.log("Clicked node:", nodeId);
-                // Here you can add more functionality, like fetching data no
+                // Here you can add more functionality, like fetching data
             }
         }
         
@@ -110,36 +108,44 @@ def ajout_script(node, network):
     """
     return custom_script
 
-import time
-
-def google_scholar_research(title=None, abstract=None, author=None, doi=None, year=None):
-    num_citations = None
-    url_citations = None
-
-    if doi and isinstance(doi, str):
-        search_query = scholarly.search_pubs(doi)
-    elif title and isinstance(title, str):
-        search_query = scholarly.search_pubs(title)
+def semantic_scholar_research(doi=None, title=None):
+    """
+    Utilise l'API de Semantic Scholar pour récupérer les informations sur une publication.
+    """
+    base_url = "https://api.semanticscholar.org/v1/paper/"
+    if doi:
+        response = requests.get(f"{base_url}{doi}")
+    elif title:
+        search_url = "https://api.semanticscholar.org/v1/paper/search"
+        params = {"query": title}
+        response = requests.get(search_url, params=params)
+        if response.ok:
+            search_results = response.json()
+            if search_results['data']:
+                paper_id = search_results['data'][0]['paperId']
+                response = requests.get(f"{base_url}{paper_id}")
+            else:
+                return None, None, None, None, None, None, None
+        else:
+            return None, None, None, None, None, None, None
     else:
-        return title, abstract, author, doi, year, num_citations, url_citations
+        return None, None, None, None, None, None, None
 
-    try:
-        result = next(search_query)
-        title = result.get("bib", {}).get("title", title)
-        abstract = result.get("bib", {}).get("abstract", abstract)
-        author = result.get("bib", {}).get("author", author)
-        doi = result.get("bib", {}).get("doi", doi)
-        year = result.get("bib", {}).get("pub_year", year)
-        num_citations = result.get("num_citations", None)
-        url_citations = result.get("url_citations", None)
-    except StopIteration:
-        pass
+    if response.ok:
+        data = response.json()
+        print("Data retrieved from API:", len(data.get('citations', None)))  # Ajoutez ceci pour déboguer
+        title = data.get('title', None)
+        abstract = data.get('abstract', None)
+        authors = ', '.join([author['name'] for author in data.get('authors', [])])
+        doi = data.get('doi', None)
+        year = data.get('year', None)
+        num_citations = len(data.get('citations', None))
+        url_citations = data.get('url', None)
 
-    # Délai avant de faire une nouvelle requête
-    time.sleep(2)  # Attendre 2 secondes
-
-    return title, abstract, author, doi, year, num_citations, url_citations
-
+        # Retournez toujours 7 valeurs
+        return title, abstract, authors, doi, year, num_citations, url_citations
+    else:
+        return None, None, None, None, None, None, None
 
 def recuperate_data(data, noms, infos):
     node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
@@ -154,24 +160,21 @@ def recuperate_data(data, noms, infos):
     node_url_citations = {}
         
     for nom in noms:
-        title, abstract, author, doi, year = node_title[nom], node_abstract[nom], node_author[nom], node_doi[nom], node_year[nom]
-        print(node_doi[nom])
-        if node_doi[nom] != '' or node_doi[nom] != None:
-            title, abstract, author, doi, year, num_citations, url_citations = google_scholar_research(
-                title if pd.notna(title) else None,
-                abstract if pd.notna(abstract) else None,
-                author if pd.notna(author) else None,
-                doi if pd.notna(doi) else None,
-                year if pd.notna(year) else None
+        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
+            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
         )
         
-        # Mise à jour des dictionnaires après récupération
-        node_title[nom], node_abstract[nom], node_author[nom], node_doi[nom], node_year[nom] = title, abstract, author, doi, year
-        node_num_citations[nom] = num_citations
-        node_url_citations[nom] = url_citations
+        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
+        node_title[nom] = title or node_title[nom] or "Titre inconnu"
+        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
+        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
+        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
+        node_year[nom] = year or node_year[nom] or "Année inconnue"
+        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+        node_url_citations[nom] = url_citations or "URL indisponible"
 
     return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
-
 
 def get_list_xSimilaritie(listeKey, x=1):
     """
