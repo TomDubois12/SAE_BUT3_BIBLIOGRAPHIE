@@ -14,11 +14,12 @@ def ajout_script(node, network):
     <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
     <script type="text/javascript">
         function onNodeInteraction(params) {
+            const canva = document.getElementsByClassName('contenerCanvaAside')[0]; // Accès au premier élément
             const className = 'generated-div';
             const nodeId = params.nodes[0];
             
             // Retrieve the title from the node attributes
-            const node = network.body.data.nodes.get(nodeId);
+            const nodeData = network.body.data.nodes.get(nodeId); // Utiliser un autre nom pour éviter la confusion
 
             // Check for existing aside element by ID
             const existingIdenticalElement = document.getElementById(nodeId);
@@ -32,30 +33,39 @@ def ajout_script(node, network):
                 if (existingElements.length > 0) {
                     existingElements[0].remove();
                 }
+                
+                if (!nodeId) {
+                    existingElements[0].remove();
+                }
 
                 // Create a new aside element
                 const aside = document.createElement("aside");
 
                 // Add content to the aside, including the title
                 const titre = document.createElement("h1");
-                titre.textContent = `Titre de la publication : ${node.title}`;
+                titre.classList.add("pTitle");
+                titre.textContent = `Titre de la publication : ${nodeData.title || "Titre non disponible"}`;
                 aside.appendChild(titre);
                 
-                const year = document.createElement("p");
-                year.textContent = `Année de publication : ${node.year}`;
-                aside.appendChild(year);
-                
                 const author = document.createElement("p");
-                author.textContent = `Auteurs : ${node.author}`;
+                author.classList.add("pAuthor");
+                author.textContent = `Auteur(s), co-auteur(s) : ${nodeData.author || "Auteur(s) non disponible"}`;
                 aside.appendChild(author);
-                
+            
+                const year = document.createElement("p");
+                year.classList.add("pYear");
+                year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
+                aside.appendChild(year);
+            
                 const abstract = document.createElement("p");
-                abstract.textContent = `Abstract : ${node.abstract}`;
+                abstract.classList.add("pAbstract");
+                abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
                 aside.appendChild(abstract);
                 
                 const doi = document.createElement("a");
-                doi.textContent = `DOI : ${node.doi}`;
-                doi.href = node.doi;  // Set the URL for the link
+                doi.classList.add("pDOI");
+                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
+                doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
@@ -64,42 +74,19 @@ def ajout_script(node, network):
                 aside.id = nodeId; // Assign unique ID
 
                 // Append the aside to the DOM
-                document.body.appendChild(aside);
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${title} publié en "${year}".`);
+                canva.appendChild(aside);
+                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title || "Titre non disponible"}" publié en "${nodeData.year || "Année non disponible"}".`);
             }
 
             if (params.nodes.length > 0) {
                 console.log("Clicked node:", nodeId);
-                // Here you can add more functionality, like fetching data no
+                // Here you can add more functionality, like fetching data
             }
         }
         
         network.on("click", onNodeInteraction);
         network.on("hoverNode", onNodeInteraction);
     </script>      
-    <style>
-        body{
-            display: flex;
-            flex-wrap: nowrap;
-        }
-        
-        .generated-div {
-            background-color: lightgray;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid black;
-            margin-left: 75vw;
-        }
-        
-        .card{
-            width: 75vw;
-            height: 100vh;
-        }
-        
-        .card-body{
-            flex-grow: 1;
-        }
-    </style>
     """
     return custom_script
 
@@ -181,8 +168,8 @@ def show_graphique(liste_key):
             G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color="000000")
     
         # Visualiser avec PyVis
-    nt = Network('50vh', '50vw', notebook=True)
-    nt.show_buttons(filter_=['physics'])
+    nt = Network('100vh', '100vw', notebook=True)
+    # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
     # Set the color of the nodes in Pyvis
@@ -269,8 +256,8 @@ def show_graphique_author(liste_key, mot_cle):
 
 
          # Visualiser avec PyVis
-    nt = Network('50vh', '50vw', notebook=True)
-    nt.show_buttons(filter_=['physics'])
+    nt = Network('100vh', '100vw', notebook=True)
+    # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
     # Set the color of the nodes in Pyvis
