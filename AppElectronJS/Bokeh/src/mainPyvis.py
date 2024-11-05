@@ -65,14 +65,14 @@ def ajout_script(node, network):
                 
                 const doi = document.createElement("a");
                 doi.classList.add("pDOI");
-                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
+                doi.textContent = `DOI : ${nodeData.index || "DOI non disponible"}`;
                 doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
                 
                 const nb_citation = document.createElement("p");
-                nb_citation.textContent = `Nombre de citations : ${node.nb_citations}`;
+                nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations}`;
                 aside.appendChild(nb_citation);
      
                 aside.classList.add(className); // Add class for styling
@@ -139,7 +139,7 @@ def recuperate_data(data, noms, infos):
     node_title = dict(zip(noms, data['Title']))
     node_abstract = dict(zip(noms, data['Abstract Note']))
     node_author = dict(zip(noms, data['Author']))
-    node_doi = dict(zip(noms, data['DOI']))
+    node_doi = dict(zip(noms, data.index))
     node_year = dict(zip(noms, data['Publication Year']))
     
     # Ajout des dictionnaires pour stocker le nombre de citations et les URLs
