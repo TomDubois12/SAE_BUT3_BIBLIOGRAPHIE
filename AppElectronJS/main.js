@@ -17,7 +17,7 @@ const webPref = {
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
-const createWindow = () => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: isDev ? 1000 : 500,
     height: 600,
@@ -29,7 +29,25 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile('renderer/loadcsv.html');
+  try {
+    // Utilisation de fs.promises.readFile pour lire le fichier de manière asynchrone
+    const data = await fs.promises.readFile('./renderer/json/userSettings.json', 'utf-8');
+    const parsedData = JSON.parse(data); // Analyse JSON
+
+    // Vérifie si le chemin CSV existe dans le JSON
+    const pathCSV = parsedData.CSVChoose;
+    
+    if (pathCSV && fs.existsSync(`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`)) {
+        mainWindow.loadFile('renderer/search.html');
+    } else {
+        mainWindow.loadFile('renderer/loadcsv.html');
+    }
+} catch (error) {
+    console.error("Erreur de lecture ou d'analyse du fichier JSON :", error);
+    mainWindow.loadFile('renderer/loadcsv.html'); // En cas d'erreur, charge une page de secours
+}
+
+
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplates)
   Menu.setApplicationMenu(mainMenu)
@@ -103,6 +121,12 @@ const mainMenuTemplates = [
         click(){
           app.quit();
         }
+      },
+      {
+        label:'Open other CSV',
+        click(){
+          mainWindow.loadFile('./renderer/loadcsv.html'); 
+        }
       }
     ]
   },
@@ -146,23 +170,23 @@ const mainMenuTemplates = [
 
 // For mac user
 if (process.platform == 'darwin'){
-  mainMenuTemplates.unshift({});
+  mainMenuTemplates.unshift({}); 
 }
 
 // For product environement, add devTool menu and accelerator
 if (isDev){
   mainMenuTemplates.push({
-    label:'Developer Tools',
+    label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
     submenu:[
       {
         label:'Toggle devTools',
-        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
         click(item, focusedWindow){
           focusedWindow.toggleDevTools();
         }
       },
       {
-        role:'reload'
+        role:'reload'  // permet de refresh l'app
       }
     ]
   });
