@@ -15,7 +15,7 @@
     z-index: 10;
     height: 100%;
     max-width: 25%;
-    padding: 2vw;
+    padding: 1vw;
 }
 
 /* .asideParam p {
@@ -47,7 +47,6 @@
     overflow-x: hidden;
 }
 
-/* Styles pour le contenu à l'intérieur de generated-div, si nécessaire */
 .pTitle, .pYear, .pAuthor, .pAbstract, .pCitation {
     margin-left: 0.5vw;
 }
@@ -66,4 +65,10 @@
 
 .pDOI {
     display: block;
+}
+
+
+.titleParam {
+    font-size: 32px;
+    font-weight: bold;
 }
