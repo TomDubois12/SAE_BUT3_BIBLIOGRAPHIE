@@ -57,6 +57,11 @@ def ajout_script(node, network):
                 year.classList.add("pYear");
                 year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
                 aside.appendChild(year);
+                
+                const nb_citation = document.createElement("p");
+                nb_citation.classList.add("pCitation");
+                nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations || "Nombre de citation non disponible"}`;
+                aside.appendChild(nb_citation);
             
                 const abstract = document.createElement("p");
                 abstract.classList.add("pAbstract");
@@ -70,10 +75,6 @@ def ajout_script(node, network):
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
-                
-                const nb_citation = document.createElement("p");
-                nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations}`;
-                aside.appendChild(nb_citation);
      
                 aside.classList.add(className); // Add class for styling
                 aside.id = nodeId; // Assign unique ID
