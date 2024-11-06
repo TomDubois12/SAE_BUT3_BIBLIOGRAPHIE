@@ -8,19 +8,87 @@
     height: 100vh;
 }
 
+
+/* Aside param */
+
+.titleParam {
+    font-size: 32px;
+    font-weight: bold;
+    color: #166F7A;
+    margin-left: 1vw;
+}
+
+.subtitleParam {
+    font-size: 30px;
+    font-weight: bold;
+    color: #166F7A;
+    margin: 1vh 0vw;
+}
+
+.contenerListeParam {
+    background-color: #48A6B5;
+    padding: 2vw;
+    border-radius: 18px;
+}
+
+.contenerListeParam ul {
+    list-style-type: none;
+    padding: 0;
+    display: inline;
+}
+
+#listeNbNoeuds li, #liste {
+    display: flex;
+}
+
+#listeContainer li, #liste {
+    display: flex;
+    align-items: center;
+}
+
+#listeNbNoeuds li p {
+    margin: 1vh 1vw;
+}
+
+#listeContainer .color-box {
+    margin-top: 2.5vh;
+}
+
+.color-box {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+    margin: 2vh 0.5vw;
+    border: 1.5px solid;
+}
+
+.contenerListeParam ul li p, label{
+    font-size: 1.5em;
+    margin: 0;
+    color: white;
+    font-weight: bolder;
+}
+
+.contenerListeParam ul li input {
+    margin: 2vh 0vw;
+    height: 2vh;
+    width: 4vh;
+}
+
+#listeContainer input {
+    margin: 1vh 0vw;
+}
+
 .asideParam {
     position: absolute;
     background-color: white;
     border: 1px solid lightgray;
     z-index: 10;
     height: 100%;
-    max-width: 25%;
-    padding: 1vw;
+    max-width: 25%; 
+    padding: 0.5vw;
 }
-
-/* .asideParam p {
-
-} */
 
 .hide{
     width: 0;
@@ -28,11 +96,14 @@
     overflow: hidden;
 }
 
+/* Canva */
 
 .TargetDiv {
     width: 100%;
     height: 100%;
 }
+
+/* Aside infos */
 
 .generated-div {
     position: absolute;
@@ -65,10 +136,4 @@
 
 .pDOI {
     display: block;
-}
-
-
-.titleParam {
-    font-size: 32px;
-    font-weight: bold;
 }
