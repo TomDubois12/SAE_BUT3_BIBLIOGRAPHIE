@@ -8,7 +8,7 @@ from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and
 import sys
 from bs4 import BeautifulSoup
 
-def ajout_script(node, network):
+def ajout_script(network):
     # Add custom script for handling node clicks and displaying the publication title
     custom_script = """
     <div id="result"></div>
@@ -70,8 +70,8 @@ def ajout_script(node, network):
                 
                 const doi = document.createElement("a");
                 doi.classList.add("pDOI");
-                doi.textContent = `DOI : ${nodeData.index || "DOI non disponible"}`;
-                doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
+                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
+                doi.href = nodeData.citations || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
@@ -148,20 +148,20 @@ def recuperate_data(data, noms, infos):
     node_num_citations = {}
     node_url_citations = {}
         
-    # for nom in noms:
-    #     title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
-    #         doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
-    #         title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
-    #     )
+    for nom in noms:
+        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
+            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+        )
         
-    #     # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
-    #     node_title[nom] = title or node_title[nom] or "Titre inconnu"
-    #     node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
-    #     node_author[nom] = author or node_author[nom] or "Auteur inconnu"
-    #     node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
-    #     node_year[nom] = year or node_year[nom] or "Année inconnue"
-    #     node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
-    #     node_url_citations[nom] = url_citations or "URL indisponible"
+        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
+        node_title[nom] = title or node_title[nom] or "Titre inconnu"
+        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
+        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
+        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
+        node_year[nom] = year or node_year[nom] or "Année inconnue"
+        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+        node_url_citations[nom] = url_citations or "URL indisponible"
 
     return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
 
@@ -184,8 +184,8 @@ def getDataFrame(dataUser):
 
     # Définir la colonne "DOI" comme index
     df.set_index("DOI", inplace=True)
-
     return df
+
 
 def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
     match liaison['liaisonName']:
@@ -201,7 +201,6 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
                 year: tuple(group.index.unique()) for year, group in dfFinal.groupby('Publication Year')
             }
             for year in result:
-                print(year, result[year])
                 listeKeyYear = result[year]
                 for i in range(len(listeKeyYear)-1):
                     for j in range(i+1,len(listeKeyYear)):
@@ -232,8 +231,8 @@ def show_graphique(liste_key, dataUser):
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
-            G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-            #G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+            #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
+            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
         return G
 
 
@@ -260,16 +259,11 @@ def show_graphique(liste_key, dataUser):
     for liaison in liaisons:
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_key, dfFinal, noms, infos)
-        # Visualiser avec PyVis
+
+
     nt = Network('100vh', '100vw', notebook=True)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
-
-    # Set the color of the nodes in Pyvis
-    for node in G.nodes(data=True):
-        nt.get_node(node[0])['color'] = node[1]['color']
-        
-    nt.show('Bokeh/bin/nx.html')
 
     # Create the HTML file
     html_file_path = 'Bokeh/bin/nx.html'
@@ -280,7 +274,7 @@ def show_graphique(liste_key, dataUser):
         html_content = f.read()
     
     # Insert the custom script just before the closing </body> tag
-    html_content = html_content.replace('</body>', ajout_script(node, nt) + '</body>')
+    html_content = html_content.replace('</body>', ajout_script( nt) + '</body>')
 
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
@@ -289,75 +283,57 @@ def show_graphique(liste_key, dataUser):
 
     
 
-def show_graphique_author(liste_key, mot_cle):
-    file = 'BERT/Bibliographie_sans_doublon.csv'
-    data2 = pd.read_csv(file)
-    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
+def show_graphique_author(liste_key):
 
+    def setAllNode(G,noms,infos):
+        node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
-    # Définir la colonne "Key" comme index
-    data.set_index("DOI", inplace=True)
-
-    # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
-    # data = data.dropna(subset=["Publication Year"])
-
-    noms = data.index  # Accéder à l'index au lieu de la colonne "Key"
-    infos = data.iloc[:, 0:3]  # Prendre les infos (les colonnes restantes)
-    annees_data = data["Publication Year"]
-
-    # Rechercher par mot clé
-    # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
-    # res = search_by_keyword_and_compare(mot_cle)
-    # Extraire les clés de la recherche
-    # liste_cles = [(cle, cle2) for cle, cle2, valeur in res if valeur > 0.5]
-    # Reindexer le DataFrame selon les clés trouvées
-    all_key1 = liste_key
-
-
-    dfFinal = data.reindex(all_key1)
-
-    noms = dfFinal.index  # Utiliser l'index (les clés)
-    infos = dfFinal.iloc[:, 0:3]  # Prendre les colonnes qui contiennent les informations
-    
-    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+        # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        for nom in noms:
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
+            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        return G
 
     # Create the graph
     G = nx.Graph()
 
-    # Determine the original nodes
-    origin_nodes = set(all_key1)  # Take the 15 keys from liste_key
-
-    # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-    for nom in noms:
-        color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size= 20+node_citations[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
-
-
-    list_tuple_cles = []
-    for i in range(len(liste_key)):
-        for j in range(i,len(liste_key)):
-            list_tuple_cles.append((liste_key[i],liste_key[j]))
+    #Get the df, the file for the CSV is directly in the function
+    df = getDataFrame(dataUser)
     
+    # Reindexer le DataFrame selon les clés trouvées
+    allTheKeys = liste_key
+    dfFinal = df.reindex(allTheKeys)
+
+    noms = dfFinal.index  # Use the index (the keys)
+    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
+    
+    originKeys = set(allTheKeys)  # Take the 15 keys from liste_key
+
+    G = setAllNode(G,noms,infos)
+
+    liaisons = dataUser["ColorPickerSettings"]
+
     liste_cle1_cle2 = []    
     for key in liste_key:
         articles_similaire = find_similar_articles(key, 3)
+        print(articles_similaire)
+        newList = [key]
+        tempList = []
         for elem in articles_similaire:
-           
             if elem[0] in liste_key:
-                liste_cle1_cle2.append((key,elem[0]))
-                G.add_edge(key,elem[0],color="000000", length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
+                tempList.append(elem)
+        newList.append(tempList)
+        liste_cle1_cle2.append(newList)
+    print(liste_cle1_cle2)
+    for liaison in liaisons:
+        if liaison['check'] == 'true':
+            G = setLiaison(G, liaison, allTheKeys, liste_cle1_cle2, dfFinal, noms, infos)
 
 
-         # Visualiser avec PyVis
     nt = Network('100vh', '100vw', notebook=True)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
-
-    # Set the color of the nodes in Pyvis
-    for node in G.nodes(data=True):
-        nt.get_node(node[0])['color'] = node[1]['color']
-        
-    nt.show('Bokeh/bin/nx.html')
 
     # Create the HTML file
     html_file_path = 'Bokeh/bin/nx.html'
@@ -368,11 +344,12 @@ def show_graphique_author(liste_key, mot_cle):
         html_content = f.read()
     
     # Insert the custom script just before the closing </body> tag
-    html_content = html_content.replace('</body>', ajout_script(node, nt) + '</body>')
+    html_content = html_content.replace('</body>', ajout_script( nt) + '</body>')
 
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
         f.write(html_content)
+    
 
 
 def readGraph_and_write(fileGraph, outputFile):
@@ -429,7 +406,7 @@ if __name__ == "__main__":
 
         if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
             liste_final = search_by_author(mot_cle)
-            show_graphique_author(liste_final,mot_cle)
+            show_graphique_author(liste_final)
         else:
             # Exécution de la recherche par mot clé
             similarities = search_by_keyword(mot_cle)
