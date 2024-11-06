@@ -135,6 +135,7 @@ def semantic_scholar_research(doi=None, title=None):
     else:
         return None, None, None, None, None, None, None
 
+
 def recuperate_data(data, noms, infos):
     node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
     node_title = dict(zip(noms, data['Title']))
@@ -175,56 +176,90 @@ def get_list_xSimilaritie(listeKey, x=1):
         liste_final += [[key, [(t[0],t[1]) for t in listeSimiliarities]]]
     return liste_final
 
-def show_graphique(liste_key):
 
-    file = 'BERT/Bibliographie_sans_doublon.csv'
-    data2 = pd.read_csv(file)
-    data = data2.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1
-    # Définir la colonne "Key" comme index
-    data.set_index("DOI", inplace=True)
+def getDataFrame(dataUser):
+    file = dataUser["pathDirectoryCSV"] +"/"+ dataUser["CSVChoose"]
+    data = pd.read_csv(file)
+    df = data.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1 
+
+    # Définir la colonne "DOI" comme index
+    df.set_index("DOI", inplace=True)
+
+    return df
+
+def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
+    match liaison['liaisonName']:
+        case 'Similarité':
+            # Add the edges
+            for key, keys in listeKeys:
+                for key2 in keys:
+                    G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
+        case 'Citation':
+            ...
+        case 'Date de publication':
+            result = {
+                year: tuple(group.index.unique()) for year, group in dfFinal.groupby('Publication Year')
+            }
+            for year in result:
+                print(year, result[year])
+                listeKeyYear = result[year]
+                for i in range(len(listeKeyYear)-1):
+                    for j in range(i+1,len(listeKeyYear)):
+                        G.add_edge(listeKeyYear[i], listeKeyYear[j], color=liaison['color'])
+    return G
+
+
+
+def show_graphique(liste_key, dataUser):
+    """
+        liste_key: list of list [[onePrincipaleKey, [(childKey1, similaritieWithParent), (...)]]]
+    """
+    def getListallKey(liste_key):
+        """return:
+            allTheKeys: (List): A list of all the OriginKeys + all the ChildKeys
+            originKeys: (List): A list of all the OriginKeys
+            childKeys:  (List): A list of all the ChildKeys
+        """  
+        all_key1 = [t[0] for t in liste_key] #List of originNode, the node with the more similarities with the subject.
+        all_key2 = [t[1] for t in liste_key] #List of the childs of all the originNode.
+        all_key2 = [t[0] for _t in all_key2 for t in _t]
+
+        return all_key1+all_key2, all_key1, all_key2
+    
+    def setAllNode(G,noms,infos):
+        node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+
+        # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        for nom in noms:
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
+            #G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        return G
+
 
     
-    # Supprimer les lignes avec des valeurs NaN dans la colonne "Publication Year"
-    # data = data.dropna(subset=["Publication Year"])
-
-    noms = data.index  # Accéder à l'index au lieu de la colonne "Key"
-    infos = data.iloc[:, 0:3]  # Prendre les infos (les colonnes restantes)
-    annees_data = data["Publication Year"]
-
-    # Rechercher par mot clé
-    # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
-    # res = search_by_keyword_and_compare(mot_cle)
-    # Extraire les clés de la recherchea
-    # liste_cles = [(cle, cle2) for cle, cle2, valeur in res if valeur > 0.5]
+    # Create the graph
+    G = nx.Graph()
+    #Get the df, the file for the CSV is directly in the function
+    df = getDataFrame(dataUser)
+    
     # Reindexer le DataFrame selon les clés trouvées
-    all_key1 = [t[0] for t in liste_key]
-    all_key2 = [t[1] for t in liste_key]
-    all_key2 = [t[0] for _t in all_key2 for t in _t]
-    dfFinal = data.reindex(all_key1 + all_key2)
+    allTheKeys, originKeys, childKeys = getListallKey(liste_key)
+    dfFinal = df.reindex(allTheKeys)
 
     noms = dfFinal.index  # Use the index (the keys)
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+    originKeys = set(originKeys)#Transform the list in a set for faster reserch in the list
 
-    # Create the graph
-    G = nx.Graph()
+    G = setAllNode(G,noms,infos)
 
-    # Determine the original nodes
-    origin_nodes = set(all_key1)  # Take the 15 keys from liste_key
 
-    # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-    for nom in noms:
-        color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-        
-        #G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+    liaisons = dataUser["ColorPickerSettings"]
 
-    # Add the edges
-    for key, keys in liste_key:
-        for key2 in keys:
-            G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color="000000")
-    
+    for liaison in liaisons:
+        if liaison['check'] == 'true':
+            G = setLiaison(G, liaison, allTheKeys, liste_key, dfFinal, noms, infos)
         # Visualiser avec PyVis
     nt = Network('100vh', '100vw', notebook=True)
     # nt.show_buttons(filter_=['physics'])
@@ -250,6 +285,9 @@ def show_graphique(liste_key):
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
         f.write(html_content)
+    
+
+    
 
 def show_graphique_author(liste_key, mot_cle):
     file = 'BERT/Bibliographie_sans_doublon.csv'
@@ -294,7 +332,6 @@ def show_graphique_author(liste_key, mot_cle):
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
         G.add_node(nom,size= 20+node_citations[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
 
-    # Déterminer les 15 nœuds d'origine
 
     list_tuple_cles = []
     for i in range(len(liste_key)):
@@ -309,7 +346,6 @@ def show_graphique_author(liste_key, mot_cle):
             if elem[0] in liste_key:
                 liste_cle1_cle2.append((key,elem[0]))
                 G.add_edge(key,elem[0],color="000000", length=(500 - ((elem[1] - 0.7) / (1 - 0.7)) * (500 - 20))) # calcule pour que la talle mini de l'edge soit20 et max 500 et qu'il prenne en compte que à partir d'une similarité > a 0.7 sinon 500
-    #G.add_edges_from(liste_cle1_cle2, color="000000")
 
 
          # Visualiser avec PyVis
@@ -359,7 +395,6 @@ def readGraph_and_write(fileGraph, outputFile):
     target_soup = BeautifulSoup(target_content, "html.parser")
     target_div = target_soup.find("div", class_="TargetDiv")
 
-
     if target_div:
         target_div.clear()
 
@@ -375,7 +410,20 @@ def readGraph_and_write(fileGraph, outputFile):
 
 
 
+
+def getUserSetting(settingFilePath):
+    with open(settingFilePath, 'r', encoding='utf-8') as f:  # Lire avec encodage UTF-8
+        data = json.load(f)
+    return data
+
+
+
 if __name__ == "__main__":
+
+    #Get all the settings of the User in the file in paramater.
+    dataUser = getUserSetting("renderer/json/userSettings.json")
+
+    #Il faut 2 argument dans le lancement du script, le premier c'est le sujet et le deuxième "true" si recherche par autheur, "false" sinon.
     if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
         mot_cle = sys.argv[1]
 
@@ -387,8 +435,9 @@ if __name__ == "__main__":
             similarities = search_by_keyword(mot_cle)
             liste_final = [t[0] for t in similarities]
             liste_final = get_list_xSimilaritie(liste_final, 5)
-            show_graphique(liste_final)
+            show_graphique(liste_final, dataUser)
         
+        #read the file in the first param and write in the second param.
         readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
     else:
@@ -404,8 +453,8 @@ if __name__ == "__main__":
 
 
 
-#python3 -m Bokeh.src.mainPyvis "carbon" "false"
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
+#python3 -m Bokeh.src.mainPyvis "carbon" "false"
 
-#python3 -m Bokeh.src.mainPyvis "richard l." "true"
 #Recherche par auteur.
+#python3 -m Bokeh.src.mainPyvis "richard l." "true"
