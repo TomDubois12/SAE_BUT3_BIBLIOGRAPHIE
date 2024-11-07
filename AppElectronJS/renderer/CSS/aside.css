@@ -7,11 +7,109 @@
     width: 100%;
     height: 100vh;
 }
+.buttonAsideParam{
+    position: absolute;
+    visibility: visible;
+    left:100%;
+}
+.buttonAsideParam2{
+    left: 0;
+}
+
+/* Aside param */
+
+.titleParam {
+    font-size: 32px;
+    font-weight: bold;
+    color: #166F7A;
+    margin-left: 1vw;
+}
+
+.subtitleParam {
+    font-size: 30px;
+    font-weight: bold;
+    color: #166F7A;
+    margin: 1vh 0vw;
+}
+
+.contenerListeParam {
+    background-color: #48A6B5;
+    padding: 2vw;
+    border-radius: 18px;
+}
+
+.contenerListeParam ul {
+    list-style-type: none;
+    padding: 0;
+    display: inline;
+}
+
+#listeNbNoeuds li, #liste {
+    display: flex;
+}
+
+#listeContainer li, #liste {
+    display: flex;
+    align-items: center;
+}
+
+#listeNbNoeuds li p {
+    margin: 1vh 1vw;
+}
+
+#listeContainer .color-box {
+    margin-top: 2.5vh;
+}
+
+.color-box {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+    margin: 2vh 0.5vw;
+    border: 1.5px solid;
+}
+
+.contenerListeParam ul li p, label{
+    font-size: 1.5em;
+    margin: 0;
+    color: white;
+    font-weight: bolder;
+}
+
+.contenerListeParam ul li input {
+    margin: 2vh 0vw;
+    height: 2vh;
+    width: 4vh;
+}
+
+#listeContainer input {
+    margin: 1vh 0vw;
+}
+
+.asideParam {
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgray;
+    z-index: 10;
+    height: 100%;
+    max-width: 25%; 
+    padding: 0.5vw;
+}
+
+.hide{
+    visibility: hidden;
+    overflow: hidden;
+}
+
+/* Canva */
 
 .TargetDiv {
     width: 100%;
     height: 100%;
 }
+
+/* Aside infos */
 
 .generated-div {
     position: absolute;
@@ -22,12 +120,11 @@
     max-width: 25%;
     top: 0;
     right: 0;
-    overflow-y: auto;  /* Ajout pour activer le défilement vertical */
-    overflow-x: hidden; /* Optionnel : empêche le défilement horizontal */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* Styles pour le contenu à l'intérieur de generated-div, si nécessaire */
-.pTitle, .pYear, .pAuthor, .pAbstract {
+.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation {
     margin-left: 0.5vw;
 }
 
@@ -39,7 +136,7 @@
     font-size: 32px;
 }
 
-.pYear, .pAuthor, .pAbstract, .pDOI {
+.pYear, .pAuthor, .pAbstract, .pDOI, .pCitation {
     font-size: 20px;
 }
 

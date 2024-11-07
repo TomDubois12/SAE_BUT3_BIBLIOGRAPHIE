@@ -11,9 +11,13 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             const li = document.createElement('li');
             li.className = "color-item";
 
-            const divColor = document.createElement('div');
+
+            const divColor = document.createElement('input');
+            divColor.type = "color";
+            divColor.id = element.liaisonName;
             divColor.className = 'color-box';
-            divColor.style.backgroundColor = element.color;
+            divColor.value = element.color;
+
 
             const label = document.createElement('label');
 
@@ -33,6 +37,11 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             input.addEventListener('change', (event) => {
                 writeElementCheck(event.target.id,event.target.checked);
             });
+
+            divColor.addEventListener('change',(event) => {
+                writeColor(event.target.id, event.target.value);
+            })
+
         });
 
         /////////////////////////////////
@@ -42,9 +51,13 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         data.ListeNoeudSettings.forEach(element => {
             const li = document.createElement('li');
             li.className = "color-item";
-            const divColor = document.createElement('div');
+
+            const divColor = document.createElement('input');
+            divColor.type = "color";
+            divColor.id = element.NoeudsName;
             divColor.className = 'color-box';
-            divColor.style.backgroundColor = element.color;
+            divColor.value = element.color;
+
 
 
             const input = document.createElement('input');
@@ -67,12 +80,58 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             input.addEventListener('change', (event) => {
                 writeElementNumber(event.target.id,event.target.value);
             });         
+          
+            divColor.addEventListener('change',(event) => {
+                writePickerColor(event.target.id, event.target.value);
+            })
+
         });
                    
     } else {
         console.error("Impossible de lire les paramètres utilisateur.");
     }
 });
+
+function writePickerColor(elemntId, newColor){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            data.ListeNoeudSettings.forEach(element => {
+                if (element.NoeudsName === elemntId) {
+                
+                    element.color = newColor;
+
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    if (err) {
+                    console.error('Erreur d’écriture :', err);
+                    }
+                });
+                }
+            });
+        }
+    });
+}
+
+function writeColor(elemntId, newColor){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            data.ColorPickerSettings.forEach(element => {
+                console.log("cc",elemntId,element.liaisonName);
+                if (element.liaisonName === elemntId) {
+        
+                    element.color = newColor;
+
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    if (err) {
+                    console.error('Erreur d’écriture :', err);
+                    }
+                });
+                }
+            });
+        }
+    });
+}
 
 
         function writeElementCheck(elementName, newValue){
@@ -103,7 +162,7 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             if (data) {
                 data = JSON.parse(data);
                 data.ListeNoeudSettings.forEach(element => {
-                    console.log("cc",element.NoeudsName, elementName);
+
                     if (element.NoeudsName === elementName) {
                 
                         if (newValue >=1 && newValue <= 50) 
