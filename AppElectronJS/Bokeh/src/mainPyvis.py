@@ -313,15 +313,15 @@ def show_graphique(liste_key, dataUser):
         return all_key1+all_key2, all_key1, all_key2
     
     def setAllNode(G,noms,infos):
-        node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations, node_url = recuperate_data(dfFinal, noms, infos)
+        node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         minTaille, maxTaille = find_min_max_values(node_citations)
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-    for nom in noms:
-        nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
-        color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+        for nom in noms:
+            nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
         
         G.add_node(
             nom,
@@ -352,7 +352,6 @@ def show_graphique(liste_key, dataUser):
     noms = dfFinal.index  # Use the index (the keys)
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
-    node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
     originKeys = set(originKeys)#Transform the list in a set for faster reserch in the list
 
     G = setAllNode(G,noms,infos)
@@ -388,31 +387,31 @@ def show_graphique(liste_key, dataUser):
 def show_graphique_author(liste_key):
 
     def setAllNode(G,noms,infos):
-        node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations, node_url = recuperate_data(dfFinal, noms, infos)
+        node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         minTaille, maxTaille = find_min_max_values(node_citations)
     
         for nom in noms:
-        nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
-        color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
         
-        G.add_node(
-            nom,
-            size=nodeTaille,
-            label=node_author.split(",")[0] +" "+ str(node_year),
-            year=node_year,
-            title=node_title,
-            abstract=node_abstract,
-            author=node_author,
-            doi=node_doi,
-            color=color,
-            nb_citations=node_citations,
-            citations=doi_citations,
-            url=node_url,
-            isOrigin=nom in originKeys
-        )
-        return G
+            G.add_node(
+                nom,
+                size=nodeTaille,
+                label=node_author.split(",")[0] +" "+ str(node_year),
+                year=node_year,
+                title=node_title,
+                abstract=node_abstract,
+                author=node_author,
+                doi=node_doi,
+                color=color,
+                nb_citations=node_citations,
+                citations=doi_citations,
+                url=node_url,
+                isOrigin=nom in originKeys
+            )
+            return G
 
     # Create the graph
     G = nx.Graph()
