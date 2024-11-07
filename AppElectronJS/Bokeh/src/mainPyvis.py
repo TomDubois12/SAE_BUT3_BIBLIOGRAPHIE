@@ -7,6 +7,7 @@ import requests
 from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
+import math
 
 def ajout_script(network):
     # Add custom script for handling node clicks and displaying the publication title
@@ -21,7 +22,7 @@ def ajout_script(network):
             
             // Retrieve the title from the node attributes
             const nodeData = network.body.data.nodes.get(nodeId); // Utiliser un autre nom pour éviter la confusion
-
+            console.log(nodeData);
             // Check for existing aside element by ID
             const existingIdenticalElement = document.getElementById(nodeId);
             
@@ -208,6 +209,28 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
     return G
 
 
+def find_min_max_values(dico):
+    #return the min and max of a dico like this {"DOI": nbCitation}
+    min_key = min(dico, key=dico.get)
+    max_key = max(dico, key=dico.get)
+    return dico[min_key], dico[max_key]
+
+
+def transform_value_log(value, original_min, original_max, target_min=20, target_max=100):
+    # Ajouter une petite valeur epsilon pour éviter le log de 0
+    epsilon = 1e-6
+    
+    # Normaliser la valeur par rapport à la plage originale
+    normalized_value = (value - original_min) / (original_max - original_min)
+    
+    # Appliquer une transformation logarithmique pour donner plus de différenciation aux petites valeurs
+    log_transformed = math.log1p((normalized_value ** 0.9) * (math.e - 1))  # log1p(x) = log(1 + x) pour éviter les problèmes autour de 0
+    
+    # Transformation linéaire vers la plage cible
+    transformed_value = target_min + log_transformed * (target_max - target_min)
+    print(transformed_value)
+    return transformed_value
+
 
 def show_graphique(liste_key, dataUser):
     """
@@ -229,10 +252,14 @@ def show_graphique(liste_key, dataUser):
         node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(node_citations)
+
+        # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
+            nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
             #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+            G.add_node(nom,size=nodeTaille,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom], isOrigin=nom in originKeys)
         return G
 
 
@@ -279,9 +306,8 @@ def show_graphique(liste_key, dataUser):
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
         f.write(html_content)
-    
 
-    
+
 
 def show_graphique_author(liste_key):
 
@@ -289,10 +315,13 @@ def show_graphique_author(liste_key):
         node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(node_citations)
+
         for nom in noms:
-            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
+            color = 'red' # Red for origin nodes, blue otherwise
             #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+            G.add_node(nom,size=nodeTaille,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom], isOrigin=nom in originKeys)
         return G
 
     # Create the graph
@@ -317,7 +346,6 @@ def show_graphique_author(liste_key):
     liste_cle1_cle2 = []    
     for key in liste_key:
         articles_similaire = find_similar_articles(key, 3)
-        print(articles_similaire)
         newList = [key]
         tempList = []
         for elem in articles_similaire:
@@ -325,7 +353,6 @@ def show_graphique_author(liste_key):
                 tempList.append(elem)
         newList.append(tempList)
         liste_cle1_cle2.append(newList)
-    print(liste_cle1_cle2)
     for liaison in liaisons:
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_cle1_cle2, dfFinal, noms, infos)
@@ -409,9 +436,11 @@ if __name__ == "__main__":
             show_graphique_author(liste_final)
         else:
             # Exécution de la recherche par mot clé
-            similarities = search_by_keyword(mot_cle)
+            nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+            NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+            similarities = search_by_keyword(mot_cle,nbNodeOrigin)
             liste_final = [t[0] for t in similarities]
-            liste_final = get_list_xSimilaritie(liste_final, 5)
+            liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
             show_graphique(liste_final, dataUser)
         
         #read the file in the first param and write in the second param.
