@@ -226,7 +226,6 @@ def recuperate_data(data, noms, infos):
             # Mettre à jour le cache avec les nouvelles données
             cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
     
-    return titre, resume, author, node_doi, pub_year, num_citations, doi_citations, node_url
 
 
 
@@ -399,31 +398,40 @@ def show_graphique(liste_key, dataUser):
 def show_graphique_author(liste_key):
 
     def setAllNode(G,noms,infos):
-        
-        node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
+        recuperate_data(dfFinal, noms, infos)
+        cache_file = 'cache_doi.json'
+
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+
+       
+
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-        minTaille, maxTaille = find_min_max_values(node_citations)
-    
-        for nom in noms:
-            nodeTaille = transform_value_log(node_citations[nom], minTaille, maxTaille)
-            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+        minTaille, maxTaille = find_min_max_values(cache_data, noms)
         
+            # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        for nom in noms:
+            node = cache_data[nom.lower()]
+            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            print(node['authors'])
             G.add_node(
                 nom,
                 size=nodeTaille,
-                label=node_author.split(",")[0] +" "+ str(node_year),
-                year=node_year,
-                title=node_title,
-                abstract=node_abstract,
-                author=node_author,
-                doi=node_doi,
+                label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                year=node['year'],
+                title=node['title'],
+                abstract=node['abstract'],
+                author=node['authors'],
+                doi=nom,
                 color=color,
-                nb_citations=node_citations,
-                citations=doi_citations,
-                url=node_url,
+                nb_citations=node['num_citations'],
+                citations=node['doi_citations'],
+                url=node['url'],
                 isOrigin=nom in originKeys
             )
-            return G
+        return G
 
     # Create the graph
     G = nx.Graph()
