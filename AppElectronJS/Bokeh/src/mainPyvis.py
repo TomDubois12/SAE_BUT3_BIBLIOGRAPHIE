@@ -7,6 +7,8 @@ import requests
 from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
+import os
+import json
 
 def ajout_script(node, network):
     # Add custom script for handling node clicks and displaying the publication title
@@ -65,8 +67,8 @@ def ajout_script(node, network):
                 
                 const doi = document.createElement("a");
                 doi.classList.add("pDOI");
-                doi.textContent = `DOI : ${nodeData.index || "DOI non disponible"}`;
-                doi.href = nodeData.doi || "#";  // Set the URL for the link, default to "#" if DOI not available
+                doi.textContent = `DOI : ${nodeData.url || "DOI non disponible"}`;
+                doi.href = nodeData.url || "#";  // Set the URL for the link, default to "#" if DOI not available
                 doi.target = "_blank";  // Open the link in a new tab
                 doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
                 aside.appendChild(doi);
@@ -112,56 +114,117 @@ def semantic_scholar_research(doi=None, title=None):
                 paper_id = search_results['data'][0]['paperId']
                 response = requests.get(f"{base_url}{paper_id}")
             else:
-                return None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, None
         else:
-            return None, None, None, None, None, None, None
+            return None, None, None, None, None, None, None, None
     else:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
 
     if response.ok:
         data = response.json()
-        print("Data retrieved from API:", len(data.get('citations', None)))  # Ajoutez ceci pour déboguer
+        print("Data retrieved from API:", len(data.get('citations', None)))
         title = data.get('title', None)
         abstract = data.get('abstract', None)
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
         doi = data.get('doi', None)
         year = data.get('year', None)
-        num_citations = len(data.get('citations', None))
-        url_citations = data.get('url', None)
 
-        # Retournez toujours 7 valeurs
-        return title, abstract, authors, doi, year, num_citations, url_citations
+        # Vérification des citations
+        citations = data.get('citations', [])
+        num_citations = len(citations)
+        citation_dois = []
+
+        # Récupérer les DOI des citations, s'ils existent
+        for citation in citations:
+            citation_doi = citation.get('doi', None)
+            citation_dois.append(citation_doi if citation_doi else "DOI indisponible")
+        
+        # Si des citations ont été trouvées, retourne leur DOI
+        doi_citations = citation_dois if citation_dois else ["Aucun DOI disponible"]
+        url = data.get('url', None)
+
+        # Retourne toujours 7 valeurs
+        return title, abstract, authors, doi, year, num_citations, doi_citations, url
     else:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
+
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, cache_file='cache_doi.json'):
+    # Vérifier si le fichier cache existe, sinon le créer avec un dictionnaire vide
+    if not os.path.exists(cache_file):
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+    # Charger le cache existant
+    with open(cache_file, 'r', encoding='utf-8') as f:
+        cache_data = json.load(f)
+
+    if doi:
+        # Ajouter ou mettre à jour les informations de DOI dans le cache
+        cache_data[doi] = {
+            'title': title,
+            'abstract': abstract,
+            'authors': authors,
+            'year': year,
+            'num_citations': num_citations,
+            'doi_citations': doi_citations,
+            'url': url
+        }
+    
+        # Sauvegarder les données mises à jour dans le fichier cache
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 def recuperate_data(data, noms, infos):
-    node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
+    #node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
     node_title = dict(zip(noms, data['Title']))
-    node_abstract = dict(zip(noms, data['Abstract Note']))
-    node_author = dict(zip(noms, data['Author']))
+    #node_abstract = dict(zip(noms, data['Abstract Note']))
+    #node_author = dict(zip(noms, data['Author']))
     node_doi = dict(zip(noms, data.index))
-    node_year = dict(zip(noms, data['Publication Year']))
+    #node_year = dict(zip(noms, data['Publication Year']))
     
-    # Ajout des dictionnaires pour stocker le nombre de citations et les URLs
-    node_num_citations = {}
-    node_url_citations = {}
-        
-    for nom in noms:
-        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
-            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
-            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
-        )
-        
-        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
-        node_title[nom] = title or node_title[nom] or "Titre inconnu"
-        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
-        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
-        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
-        node_year[nom] = year or node_year[nom] or "Année inconnue"
-        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
-        node_url_citations[nom] = url_citations or "URL indisponible"
+    cache_file = 'cache_doi.json'
+    
+    # Initialisation des dictionnaires pour stocker le nombre de citations et les URLs
+    num_citations = 0
+    doi_citations = {}
+    url = ""
+    
+    # Charger le cache si disponible, sinon initialiser un cache vide
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+    else:
+        cache_data = {}  # Si le fichier n'existe pas, initialiser un cache vide
 
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
+    for nom in noms:
+        # Vérifier si le DOI est dans le cache
+        doi = node_doi[nom]
+        if doi in cache_data:
+            num_citations = cache_data[doi]['num_citations']
+            doi_citations = cache_data[doi]['doi_citations']
+        else:
+            # Appel à Semantic Scholar si les données ne sont pas en cache
+            title, abstract, author, doi, year, num_citations, doi_citations, url = semantic_scholar_research(
+                doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+                title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+            )
+        
+            # Si les informations de Semantic Scholar sont absentes, garder celles du CSV
+            titre = title or "Titre inconnu"
+            resume = abstract or "Aperçu indisponible"
+            author = author or "Auteur inconnu"
+            node_doi[nom] = doi or "DOI indisponible"
+            pub_year = year or "Année inconnue"
+            num_citations = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+            doi_citations = doi_citations or "Pas de citations"
+            node_url = url or "URL indisponible"
+            
+            # Mettre à jour le cache avec les nouvelles données
+            cache(doi, title, abstract, author, year, url, num_citations, doi_citations)
+    
+    return titre, resume, author, node_doi, pub_year, num_citations, doi_citations, node_url
+
+
 
 def get_list_xSimilaritie(listeKey, x=1):
     """
@@ -188,7 +251,6 @@ def show_graphique(liste_key):
 
     noms = data.index  # Accéder à l'index au lieu de la colonne "Key"
     infos = data.iloc[:, 0:3]  # Prendre les infos (les colonnes restantes)
-    annees_data = data["Publication Year"]
 
     # Rechercher par mot clé
     # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
@@ -204,7 +266,7 @@ def show_graphique(liste_key):
     noms = dfFinal.index  # Use the index (the keys)
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+    node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -215,7 +277,20 @@ def show_graphique(liste_key):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+
+        G.add_node(
+            nom,
+            size=20 + node_citations / 30,
+            year=node_year,
+            title=node_title,
+            abstract=node_abstract,
+            author=node_author,
+            doi=node_doi,
+            color=color,
+            nb_citations=node_citations,
+            citations=doi_citations,
+            url=node_url
+        )
 
     # Add the edges
     for key, keys in liste_key:
@@ -263,7 +338,6 @@ def show_graphique_author(liste_key, mot_cle):
 
     noms = data.index  # Accéder à l'index au lieu de la colonne "Key"
     infos = data.iloc[:, 0:3]  # Prendre les infos (les colonnes restantes)
-    annees_data = data["Publication Year"]
 
     # Rechercher par mot clé
     # mot_cle = "Linear sweep voltammetry at very small stationary disk electrodes"
@@ -279,7 +353,7 @@ def show_graphique_author(liste_key, mot_cle):
     noms = dfFinal.index  # Utiliser l'index (les clés)
     infos = dfFinal.iloc[:, 0:3]  # Prendre les colonnes qui contiennent les informations
     
-    node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+    node_title, node_abstract, node_author, node_doi, node_year, node_citations, doi_citations, node_url = recuperate_data(dfFinal, noms, infos)
 
     # Create the graph
     G = nx.Graph()
@@ -290,7 +364,8 @@ def show_graphique_author(liste_key, mot_cle):
     # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
     for nom in noms:
         color = 'red' if nom in origin_nodes else 'blue'  # Red for origin nodes, blue otherwise
-        G.add_node(nom,size= 20+node_citations[nom]/30, infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        G.add_node(nom,size= 20+node_citations[nom]/30, year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=doi_citations[nom], 
+            url=node_url)
 
     # Déterminer les 15 nœuds d'origine
 
