@@ -5,6 +5,7 @@ const fs = require("fs");
 
 
 let mainWindow;
+let graphWindo;
 
 const webPref = {
   preload: path.join(__dirname, 'preload.js'),  // Chemin vers votre script de preload
@@ -163,13 +164,13 @@ const mainMenuTemplates = [
         // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
         click(){
           // Une fenêtre pour gerer les couleurs des noeuds 
-          const fenetre = new BrowserWindow({
+          graphWindo = new BrowserWindow({
             width: 800,
             height: 600,
             icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
             webPreferences: webPref
         });
-        fenetre.loadFile('./renderer/test.html');
+        graphWindo.loadFile('./renderer/test.html');
         }
       }
     ]
@@ -187,6 +188,9 @@ ipcMain.handle('openWindoColor', (event) => {
   fenetre.loadFile('./renderer/colorSettings.html');
 });
 
+ipcMain.handle("reloadPage", (event) => {
+  graphWindo.webContents.reloadIgnoringCache()
+});
 
 // For mac user
 if (process.platform == 'darwin'){
