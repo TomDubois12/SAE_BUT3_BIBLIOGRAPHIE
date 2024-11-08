@@ -38,7 +38,7 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
     return combined_embeddings
 
 # Charger le modèle pré-entraîné
-model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
+model = SentenceTransformer('fine_tuned_model')
 
 # Charger le fichier CSV avec encodage UTF-8
 df = pd.read_csv('./Data/Bibliographie_sans_doublon.csv', encoding='utf-8')

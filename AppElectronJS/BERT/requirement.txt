@@ -1,6 +1,6 @@
 torch
-transformers
-sentence_transformers
+transformers==4.45.2
+sentence_transformers==3.1.1
 pandas
 pyvis
 bs4
