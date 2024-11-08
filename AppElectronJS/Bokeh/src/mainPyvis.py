@@ -7,92 +7,16 @@ import requests
 from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
+import os
+import json
+import math
 
 def ajout_script(network):
     # Add custom script for handling node clicks and displaying the publication title
     custom_script = """
     <div id="result"></div>
     <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
-    <script type="text/javascript">
-        function onNodeInteraction(params) {
-            const canva = document.getElementsByClassName('contenerCanvaAside')[0]; // Accès au premier élément
-            const className = 'generated-div';
-            const nodeId = params.nodes[0];
-            
-            // Retrieve the title from the node attributes
-            const nodeData = network.body.data.nodes.get(nodeId); // Utiliser un autre nom pour éviter la confusion
-
-            // Check for existing aside element by ID
-            const existingIdenticalElement = document.getElementById(nodeId);
-            
-            // If the existing aside is found, remove it
-            if (existingIdenticalElement) {
-                existingIdenticalElement.remove();
-            } else {
-                const existingElements = document.getElementsByClassName(className);
-                // Remove the first existing element if it exists
-                if (existingElements.length > 0) {
-                    existingElements[0].remove();
-                }
-                
-                if (!nodeId) {
-                    existingElements[0].remove();
-                }
-
-                // Create a new aside element
-                const aside = document.createElement("aside");
-
-                // Add content to the aside, including the title
-                const titre = document.createElement("h1");
-                titre.classList.add("pTitle");
-                titre.textContent = `Titre de la publication : ${nodeData.title || "Titre non disponible"}`;
-                aside.appendChild(titre);
-                
-                const author = document.createElement("p");
-                author.classList.add("pAuthor");
-                author.textContent = `Auteur(s), co-auteur(s) : ${nodeData.author || "Auteur(s) non disponible"}`;
-                aside.appendChild(author);
-            
-                const year = document.createElement("p");
-                year.classList.add("pYear");
-                year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
-                aside.appendChild(year);
-                
-                const nb_citation = document.createElement("p");
-                nb_citation.classList.add("pCitation");
-                nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations || "Nombre de citation non disponible"}`;
-                aside.appendChild(nb_citation);
-            
-                const abstract = document.createElement("p");
-                abstract.classList.add("pAbstract");
-                abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
-                aside.appendChild(abstract);
-                
-                const doi = document.createElement("a");
-                doi.classList.add("pDOI");
-                doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
-                doi.href = nodeData.citations || "#";  // Set the URL for the link, default to "#" if DOI not available
-                doi.target = "_blank";  // Open the link in a new tab
-                doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
-                aside.appendChild(doi);
-     
-                aside.classList.add(className); // Add class for styling
-                aside.id = nodeId; // Assign unique ID
-
-                // Append the aside to the DOM
-                canva.appendChild(aside);
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title || "Titre non disponible"}" publié en "${nodeData.year || "Année non disponible"}".`);
-            }
-
-            if (params.nodes.length > 0) {
-                console.log("Clicked node:", nodeId);
-                // Here you can add more functionality, like fetching data
-            }
-        }
-        
-        network.on("click", onNodeInteraction);
-        network.on("hoverNode", onNodeInteraction);
-    </script>      
+    <script src="js/EventNodeEdge.js"> </script>
     """
     return custom_script
 
@@ -113,57 +37,117 @@ def semantic_scholar_research(doi=None, title=None):
                 paper_id = search_results['data'][0]['paperId']
                 response = requests.get(f"{base_url}{paper_id}")
             else:
-                return None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, None
         else:
-            return None, None, None, None, None, None, None
+            return None, None, None, None, None, None, None, None
     else:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
 
     if response.ok:
         data = response.json()
-        print("Data retrieved from API:", len(data.get('citations', None)))  # Ajoutez ceci pour déboguer
+        print("Data retrieved from API:", len(data.get('citations', None)))
         title = data.get('title', None)
         abstract = data.get('abstract', None)
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
         doi = data.get('doi', None)
         year = data.get('year', None)
-        num_citations = len(data.get('citations', None))
-        url_citations = data.get('url', None)
 
-        # Retournez toujours 7 valeurs
-        return title, abstract, authors, doi, year, num_citations, url_citations
+        # Vérification des citations
+        citations = data.get('citations', [])
+        num_citations = len(citations)
+        citation_dois = []
+
+        # Récupérer les DOI des citations, s'ils existent
+        for citation in citations:
+            citation_doi = citation.get('doi', None)
+            citation_dois.append(citation_doi if citation_doi else "DOI indisponible")
+        
+        # Si des citations ont été trouvées, retourne leur DOI
+        doi_citations = citation_dois if citation_dois else ["Aucun DOI disponible"]
+        url = data.get('url', None)
+
+        # Retourne toujours 7 valeurs
+        return title, abstract, authors, doi, year, num_citations, doi_citations, url
     else:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
+
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, cache_file='cache_doi.json'):
+    # Vérifier si le fichier cache existe, sinon le créer avec un dictionnaire vide
+    if not os.path.exists(cache_file):
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+    # Charger le cache existant
+    with open(cache_file, 'r', encoding='utf-8') as f:
+        cache_data = json.load(f)
+
+    if doi:
+        # Ajouter ou mettre à jour les informations de DOI dans le cache
+        cache_data[doi] = {
+            'title': title,
+            'abstract': abstract,
+            'authors': authors,
+            'year': year,
+            'num_citations': num_citations,
+            'doi_citations': doi_citations,
+            'url': url
+        }
+    
+        # Sauvegarder les données mises à jour dans le fichier cache
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 
 def recuperate_data(data, noms, infos):
-    node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
+    #node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
     node_title = dict(zip(noms, data['Title']))
-    node_abstract = dict(zip(noms, data['Abstract Note']))
-    node_author = dict(zip(noms, data['Author']))
+    #node_abstract = dict(zip(noms, data['Abstract Note']))
+    #node_author = dict(zip(noms, data['Author']))
     node_doi = dict(zip(noms, data.index))
-    node_year = dict(zip(noms, data['Publication Year']))
+    #node_year = dict(zip(noms, data['Publication Year']))
     
-    # Ajout des dictionnaires pour stocker le nombre de citations et les URLs
-    node_num_citations = {}
-    node_url_citations = {}
-        
-    for nom in noms:
-        title, abstract, author, doi, year, num_citations, url_citations = semantic_scholar_research(
-            doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
-            title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
-        )
-        
-        # Si les informations de Semantic Scholar sont absentes, gardez celles du CSV
-        node_title[nom] = title or node_title[nom] or "Titre inconnu"
-        node_abstract[nom] = abstract or node_abstract[nom] or "Aperçu indisponible"
-        node_author[nom] = author or node_author[nom] or "Auteur inconnu"
-        node_doi[nom] = doi or node_doi[nom] or "DOI indisponible"
-        node_year[nom] = year or node_year[nom] or "Année inconnue"
-        node_num_citations[nom] = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
-        node_url_citations[nom] = url_citations or "URL indisponible"
+    cache_file = 'cache_doi.json'
+    
+    # Initialisation des dictionnaires pour stocker le nombre de citations et les URLs
+    num_citations = 0
+    doi_citations = {}
+    url = ""
+    
+    # Charger le cache si disponible, sinon initialiser un cache vide
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+    else:
+        cache_data = {}  # Si le fichier n'existe pas, initialiser un cache vide
 
-    return node_info, node_title, node_abstract, node_author, node_doi, node_year, node_num_citations, node_url_citations
+    for nom in noms:
+        # Vérifier si le DOI est dans le cache
+        doi = node_doi[nom]
+        if doi.lower() in cache_data:
+            num_citations = cache_data[doi.lower()]['num_citations']
+            doi_citations = cache_data[doi.lower()]['doi_citations']
+        else:
+            # Appel à Semantic Scholar si les données ne sont pas en cache
+            title, abstract, author, doi, year, num_citations, doi_citations, url = semantic_scholar_research(
+                doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
+                title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+            )
+        
+            # Si les informations de Semantic Scholar sont absentes, garder celles du CSV
+            titre = title or "Titre inconnu"
+            resume = abstract or "Aperçu indisponible"
+            author = author or "Auteur inconnu"
+            node_doi[nom] = doi or "DOI indisponible"
+            pub_year = year or "Année inconnue"
+            num_citations = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
+            doi_citations = doi_citations or "Pas de citations"
+            node_url = url or "URL indisponible"
+            
+            # Mettre à jour le cache avec les nouvelles données
+            cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
+    
+
+
 
 def get_list_xSimilaritie(listeKey, x=1):
     """
@@ -208,6 +192,32 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
     return G
 
 
+def find_min_max_values(dico,noms):
+    liste = set()
+    for nom in noms:
+        liste.add(dico[nom.lower()]['num_citations'])
+
+    #return the min and max of a dico like this {"DOI": nbCitation}
+    min_key = min(liste)
+    max_key = max(liste)
+    return min_key, max_key
+
+
+def transform_value_log(value, original_min, original_max, target_min=20, target_max=100):
+    # Ajouter une petite valeur epsilon pour éviter le log de 0
+    epsilon = 1e-6
+    
+    # Normaliser la valeur par rapport à la plage originale
+    normalized_value = (value - original_min) / (original_max - original_min)
+    
+    # Appliquer une transformation logarithmique pour donner plus de différenciation aux petites valeurs
+    log_transformed = math.log1p((normalized_value ** 0.9) * (math.e - 1))  # log1p(x) = log(1 + x) pour éviter les problèmes autour de 0
+    
+    # Transformation linéaire vers la plage cible
+    transformed_value = target_min + log_transformed * (target_max - target_min)
+    print(transformed_value)
+    return transformed_value
+
 
 def show_graphique(liste_key, dataUser):
     """
@@ -226,16 +236,40 @@ def show_graphique(liste_key, dataUser):
         return all_key1+all_key2, all_key1, all_key2
     
     def setAllNode(G,noms,infos):
-        node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+        recuperate_data(dfFinal, noms, infos)
+        cache_file = 'cache_doi.json'
+
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+
+       
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(cache_data, noms)
+        
+            # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
+            node = cache_data[nom.lower()]
+            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
-            #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+        
+            G.add_node(
+                nom,
+                size=nodeTaille,
+                label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                year=node['year'],
+                title=node['title'],
+                abstract=node['abstract'],
+                author=node['authors'],
+                doi=nom,
+                color=color,
+                nb_citations=node['num_citations'],
+                citations=node['doi_citations'],
+                url=node['url'],
+                isOrigin=nom in originKeys
+            )
         return G
-
-
     
     # Create the graph
     G = nx.Graph()
@@ -260,7 +294,6 @@ def show_graphique(liste_key, dataUser):
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_key, dfFinal, noms, infos)
 
-
     nt = Network('100vh', '100vw', notebook=True)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
@@ -279,20 +312,45 @@ def show_graphique(liste_key, dataUser):
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
         f.write(html_content)
-    
 
-    
+
 
 def show_graphique_author(liste_key):
 
     def setAllNode(G,noms,infos):
-        node_info, node_title, node_abstract, node_author, node_doi, node_year, node_citations, url_citations = recuperate_data(dfFinal, noms, infos)
+        recuperate_data(dfFinal, noms, infos)
+        cache_file = 'cache_doi.json'
+
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+
+       
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(cache_data, noms)
+        
+            # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
+            node = cache_data[nom.lower()]
+            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
-            #G.add_node(nom,size=20+500/30 , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=500, citations="blablou")
-            G.add_node(nom,size=20+node_citations[nom]/30,label=node_author[nom].split(",")[0] +" "+ str(node_year[nom]) , infos=node_info[nom], year=node_year[nom], title=node_title[nom], abstract=node_abstract[nom], author=node_author[nom], doi=node_doi[nom], color=color, nb_citations=node_citations[nom], citations=url_citations[nom])
+            print(node['authors'])
+            G.add_node(
+                nom,
+                size=nodeTaille,
+                label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                year=node['year'],
+                title=node['title'],
+                abstract=node['abstract'],
+                author=node['authors'],
+                doi=nom,
+                color=color,
+                nb_citations=node['num_citations'],
+                citations=node['doi_citations'],
+                url=node['url'],
+                isOrigin=nom in originKeys
+            )
         return G
 
     # Create the graph
@@ -304,7 +362,7 @@ def show_graphique_author(liste_key):
     # Reindexer le DataFrame selon les clés trouvées
     allTheKeys = liste_key
     dfFinal = df.reindex(allTheKeys)
-
+    
     noms = dfFinal.index  # Use the index (the keys)
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
@@ -317,7 +375,6 @@ def show_graphique_author(liste_key):
     liste_cle1_cle2 = []    
     for key in liste_key:
         articles_similaire = find_similar_articles(key, 3)
-        print(articles_similaire)
         newList = [key]
         tempList = []
         for elem in articles_similaire:
@@ -325,7 +382,6 @@ def show_graphique_author(liste_key):
                 tempList.append(elem)
         newList.append(tempList)
         liste_cle1_cle2.append(newList)
-    print(liste_cle1_cle2)
     for liaison in liaisons:
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_cle1_cle2, dfFinal, noms, infos)
@@ -409,9 +465,11 @@ if __name__ == "__main__":
             show_graphique_author(liste_final)
         else:
             # Exécution de la recherche par mot clé
-            similarities = search_by_keyword(mot_cle)
+            nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+            NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+            similarities = search_by_keyword(mot_cle,nbNodeOrigin)
             liste_final = [t[0] for t in similarities]
-            liste_final = get_list_xSimilaritie(liste_final, 5)
+            liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
             show_graphique(liste_final, dataUser)
         
         #read the file in the first param and write in the second param.
@@ -419,15 +477,6 @@ if __name__ == "__main__":
 
     else:
         raise ValueError("valeur nul, il doit y avoir une valeur")
-
-    
-
-
-    
-
-
-
-
 
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon

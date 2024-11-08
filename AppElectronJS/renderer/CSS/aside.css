@@ -7,7 +7,14 @@
     width: 100%;
     height: 100vh;
 }
-
+.buttonAsideParam{
+    position: absolute;
+    visibility: visible;
+    left:100%;
+}
+.buttonAsideParam2{
+    left: 0;
+}
 
 /* Aside param */
 
@@ -91,8 +98,7 @@
 }
 
 .hide{
-    width: 0;
-    opacity: 0;
+    visibility: hidden;
     overflow: hidden;
 }
 
