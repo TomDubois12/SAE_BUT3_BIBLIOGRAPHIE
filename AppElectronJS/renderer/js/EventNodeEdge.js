@@ -1,6 +1,7 @@
-var AS_ASIDE = false;
-var AS_CLICK = false;
-var idSelectedNode = "";
+let AS_ASIDE = false;
+let AS_CLICK = false;
+let idSelectedNode = "";
+
 
 async function changeColorOnHover(nodeId, isOrigin) {
 
@@ -8,13 +9,31 @@ async function changeColorOnHover(nodeId, isOrigin) {
     const color = await getColorParamUser(isOrigin);
     const lightColor = lightenColor(color);
 
-    // Appliquer la couleur au nœud immédiatement
+    let year = network.body.data.nodes.get(nodeId).year;
+    let minD;
+    let maxD;
+        if (isOrigin){
+            minD = minDateOrigin;
+            maxD = maxDateOrigin;
+        }else {
+            minD = minDateEnv;
+            maxD = maxDateEnv;
+        }
     network.body.data.nodes.update({
-        id: nodeId,
-        color: lightColor,
-        borderWidth: 3,
-        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    });
+            id: nodeId,
+            color: getColorForDate(year,maxD,minD,color),
+            borderWidth: 3,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+        });
+
+
+    // Appliquer la couleur au nœud immédiatement
+    // network.body.data.nodes.update({
+    //     id: nodeId,
+    //     color: lightColor,
+    //     borderWidth: 3,
+    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+    // });
 
     // Si vous voulez vraiment que la couleur revienne après un certain délai, il faut 
     // vous assurer que la couleur reste avant le retour à la couleur d'origine.
@@ -25,12 +44,30 @@ async function changeBlurColor(nodeId, isOrigin){
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
 
+    let year = network.body.data.nodes.get(nodeId).year;
+    let minD;
+    let maxD;
+        if (isOrigin){
+            minD = minDateOrigin;
+            maxD = maxDateOrigin;
+        }else {
+            minD = minDateEnv;
+            maxD = maxDateEnv;
+        }
     network.body.data.nodes.update({
-        id: nodeId,
-        color: color,
-        borderWidth: 0,
-        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    });
+            id: nodeId,
+            color: getColorForDate(year,maxD,minD,color),
+            borderWidth: 0,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+        });
+
+
+    // network.body.data.nodes.update({
+    //     id: nodeId,
+    //     color: color,
+    //     borderWidth: 0,
+    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+    // });
     // Délai avant de remettre la couleur d'origine (si nécessaire)
 }
 
@@ -40,12 +77,29 @@ async function changeColorOnClick(nodeId){
     const color = await getColorParamUser(isOrigin);
     const lightColor = lightenColor(color);
 
+    let year = network.body.data.nodes.get(nodeId).year;
+    let minD;
+    let maxD;
+        if (isOrigin){
+            minD = minDateOrigin;
+            maxD = maxDateOrigin;
+        }else {
+            minD = minDateEnv;
+            maxD = maxDateEnv;
+        }
     network.body.data.nodes.update({
-        id: nodeId,
-        color: lightColor,
-        borderWidth: 3,
-        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    });
+            id: nodeId,
+            color: getColorForDate(year,maxD,minD,color),
+            borderWidth: 3,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+        });
+
+//     network.body.data.nodes.update({
+//         id: nodeId,
+//         color: lightColor,
+//         borderWidth: 3,
+//         shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+//     });
 }
 
 async function colorOnNodeSave(idNode){
@@ -55,12 +109,29 @@ async function colorOnNodeSave(idNode){
     const isOrigin = network.body.data.nodes.get(idNode).isOrigin;    
     const color = await getColorParamUser(isOrigin);
 
+    let year = network.body.data.nodes.get(idNode).year;
+    let minD;
+    let maxD;
+        if (isOrigin){
+            minD = minDateOrigin;
+            maxD = maxDateOrigin;
+        }else {
+            minD = minDateEnv;
+            maxD = maxDateEnv;
+        }
     network.body.data.nodes.update({
-        id:  idNode,
-        color: color,
-        borderWidth: 0,
-       shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-    });
+            id: idNode,
+            color: getColorForDate(year,maxD,minD,color),
+            borderWidth: 0,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+        });
+
+    // network.body.data.nodes.update({
+    //     id:  idNode,
+    //     color: color,
+    //     borderWidth: 0,
+    //    shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+    // });
     idSelectedNode = "";
 }
 
@@ -243,19 +314,101 @@ network.on("blurNode", onBLur);
 
 
 
-async function loadNodesColor() {
+
+
+function adjustColorBrightness(hex, factor) {
+    // Enlever le "#" du début si nécessaire
+    hex = hex.replace('#', '');
+    
+    // Convertir la couleur hex en RGB
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    
+    // Ajuster la luminosité en fonction du facteur (valeur de 0 à 1)
+    r = Math.min(255, Math.max(0, r + factor * (255 - r)));
+    g = Math.min(255, Math.max(0, g + factor * (255 - g)));
+    b = Math.min(255, Math.max(0, b + factor * (255 - b)));
+    
+    // Convertir à nouveau en hexadécimal
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+}
+
+function getColorForDate(date, minDate , maxDate, baseColor) {
+    //function getColorForDate(date, minDate = 1984, maxDate = 2015, baseColor = '#A62121') {
+    // Normaliser l'année dans la plage de 0 à 1
+    const normalizedYear = (date - minDate) / (maxDate - minDate);
+    
+    // Calculer la luminosité en fonction de l'année : plus près de 1984, plus foncé, plus près de 2015, plus clair
+    const factor = normalizedYear * 0.5; // Ajuste le facteur si nécessaire
+    
+    // Retourner la couleur ajustée
+    return adjustColorBrightness(baseColor, factor);
+}
+
+
+
+
+let maxDateOrigin;
+let minDateOrigin;
+let maxDateEnv;
+let minDateEnv;
+
+function loadNodesColor() {
+    network.body.data.nodes.forEach( (elem) => {
+        const isOrigin = elem.isOrigin;
+        if (isOrigin) {
+            // Si le nœud est d'origine
+            if (maxDateOrigin == null || elem.year > maxDateOrigin) {
+                maxDateOrigin = elem.year;
+            }
+            if (minDateOrigin == null || elem.year < minDateOrigin) {
+                minDateOrigin = elem.year;
+            }
+        } else {
+            // Si le nœud n'est pas d'origine (environnement)
+            if (maxDateEnv == null || elem.year > maxDateEnv) {
+                maxDateEnv = elem.year;
+            }
+            if (minDateEnv == null || elem.year < minDateEnv) {
+                minDateEnv = elem.year;
+            }
+        }
+    });
+}
+loadNodesColor();
+
+
+
+async function setAllNodeDeg(){
+
     network.body.data.nodes.forEach(async (elem) => {
         const isOrigin = elem.isOrigin;
         const color = await getColorParamUser(isOrigin);
+
+        // console.log(color,elem.year);
+        // console.log(getColorForDate(elem.year,maxDateOrigin,minDateOrigin,color))
+        let minD;
+        let maxD;
+        if (isOrigin){
+            minD = minDateOrigin;
+            maxD = maxDateOrigin;
+        }else {
+            minD = minDateEnv;
+            maxD = maxDateEnv;
+        }
+
         network.body.data.nodes.update({
             id: elem.id,
-            color: color,
+            color: getColorForDate(elem.year,maxD,minD,color),
             borderWidth: 1,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
     });
+    console.log(maxDateOrigin,minDateOrigin,maxDateEnv,minDateEnv);
 }
-loadNodesColor();
+setAllNodeDeg();
+
 
 
 
