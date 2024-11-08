@@ -144,22 +144,6 @@ const mainMenuTemplates = [
     label:'Settings',
     submenu:[
       {
-        // Switch entre Dark mode et Light mode
-        label:'Switch Dark Mode',
-        accelerator: process.platform == 'darwin' ? 'Command+M' : 'Ctrl+M',
-        click(){
-
-          // Looking for actual theme
-          if (nativeTheme.shouldUseDarkColors) {
-            nativeTheme.themeSource = 'light';
-        } else {
-            nativeTheme.themeSource = 'dark';
-        }
-
-        return nativeTheme.shouldUseDarkColors;
-        }
-      },
-      {
         label: 'Gerer les couleurs',
         // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
         click(){
@@ -191,6 +175,9 @@ ipcMain.handle('openWindoColor', (event) => {
 ipcMain.handle("reloadPage", (event) => {
   graphWindo.webContents.reloadIgnoringCache()
 });
+
+
+
 
 // For mac user
 if (process.platform == 'darwin'){
