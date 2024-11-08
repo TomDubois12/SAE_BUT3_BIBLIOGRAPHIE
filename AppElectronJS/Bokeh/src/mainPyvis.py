@@ -122,6 +122,7 @@ def recuperate_data(data, noms, infos):
 
     for nom in noms:
         # Vérifier si le DOI est dans le cache
+
         doi = node_doi[nom]
         if doi.lower() in cache_data:
             num_citations = cache_data[doi.lower()]['num_citations']
@@ -179,7 +180,24 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
                 for key2 in keys:
                     G.add_edge(key, key2[0],length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
         case 'Citation':
-            ...
+                cache_file = 'cache_doi.json'
+                if os.path.exists(cache_file):
+                    with open(cache_file, 'r', encoding='utf-8') as f:
+                        cache_data = json.load(f)
+                else:
+                    cache_data = {}  # Si le fichier n'existe pas, initialiser un cache vide
+                allTheKeys = set(allTheKeys)
+                set_liaison_final = set()
+                for key in allTheKeys:
+                    key = key.lower()
+                    liste_doi = cache_data[key]["doi_citations"]
+                    for keyCite in liste_doi:
+                        if keyCite in allTheKeys:
+                            set_liaison_final.add((keyCite, key))
+                print(set_liaison_final)
+                for couple in set_liaison_final:
+                    G.add_edge(couple[0],couple[1], color=liaison['color'])
+
         case 'Date de publication':
             result = {
                 year: tuple(group.index.unique()) for year, group in dfFinal.groupby('Publication Year')
