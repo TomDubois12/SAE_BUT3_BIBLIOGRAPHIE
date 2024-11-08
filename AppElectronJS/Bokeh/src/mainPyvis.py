@@ -16,87 +16,7 @@ def ajout_script(network):
     custom_script = """
     <div id="result"></div>
     <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
-    <script type="text/javascript">
-        function onNodeInteraction(params) {
-            const canva = document.getElementsByClassName('contenerCanvaAside')[0]; // Accès au premier élément
-            const className = 'generated-div';
-            const nodeId = params.nodes[0];
-            
-            // Retrieve the title from the node attributes
-            const nodeData = network.body.data.nodes.get(nodeId); // Utiliser un autre nom pour éviter la confusion
-            console.log(nodeData);
-            // Check for existing aside element by ID
-            const existingIdenticalElement = document.getElementById(nodeId);
-            
-            // If the existing aside is found, remove it
-            if (existingIdenticalElement) {
-                existingIdenticalElement.remove();
-            } else {
-                const existingElements = document.getElementsByClassName(className);
-                // Remove the first existing element if it exists
-                if (existingElements.length > 0) {
-                    existingElements[0].remove();
-                }
-                
-                if (!nodeId) {
-                    existingElements[0].remove();
-                }
-
-                // Create a new aside element
-                const aside = document.createElement("aside");
-
-                // Add content to the aside, including the title
-                const titre = document.createElement("h1");
-                titre.classList.add("pTitle");
-                titre.textContent = `Titre de la publication : ${nodeData.title || "Titre non disponible"}`;
-                aside.appendChild(titre);
-                
-                const author = document.createElement("p");
-                author.classList.add("pAuthor");
-                author.textContent = `Auteur(s), co-auteur(s) : ${nodeData.author || "Auteur(s) non disponible"}`;
-                aside.appendChild(author);
-            
-                const year = document.createElement("p");
-                year.classList.add("pYear");
-                year.textContent = `Année de publication : ${nodeData.year || "Année non disponible"}`;
-                aside.appendChild(year);
-                
-                const nb_citation = document.createElement("p");
-                nb_citation.classList.add("pCitation");
-                nb_citation.textContent = `Nombre de citations : ${nodeData.nb_citations || "Nombre de citation non disponible"}`;
-                aside.appendChild(nb_citation);
-            
-                const abstract = document.createElement("p");
-                abstract.classList.add("pAbstract");
-                abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
-                aside.appendChild(abstract);
-                
-                const doi = document.createElement("a");
-                doi.classList.add("pDOI");
-                doi.textContent = `DOI : ${nodeData.url || "DOI non disponible"}`;
-                doi.href = nodeData.url || "#";  // Set the URL for the link, default to "#" if DOI not available
-
-                doi.target = "_blank";  // Open the link in a new tab
-                doi.rel = "noopener noreferrer";  // Security measure to prevent exploitation
-                aside.appendChild(doi);
-     
-                aside.classList.add(className); // Add class for styling
-                aside.id = nodeId; // Assign unique ID
-
-                // Append the aside to the DOM
-                canva.appendChild(aside);
-                console.log(`Un nouvel aside a été créé pour ${nodeId} avec le titre "${nodeData.title || "Titre non disponible"}" publié en "${nodeData.year || "Année non disponible"}".`);
-            }
-
-            if (params.nodes.length > 0) {
-                console.log("Clicked node:", nodeId);
-                // Here you can add more functionality, like fetching data
-            }
-        }
-        
-        network.on("click", onNodeInteraction);
-        network.on("hoverNode", onNodeInteraction);
-    </script>      
+    <script src="js/EventNodeEdge.js"> </script>
     """
     return custom_script
 
@@ -203,9 +123,9 @@ def recuperate_data(data, noms, infos):
     for nom in noms:
         # Vérifier si le DOI est dans le cache
         doi = node_doi[nom]
-        if doi in cache_data:
-            num_citations = cache_data[doi]['num_citations']
-            doi_citations = cache_data[doi]['doi_citations']
+        if doi.lower() in cache_data:
+            num_citations = cache_data[doi.lower()]['num_citations']
+            doi_citations = cache_data[doi.lower()]['doi_citations']
         else:
             # Appel à Semantic Scholar si les données ne sont pas en cache
             title, abstract, author, doi, year, num_citations, doi_citations, url = semantic_scholar_research(
