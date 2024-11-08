@@ -145,7 +145,8 @@ def recuperate_data(data, noms, infos):
             node_url = url or "URL indisponible"
             
             # Mettre à jour le cache avec les nouvelles données
-            cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
+            if doi:
+                cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
     
 
 
@@ -189,7 +190,11 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
                 allTheKeys = set(allTheKeys)
                 set_liaison_final = set()
                 for key in allTheKeys:
-                    key = key.lower()
+                    if key.lower() in cache_data.keys():
+                        key = key.lower()
+                    if key.upper() in cache_data.keys():
+                        key = key.upper()
+                    print(key)
                     liste_doi = cache_data[key]["doi_citations"]
                     for keyCite in liste_doi:
                         if keyCite in allTheKeys:
@@ -213,7 +218,8 @@ def setLiaison(G, liaison, allTheKeys, listeKeys, dfFinal, noms, infos):
 def find_min_max_values(dico,noms):
     liste = set()
     for nom in noms:
-        liste.add(dico[nom.lower()]['num_citations'])
+        if(nom in dico.keys()):
+            liste.add(dico[nom.lower()]['num_citations'])
 
     #return the min and max of a dico like this {"DOI": nbCitation}
     min_key = min(liste)
@@ -268,25 +274,26 @@ def show_graphique(liste_key, dataUser):
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
-            node = cache_data[nom.lower()]
-            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
-            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            if(nom in cache_data.keys()):
+                node = cache_data[nom.lower()]
+                nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
+                color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
         
-            G.add_node(
-                nom,
-                size=nodeTaille,
-                label=node['authors'].split(",")[0] +" "+ str(node['year']),
-                year=node['year'],
-                title=node['title'],
-                abstract=node['abstract'],
-                author=node['authors'],
-                doi=nom,
-                color=color,
-                nb_citations=node['num_citations'],
-                citations=node['doi_citations'],
-                url=node['url'],
-                isOrigin=nom in originKeys
-            )
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=nom in originKeys
+                )
         return G
     
     # Create the graph
