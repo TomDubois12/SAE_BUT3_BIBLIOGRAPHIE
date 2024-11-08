@@ -38,10 +38,10 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
     return combined_embeddings
 
 # Charger le modèle pré-entraîné
-model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
+model = SentenceTransformer('fine_tuned_model')
 
 # Charger le fichier CSV avec encodage UTF-8
-df = pd.read_csv('BERT/Bibliographie_sans_doublon.csv', encoding='utf-8')
+df = pd.read_csv('Bibliographie_sans_doublon.csv', encoding='utf-8')
 
 # Vérifier les premières lignes du DataFrame
 print(df.head())

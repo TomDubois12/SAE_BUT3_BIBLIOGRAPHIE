@@ -3,7 +3,8 @@ import torch
 from sentence_transformers import SentenceTransformer, util
 
 # Charger le modèle
-model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
+# model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
+model = SentenceTransformer('fine_tuned_model')
 
 def evaluate_model(df):
     # Vérifier les colonnes disponibles
