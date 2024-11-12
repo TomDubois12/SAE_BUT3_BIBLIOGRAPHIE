@@ -47,8 +47,8 @@ def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddi
 
 # Charger le modèle pré-entraîné
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1') #replacé plus tard par SentenceTransformer("fine_tuned_model")
-#df = pd.read_csv('./Data/Bibliographie_sans_doublon.csv', encoding='utf-8')
-df = pd.read_csv('Bibliographie_sans_doublon.csv', encoding='utf-8')
+df = pd.read_csv('./Data/Bibliographie_sans_doublon.csv', encoding='utf-8')
+#df = pd.read_csv('Bibliographie_sans_doublon.csv', encoding='utf-8')
 print(df.head())
 
 keys = df['DOI'].tolist()
