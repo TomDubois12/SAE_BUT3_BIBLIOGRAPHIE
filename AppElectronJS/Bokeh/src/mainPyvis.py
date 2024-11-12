@@ -274,7 +274,7 @@ def show_graphique(liste_key, dataUser):
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
-            if(nom in cache_data.keys()):
+            if(nom.lower() in cache_data.keys()):
                 node = cache_data[nom.lower()]
                 nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
                 color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
