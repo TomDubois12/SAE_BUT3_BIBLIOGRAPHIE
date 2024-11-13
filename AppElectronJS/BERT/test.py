@@ -8,61 +8,110 @@ from sentence_transformers import SentenceTransformer, util
 # Configurer la sortie de la console pour utiliser l'UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
 
-def load_or_compute_embeddings(model, embedding_file='BERT/cache_doi_test.json', title_weight=0.3, abstract_weight=0.7):
+###########################################################################
+# A UTILISER UNE FOIS LA RECUPERATION DES DONNÉES FAITE DANS LE CACHE_DOI #
+###########################################################################
+# def load_or_compute_embeddings(model, embedding_file='BERT/Bibliographie_sans_doublon.csv', title_weight=0.3, abstract_weight=0.7):
+#     """
+#     Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
+
+#     Args:
+#         model: SentenceTransformer utilisé pour calculer les embeddings.
+#         embedding_file: Nom du fichier JSON contenant les informations et dans lequel les embeddings seront ajoutés.
+#         title_weight: Pondération appliquée aux embeddings des titres.
+#         abstract_weight: Pondération appliquée aux embeddings des résumés.
+
+#     Returns:
+#         data: Dictionnaire des données enrichies avec les embeddings.
+#     """
+#     if not os.path.exists(embedding_file):
+#         raise FileNotFoundError(f"Le fichier '{embedding_file}' n'existe pas.")
+
+#     with open(embedding_file, 'r', encoding='utf-8') as f:
+#         data = json.load(f)
+
+#     dois_to_process = []
+#     titles = []
+#     abstracts = []
+
+#     for doi, info in data.items():
+#         if "embeddings" not in info or "title" not in info["embeddings"] or "abstract" not in info["embeddings"]:
+#             title = info.get("title", "")
+#             abstract = info.get("abstract", "")
+#             if title or abstract:
+#                 dois_to_process.append(doi)
+#                 titles.append(title)
+#                 abstracts.append(abstract)
+
+#     print("Calcul des embeddings pour les articles sans embeddings...")
+#     title_embeddings = model.encode(titles).tolist()
+#     abstract_embeddings = model.encode(abstracts).tolist()
+
+#     for doi, title_emb, abstract_emb in zip(dois_to_process, title_embeddings, abstract_embeddings):
+#         if "embeddings" not in data[doi]:
+#             data[doi]["embeddings"] = {}
+        
+#         data[doi]["embeddings"]["title"] = title_emb
+#         data[doi]["embeddings"]["abstract"] = abstract_emb
+        
+#         combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
+#         data[doi]["embeddings"]["combined"] = combined_embedding.tolist()
+
+#     with open(embedding_file, 'w', encoding='utf-8') as f:
+#         json.dump(data, f, ensure_ascii=False, indent=4)
+
+#     return data
+
+def load_or_compute_embeddings(model, titles, abstracts, embedding_file='embeddings.json', title_weight=0.3, abstract_weight=0.7):
     """
-    Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
+    Charge les embeddings depuis un fichier JSON s'il existe ; sinon, calcule et stocke les embeddings dans un fichier.
 
     Args:
         model: SentenceTransformer utilisé pour calculer les embeddings.
-        embedding_file: Nom du fichier JSON contenant les informations et dans lequel les embeddings seront ajoutés.
+        titles: Liste de titres des articles.
+        abstracts: Liste de résumés des articles.
+        embedding_file: Nom du fichier pour stocker/charger les embeddings.
         title_weight: Pondération appliquée aux embeddings des titres.
         abstract_weight: Pondération appliquée aux embeddings des résumés.
 
     Returns:
-        data: Dictionnaire des données enrichies avec les embeddings.
+        combined_embeddings: Embeddings combinés des titres et résumés pondérés.
     """
-    if not os.path.exists(embedding_file):
-        raise FileNotFoundError(f"Le fichier '{embedding_file}' n'existe pas.")
+    if os.path.exists(embedding_file):
+        print("Chargement des embeddings depuis le fichier JSON...")
+        with open(embedding_file, 'r', encoding='utf-8') as f:  # Lire avec encodage UTF-8
+            embeddings_data = json.load(f)
+            title_embeddings = embeddings_data['title_embeddings']
+            abstract_embeddings = embeddings_data['abstract_embeddings']
+    else:
+        print("Calcul et stockage des embeddings dans un fichier JSON...")
+        # Calculer les embeddings pour les titres et abstracts
+        title_embeddings = model.encode(titles).tolist()  # Convertir en liste pour pouvoir les stocker en JSON
+        abstract_embeddings = model.encode(abstracts).tolist()
 
-    with open(embedding_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+        # Stocker les embeddings dans un fichier JSON avec encodage UTF-8
+        with open(embedding_file, 'w', encoding='utf-8') as f:
+            json.dump({
+                'title_embeddings': title_embeddings,
+                'abstract_embeddings': abstract_embeddings
+            }, f)
 
-    dois_to_process = []
-    titles = []
-    abstracts = []
+    # Convertir les embeddings de listes en tableaux NumPy (et assurer un dtype cohérent)
+    title_embeddings = np.array(title_embeddings, dtype=np.float32)  # Conversion en float32
+    abstract_embeddings = np.array(abstract_embeddings, dtype=np.float32)  # Conversion en float32
 
-    for doi, info in data.items():
-        if "embeddings" not in info or "title" not in info["embeddings"] or "abstract" not in info["embeddings"]:
-            title = info.get("title", "")
-            abstract = info.get("abstract", "")
-            if title or abstract:
-                dois_to_process.append(doi)
-                titles.append(title)
-                abstracts.append(abstract)
+    # Pondérer les embeddings
+    combined_embeddings = title_weight * title_embeddings + abstract_weight * abstract_embeddings
 
-    print("Calcul des embeddings pour les articles sans embeddings...")
-    title_embeddings = model.encode(titles).tolist()
-    abstract_embeddings = model.encode(abstracts).tolist()
-
-    for doi, title_emb, abstract_emb in zip(dois_to_process, title_embeddings, abstract_embeddings):
-        if "embeddings" not in data[doi]:
-            data[doi]["embeddings"] = {}
-        
-        data[doi]["embeddings"]["title"] = title_emb
-        data[doi]["embeddings"]["abstract"] = abstract_emb
-        
-        combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
-        data[doi]["embeddings"]["combined"] = combined_embedding.tolist()
-
-    with open(embedding_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-    return data
+    return combined_embeddings
 
 
 # Charger le modèle pré-entraîné
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1') #replacé plus tard par SentenceTransformer("fine_tuned_model")
-combined_embeddings = load_or_compute_embeddings(model)
+###########################################################################
+# A UTILISER UNE FOIS LA RECUPERATION DES DONNÉES FAITE DANS LE CACHE_DOI #
+###########################################################################
+#combined_embeddings = load_or_compute_embeddings(model)
 
 df = pd.read_csv('./Data/Bibliographie_sans_doublon.csv', encoding='utf-8')
 print(df.head())
@@ -70,6 +119,8 @@ keys = df['DOI'].tolist()
 titles = df['Title'].fillna('').tolist()
 abstracts = df['Abstract Note'].fillna('').tolist()
 authors = df['Author'].fillna('').tolist()
+
+combined_embeddings = load_or_compute_embeddings(model, titles, abstracts)
 
 ###########################################################################
 # A UTILISER UNE FOIS LA RECUPERATION DES DONNÉES FAITE DANS LE CACHE_DOI #
