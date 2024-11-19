@@ -19,6 +19,10 @@ def ajout_script(network):
     <script src="js/EventNodeEdge.js"> </script>
     """
     return custom_script
+import pandas as pd
+import json
+import os
+import requests
 
 def semantic_scholar_research(doi=None, title=None):
     """
@@ -45,7 +49,6 @@ def semantic_scholar_research(doi=None, title=None):
 
     if response.ok:
         data = response.json()
-        print("Data retrieved from API:", len(data.get('citations', None)))
         title = data.get('title', None)
         abstract = data.get('abstract', None)
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
@@ -71,18 +74,16 @@ def semantic_scholar_research(doi=None, title=None):
     else:
         return None, None, None, None, None, None, None, None
 
+
 def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, cache_file='cache_doi.json'):
-    # Vérifier si le fichier cache existe, sinon le créer avec un dictionnaire vide
     if not os.path.exists(cache_file):
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({}, f)
 
-    # Charger le cache existant
     with open(cache_file, 'r', encoding='utf-8') as f:
         cache_data = json.load(f)
 
     if doi:
-        # Ajouter ou mettre à jour les informations de DOI dans le cache
         cache_data[doi] = {
             'title': title,
             'abstract': abstract,
@@ -92,64 +93,61 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'doi_citations': doi_citations,
             'url': url
         }
-    
-        # Sauvegarder les données mises à jour dans le fichier cache
+
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 
-def recuperate_data(data, noms, infos):
-    #node_info = {nom: json.dumps(dict(info), ensure_ascii=False) for nom, info in zip(noms, infos.to_dict(orient="records"))}
-    node_title = dict(zip(noms, data['Title']))
-    #node_abstract = dict(zip(noms, data['Abstract Note']))
-    #node_author = dict(zip(noms, data['Author']))
-    node_doi = dict(zip(noms, data.index))
-    #node_year = dict(zip(noms, data['Publication Year']))
+def recuperate_data(csv_file, cache_file='cache_doi.json'):
+    # Charger le fichier CSV
+    data = pd.read_csv(csv_file)
     
-    cache_file = 'cache_doi.json'
-    
-    # Initialisation des dictionnaires pour stocker le nombre de citations et les URLs
+    # Initialiser les dictionnaires pour stocker les informations
+    node_title = dict(zip(data['Title'], data['Title']))
+    node_doi = dict(zip(data['Title'], data['DOI']))
+
+    # Initialiser les variables pour stocker les citations et URL
     num_citations = 0
     doi_citations = {}
     url = ""
-    
+
     # Charger le cache si disponible, sinon initialiser un cache vide
     if os.path.exists(cache_file):
         with open(cache_file, 'r', encoding='utf-8') as f:
             cache_data = json.load(f)
     else:
-        cache_data = {}  # Si le fichier n'existe pas, initialiser un cache vide
+        cache_data = {}
 
-    for nom in noms:
-        # Vérifier si le DOI est dans le cache
-
+    # Parcourir chaque ligne du CSV
+    for index, row in data.iterrows():
+        nom = row['Title']
         doi = node_doi[nom]
+
         if doi.lower() in cache_data:
             num_citations = cache_data[doi.lower()]['num_citations']
             doi_citations = cache_data[doi.lower()]['doi_citations']
         else:
-            # Appel à Semantic Scholar si les données ne sont pas en cache
+            # Appel à Semantic Scholar pour obtenir les informations
             title, abstract, author, doi, year, num_citations, doi_citations, url = semantic_scholar_research(
-                doi=node_doi[nom] if pd.notna(node_doi[nom]) and node_doi[nom] else None,
-                title=node_title[nom] if pd.notna(node_title[nom]) and node_title[nom] else None
+                doi=doi if pd.notna(doi) else None,
+                title=nom if pd.notna(nom) else None
             )
-        
-            # Si les informations de Semantic Scholar sont absentes, garder celles du CSV
-            titre = title or "Titre inconnu"
-            resume = abstract or "Aperçu indisponible"
+
+            # Si les informations sont manquantes, les valeurs par défaut sont utilisées
+            title = title or "Titre inconnu"
+            abstract = abstract or "Aperçu indisponible"
             author = author or "Auteur inconnu"
-            node_doi[nom] = doi or "DOI indisponible"
-            pub_year = year or "Année inconnue"
-            num_citations = num_citations if num_citations is not None else 0  # Si pas de citations, 0 par défaut
-            doi_citations = doi_citations or "Pas de citations"
-            node_url = url or "URL indisponible"
+            doi = doi or "DOI indisponible"
+            year = year or "Année inconnue"
+            num_citations = num_citations if num_citations is not None else 0
+            doi_citations = doi_citations or ["Pas de citations"]
+            url = url or "URL indisponible"
             
-            # Mettre à jour le cache avec les nouvelles données
+            # Mettre à jour le cache
             if doi:
                 cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
-    
 
-
+    return data  # Retourne les données mises à jour du CSV (facultatif, selon l'utilisation)
 
 def get_list_xSimilaritie(listeKey, x=1):
     """
