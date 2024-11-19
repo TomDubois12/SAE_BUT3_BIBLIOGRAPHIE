@@ -20,8 +20,8 @@ contextBridge.exposeInMainWorld('api', {
 
 contextBridge.exposeInMainWorld('electronAPI', {
     accessBiblioLectio: () => ipcRenderer.send('load-search-page'),
+    
     saveCSVPath: async (file) => {
-        
         try {
             // Lire les paramètres d'utilisateur
             const settingFileData = await fs.promises.readFile("./renderer/json/userSettings.json", 'utf-8');
@@ -64,5 +64,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
             console.error("Erreur lors de la lecture ou de l'écriture du fichier :", error);
         }
     },
+
+    on: (event, callback) => {
+        ipcRenderer.on(event, (event, ...args) => callback(...args)); // Permet d'écouter des événements
+    },
+    
 });
 

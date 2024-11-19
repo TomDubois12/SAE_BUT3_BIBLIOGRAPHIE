@@ -19,10 +19,6 @@ def ajout_script(network):
     <script src="js/EventNodeEdge.js"> </script>
     """
     return custom_script
-import pandas as pd
-import json
-import os
-import requests
 
 def semantic_scholar_research(doi=None, title=None):
     """

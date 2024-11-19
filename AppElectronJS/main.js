@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog } = require('electron')
 const path = require('node:path');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require("fs");
 
 
@@ -203,7 +203,29 @@ if (isDev){
   });
 }
 
-ipcMain.on('load-search-page', () => {
-  mainWindow.loadFile('renderer/search.html');
+ipcMain.on('load-search-page', (event) => {
+  // Exécute le script Python et attends qu'il soit terminé
+  exec('python recup_data.py', (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur d'exécution: ${error.message}`);
+          // Envoi de l'événement d'erreur vers l'interface
+          event.sender.send('python-error', error.message);
+          return;
+      }
+      if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          // Envoi de l'événement d'erreur vers l'interface si nécessaire
+          event.sender.send('python-error', stderr);
+          return;
+      }
+      console.log(`stdout: ${stdout}`);
+
+      // Envoie un événement python-finished vers l'interface quand le script est terminé avec succès
+      event.sender.send('python-finished'); 
+
+      // Charge la page suivante après l'exécution du script
+      mainWindow.loadFile('renderer/search.html');
+  });
 });
+
 
