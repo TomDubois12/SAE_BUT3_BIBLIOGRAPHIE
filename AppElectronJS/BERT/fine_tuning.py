@@ -50,6 +50,7 @@ def fine_tune_model(pairs, labels, epochs=3, batch_size=16, output_dir='fine_tun
 
     # Sauvegarder le modèle fine-tuné
     model.save(output_dir)
+    #model.save_pretrained(output_dir)
 
     print(f"Modèle fine-tuné sauvegardé dans '{output_dir}'")
 
