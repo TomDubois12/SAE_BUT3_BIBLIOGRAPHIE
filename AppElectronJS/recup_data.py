@@ -135,6 +135,7 @@ def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.jso
 
     return data  # Retourne les données mises à jour du CSV (facultatif, selon l'utilisation)
 
+#model = SentenceTransformer('TomDubois12/fine-tuned-model')
 def load_or_compute_embeddings(model = SentenceTransformer('sentence-transformers/all-distilroberta-v1'), embedding_file='cache_doi.json', title_weight=0.3, abstract_weight=0.7):
     """
     Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
