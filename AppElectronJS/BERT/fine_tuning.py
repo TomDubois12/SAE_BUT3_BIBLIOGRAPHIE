@@ -1,7 +1,7 @@
-import pandas as pd
 from sentence_transformers import SentenceTransformer, models, losses
 from torch.utils.data import DataLoader
 from sentence_transformers import InputExample
+import pandas as pd
 import torch
 import random
 
@@ -9,8 +9,8 @@ import random
 model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
 
 def prepare_data(file_path, num_negative_pairs=1):
-    # Charger les données depuis le fichier CSV
-    df = pd.read_csv(file_path)
+    # Charger les données depuis le fichier CSV avec encodage explicite
+    df = pd.read_csv(file_path, encoding='utf-8')
 
     # Remplacer les valeurs NaN par des chaînes vides
     df['Title'] = df['Title'].fillna('')
@@ -48,12 +48,10 @@ def fine_tune_model(pairs, labels, epochs=3, batch_size=16, output_dir='fine_tun
     # Fine-tuning du modèle
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=epochs, warmup_steps=100)
 
-    # Sauvegarder le modèle fine-tuné
-    model.save(output_dir)
-    #model.save_pretrained(output_dir)
+    # Sauvegarder le modèle fine-tuné avec save_pretrained
+    model.save_pretrained(output_dir)
 
     print(f"Modèle fine-tuné sauvegardé dans '{output_dir}'")
-
 
 def main():
     # Remplacez par le chemin vers votre fichier de données
