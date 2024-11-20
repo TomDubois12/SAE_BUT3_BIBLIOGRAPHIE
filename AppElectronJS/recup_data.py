@@ -83,7 +83,7 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 
-def recuperate_data(csv_file='Bibliographie.csv', cache_file='cache_doi.json'):
+def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.json'):
     # Charger le fichier CSV
     data = pd.read_csv(csv_file)
     
