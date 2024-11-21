@@ -3,38 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chargement</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-        .spinner {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        p {
-            margin-top: 15px;
-            font-size: 18px;
-            color: #555;
-        }
-    </style>
+    <link rel="stylesheet" href="CSS/loading.css">
 </head>
 <body>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div> 
     <div class="spinner"></div>
     <p>Chargement de vos données...</p>
 </body>
