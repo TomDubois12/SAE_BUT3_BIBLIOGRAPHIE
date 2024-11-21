@@ -204,28 +204,25 @@ if (isDev){
 }
 
 ipcMain.on('load-search-page', (event) => {
-  // Exécute le script Python et attends qu'il soit terminé
+  // Charge immédiatement la page de chargement
+  mainWindow.loadFile('renderer/loading.html');
+
+  // Exécute le script Python
   exec('python recup_data.py', (error, stdout, stderr) => {
       if (error) {
           console.error(`Erreur d'exécution: ${error.message}`);
-          // Envoi de l'événement d'erreur vers l'interface
           event.sender.send('python-error', error.message);
           return;
       }
       if (stderr) {
           console.error(`stderr: ${stderr}`);
-          // Envoi de l'événement d'erreur vers l'interface si nécessaire
           event.sender.send('python-error', stderr);
           return;
       }
       console.log(`stdout: ${stdout}`);
 
-      // Envoie un événement python-finished vers l'interface quand le script est terminé avec succès
-      event.sender.send('python-finished'); 
-
-      // Charge la page suivante après l'exécution du script
+      // Redirige vers la page finale après l'exécution
       mainWindow.loadFile('renderer/search.html');
   });
 });
-
 
