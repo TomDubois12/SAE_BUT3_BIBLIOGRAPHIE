@@ -65,12 +65,6 @@
         </div>
         <button id="access-btn" onclick="window.electronAPI.accessBiblioLectio();">Charger les données</button>
         <script>
-            // const { ipcRenderer } = require('electron');
-
-            // function accessBiblioLectio() {
-            //     ipcRenderer.send('load-search-page');
-            // }
-
             window.electronAPI.on('python-error', (errorMessage) => {
                 alert("Une erreur est survenue : " + errorMessage);
             });

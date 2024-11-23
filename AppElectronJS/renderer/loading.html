@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="CSS/loading.css">
+    <title>Chargement de données</title>
 </head>
 <body>
     <div class="logo">
@@ -11,5 +12,45 @@
     </div> 
     <div class="spinner"></div>
     <p>Chargement de vos données...</p>
+
+    <p id="estimated-time">Chargement...</p>
+
+    <script>
+        /**
+         * Compte le nombre de lignes dans un fichier CSV et affiche le résultat du calcul en minutes et secondes.
+         * @param {string} csvPath - Le chemin du fichier CSV.
+         */
+        async function countCsvLines(csvPath) {
+            try {
+                // Récupération du fichier CSV
+                const response = await fetch(csvPath);
+                if (!response.ok) {
+                    throw new Error(`Impossible de charger le fichier CSV : ${response.statusText}`);
+                }
+
+                // Lecture du contenu CSV
+                const text = await response.text();
+
+                // Compter les lignes (en tenant compte des lignes vides)
+                const nbLignes = text.split("\n").filter(line => line.trim() !== "").length;
+
+                // Calcul du résultat en minutes
+                const resultInMinutes = (15 * ((nbLignes - 1) / 10)+10) / 60;
+
+                // Conversion en minutes et secondes
+                const minutes = Math.floor(resultInMinutes); // Partie entière des minutes
+                const seconds = Math.round((resultInMinutes - minutes) * 60); // Partie décimale convertie en secondes
+
+                // Mise à jour de l'élément HTML avec le résultat en minutes et secondes
+                document.getElementById("estimated-time").textContent = `Estimation du temps : ${minutes} minutes et ${seconds} secondes`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById("estimated-time").textContent = "Erreur lors du chargement des données.";
+            }
+        }
+
+        // Appel de la fonction avec le chemin vers le CSV
+        countCsvLines("../Bibliographie_mini.csv");
+    </script>
 </body>
 </html>
