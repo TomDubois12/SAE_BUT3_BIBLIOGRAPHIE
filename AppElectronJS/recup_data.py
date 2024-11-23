@@ -9,6 +9,8 @@ import json
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
 
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 def semantic_scholar_research(doi=None, title=None):
     """
     Utilise l'API de Semantic Scholar pour récupérer les informations sur une publication.
