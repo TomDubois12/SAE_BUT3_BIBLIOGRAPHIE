@@ -15,7 +15,17 @@
 
     <p id="estimated-time">Chargement...</p>
 
-    <script>
+    <script type="module">
+
+        async function loadCSVName() {
+            const response = await fetch('./json/userSettings.json');
+            if (!response.ok) {
+                throw new Error(`Erreur de chargement du fichier JSON : ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data.CSVChoose;
+        }
+
         /**
          * Compte le nombre de lignes dans un fichier CSV et affiche le résultat du calcul en minutes et secondes.
          * @param {string} csvPath - Le chemin du fichier CSV.
@@ -42,7 +52,7 @@
                 const seconds = Math.round((resultInMinutes - minutes) * 60); // Partie décimale convertie en secondes
 
                 // Mise à jour de l'élément HTML avec le résultat en minutes et secondes
-                document.getElementById("estimated-time").textContent = `Estimation du temps : ${minutes} minutes et ${seconds} secondes`;
+                document.getElementById("estimated-time").textContent = `Estimation du temps : ${minutes} minutes et ${seconds} secondes (pour ${nbLignes} lignes)`;
             } catch (error) {
                 console.error(error);
                 document.getElementById("estimated-time").textContent = "Erreur lors du chargement des données.";
@@ -50,7 +60,10 @@
         }
 
         // Appel de la fonction avec le chemin vers le CSV
-        countCsvLines("../Bibliographie_mini.csv");
+        (async () => {
+            const CSVChoose = await loadCSVName();
+            countCsvLines(`../Data/${CSVChoose}`);
+        })();
     </script>
 </body>
 </html>
