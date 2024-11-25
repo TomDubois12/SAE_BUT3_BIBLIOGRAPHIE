@@ -35,7 +35,7 @@
                 const nbLignes = text.split("\n").filter(line => line.trim() !== "").length;
 
                 // Calcul du résultat en minutes
-                const resultInMinutes = (15 * ((nbLignes - 1) / 10)+10) / 60;
+                const resultInMinutes = (15 * ((nbLignes - 1) / 10)+30) / 60;
 
                 // Conversion en minutes et secondes
                 const minutes = Math.floor(resultInMinutes); // Partie entière des minutes
