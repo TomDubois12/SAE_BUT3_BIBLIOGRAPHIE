@@ -5,6 +5,7 @@ import requests
 from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
 from bs4 import BeautifulSoup
 import os
+import sys
 import json
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
@@ -86,6 +87,9 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
 
 
 def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.json'):
+    
+    print(f"Chemin du fichier CSV : {csv_file}")
+    
     # Charger le fichier CSV
     data = pd.read_csv(csv_file)
     
@@ -190,5 +194,6 @@ def load_or_compute_embeddings(model = SentenceTransformer('TomDubois12/fine-tun
     return data
 
 if __name__ == "__main__":
-    recuperate_data()
+    csv_file_path = sys.argv[1] if len(sys.argv) > 1 else './Data/Bibliographie_mini.csv'
+    recuperate_data(csv_file="./Data/" + csv_file_path)
     load_or_compute_embeddings()

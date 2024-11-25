@@ -71,3 +71,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
 });
 
+contextBridge.exposeInMainWorld('electronAPI', {
+    sendCSVPath: (csvFilePath) => ipcRenderer.send('load-search-page', csvFilePath),
+});
+
+

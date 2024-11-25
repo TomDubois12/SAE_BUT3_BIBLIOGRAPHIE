@@ -226,3 +226,21 @@ ipcMain.on('load-search-page', (event) => {
   });
 });
 
+ipcMain.on('send-csv-path', (event, csvPath) => {
+  console.log(`Chemin du CSV reçu : ${csvPath}`);
+
+  // Appeler le script Python avec le chemin en paramètre
+  const command = `python recup_data.py ${csvPath}`;
+  exec(command, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+          return;
+      }
+      if (stderr) {
+          console.error(`Erreur standard : ${stderr}`);
+          return;
+      }
+      console.log(`Sortie du script Python : ${stdout}`);
+  });
+});
+
