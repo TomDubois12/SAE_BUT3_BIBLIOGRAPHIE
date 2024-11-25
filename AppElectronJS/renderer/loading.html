@@ -23,7 +23,6 @@
                 throw new Error(`Erreur de chargement du fichier JSON : ${response.statusText}`);
             }
             const data = await response.json();
-            window.electronAPI.sendCSVPath(data.CSVChoose);
             console.log(data.CSVChoose);
             return data.CSVChoose;
         }

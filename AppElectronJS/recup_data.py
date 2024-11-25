@@ -1,14 +1,9 @@
-import json
-import pandas as pd
-from pyvis.network import Network
-import requests
-from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
-from bs4 import BeautifulSoup
 import os
-import sys
 import json
-from sentence_transformers import SentenceTransformer, util
+import requests
 import numpy as np
+import pandas as pd
+from sentence_transformers import SentenceTransformer, util
 
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
@@ -86,12 +81,15 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 
-def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.json'):
+def recuperate_data(cache_file='cache_doi.json'):
     
-    print(f"Chemin du fichier CSV : {csv_file}")
-    
+    with open("./renderer/json/userSettings.json", "r") as file:
+        settings = json.load(file)
+            
+    csv_name = settings.get("CSVChoose", None)
+
     # Charger le fichier CSV
-    data = pd.read_csv(csv_file)
+    data = pd.read_csv("./Data/"+ csv_name)
     
     # Initialiser les dictionnaires pour stocker les informations
     node_title = dict(zip(data['Title'], data['Title']))
@@ -194,6 +192,5 @@ def load_or_compute_embeddings(model = SentenceTransformer('TomDubois12/fine-tun
     return data
 
 if __name__ == "__main__":
-    csv_file_path = sys.argv[1] if len(sys.argv) > 1 else './Data/Bibliographie_mini.csv'
-    recuperate_data(csv_file="./Data/" + csv_file_path)
+    recuperate_data()
     load_or_compute_embeddings()
