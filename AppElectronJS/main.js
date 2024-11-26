@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog } = require('electron')
 const path = require('node:path');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require("fs");
 
 
@@ -203,7 +203,44 @@ if (isDev){
   });
 }
 
-ipcMain.on('load-search-page', () => {
-  mainWindow.loadFile('renderer/search.html');
+ipcMain.on('load-search-page', (event) => {
+  // Charge immédiatement la page de chargement
+  mainWindow.loadFile('renderer/loading.html');
+
+  // Exécute le script Python
+  exec('python recup_data.py', (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur d'exécution: ${error.message}`);
+          event.sender.send('python-error', error.message);
+          return;
+      }
+      if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          event.sender.send('python-error', stderr);
+          return;
+      }
+      console.log(`stdout: ${stdout}`);
+
+      // Redirige vers la page finale après l'exécution
+      mainWindow.loadFile('renderer/search.html');
+  });
+});
+
+ipcMain.on('send-csv-path', (event, csvPath) => {
+  console.log(`Chemin du CSV reçu : ${csvPath}`);
+
+  // Appeler le script Python avec le chemin en paramètre
+  const command = `python recup_data.py ${csvPath}`;
+  exec(command, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+          return;
+      }
+      if (stderr) {
+          console.error(`Erreur standard : ${stderr}`);
+          return;
+      }
+      console.log(`Sortie du script Python : ${stdout}`);
+  });
 });
 
