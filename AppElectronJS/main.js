@@ -204,28 +204,43 @@ if (isDev){
 }
 
 ipcMain.on('load-search-page', (event) => {
-  // Exécute le script Python et attends qu'il soit terminé
+  // Charge immédiatement la page de chargement
+  mainWindow.loadFile('renderer/loading.html');
+
+  // Exécute le script Python
   exec('python recup_data.py', (error, stdout, stderr) => {
       if (error) {
           console.error(`Erreur d'exécution: ${error.message}`);
-          // Envoi de l'événement d'erreur vers l'interface
           event.sender.send('python-error', error.message);
           return;
       }
       if (stderr) {
           console.error(`stderr: ${stderr}`);
-          // Envoi de l'événement d'erreur vers l'interface si nécessaire
           event.sender.send('python-error', stderr);
           return;
       }
       console.log(`stdout: ${stdout}`);
 
-      // Envoie un événement python-finished vers l'interface quand le script est terminé avec succès
-      event.sender.send('python-finished'); 
-
-      // Charge la page suivante après l'exécution du script
+      // Redirige vers la page finale après l'exécution
       mainWindow.loadFile('renderer/search.html');
   });
 });
 
+ipcMain.on('send-csv-path', (event, csvPath) => {
+  console.log(`Chemin du CSV reçu : ${csvPath}`);
+
+  // Appeler le script Python avec le chemin en paramètre
+  const command = `python recup_data.py ${csvPath}`;
+  exec(command, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+          return;
+      }
+      if (stderr) {
+          console.error(`Erreur standard : ${stderr}`);
+          return;
+      }
+      console.log(`Sortie du script Python : ${stdout}`);
+  });
+});
 

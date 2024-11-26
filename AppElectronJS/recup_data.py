@@ -1,13 +1,11 @@
-import json
-import pandas as pd
-from pyvis.network import Network
-import requests
-from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
-from bs4 import BeautifulSoup
 import os
 import json
-from sentence_transformers import SentenceTransformer, util
+import requests
 import numpy as np
+import pandas as pd
+from sentence_transformers import SentenceTransformer, util
+
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 def semantic_scholar_research(doi=None, title=None):
     """
@@ -83,9 +81,15 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
 
-def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.json'):
+def recuperate_data(cache_file='cache_doi.json'):
+    
+    with open("./renderer/json/userSettings.json", "r") as file:
+        settings = json.load(file)
+            
+    csv_name = settings.get("CSVChoose", None)
+
     # Charger le fichier CSV
-    data = pd.read_csv(csv_file)
+    data = pd.read_csv("./Data/"+ csv_name)
     
     # Initialiser les dictionnaires pour stocker les informations
     node_title = dict(zip(data['Title'], data['Title']))
@@ -135,7 +139,8 @@ def recuperate_data(csv_file='Bibliographie_mini.csv', cache_file='cache_doi.jso
 
     return data  # Retourne les données mises à jour du CSV (facultatif, selon l'utilisation)
 
-def load_or_compute_embeddings(model = SentenceTransformer('sentence-transformers/all-distilroberta-v1'), embedding_file='cache_doi.json', title_weight=0.3, abstract_weight=0.7):
+#model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
+def load_or_compute_embeddings(model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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"), embedding_file='cache_doi.json', title_weight=0.3, abstract_weight=0.7):
     """
     Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
 
