@@ -1,17 +1,21 @@
 import json
-import numpy as np
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-import requests
-from BERT.test import search_by_author, search_by_keyword, search_by_keyword_and_compare, find_similar_articles
+from BERT.test import search_by_author, search_by_keyword, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
 import os
-import json
 import math
 
-def ajout_script(network):
+cache_file = 'cache_doi.json'
+if os.path.exists(cache_file):
+    with open(cache_file, 'r', encoding='utf-8') as f:
+        cache_data = json.load(f)
+else:
+    cache_data = {}  # If the cache doesn't exist, initialize an empty dictionary
+
+def ajout_script():
     # Add custom script for handling node clicks and displaying the publication title
     custom_script = """
     <div id="result"></div>
@@ -31,17 +35,6 @@ def get_list_xSimilaritie(listeKey, x=1):
         liste_final += [[key, [(t[0],t[1]) for t in listeSimiliarities]]]
     return liste_final
 
-
-def getDataFrame(dataUser):
-    file = dataUser["pathDirectoryCSV"] +"/"+ dataUser["CSVChoose"]
-    data = pd.read_csv(file)
-    df = data.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11, -1]] #rajout de la colonne nbCitation avec le -1 
-
-    # Définir la colonne "DOI" comme index
-    df.set_index("DOI", inplace=True)
-    return df
-
-
 def setLiaison(G, liaison, allTheKeys, listeKeys):
     match liaison['liaisonName']:
         case 'Similarité':
@@ -51,12 +44,6 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                     G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
         
         case 'Citation':
-            cache_file = 'cache_doi.json'
-            if os.path.exists(cache_file):
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cache_data = json.load(f)
-            else:
-                cache_data = {}  # If the cache doesn't exist, initialize an empty dictionary
 
             allTheKeys = set(allTheKeys)
             set_liaison_final = set()
@@ -67,20 +54,13 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                 if normalized_key in cache_data:
                     liste_doi = cache_data[normalized_key].get("doi_citations", [])
                     for keyCite in liste_doi:
-                        if keyCite in allTheKeys:
+                        if key in cache_data.keys() and keyCite in cache_data.keys():
                             set_liaison_final.add((keyCite, key))
             
             for couple in set_liaison_final:
                 G.add_edge(couple[0], couple[1], color=liaison['color'])
 
         case 'Date de publication':
-            # Load cache and extract years directly from cache
-            cache_file = 'cache_doi.json'
-            if os.path.exists(cache_file):
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cache_data = json.load(f)
-            else:
-                cache_data = {}  # Initialize empty cache if it doesn't exist
             
             # Group the articles by their publication year
             year_dict = {}
@@ -104,7 +84,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
 def find_min_max_values(dico):
     liste = set()
     for nom in dico.keys():
-        liste.add(dico[nom.lower()]['num_citations'])
+        liste.add(dico[nom]['num_citations'])
         print(liste)
 
     #return the min and max of a dico like this {"DOI": nbCitation}
@@ -143,20 +123,13 @@ def show_graphique(liste_key, dataUser):
         return all_key1+all_key2, all_key1, all_key2
     
     def setAllNode(G):
-        cache_file = 'cache_doi.json'
-
-        if os.path.exists(cache_file):
-            with open(cache_file, 'r', encoding='utf-8') as f:
-                cache_data = json.load(f)
-
-       
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         minTaille, maxTaille = find_min_max_values(cache_data)
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in cache_data.keys():
-            node = cache_data[nom.lower()]
+            node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
     
@@ -207,7 +180,7 @@ def show_graphique(liste_key, dataUser):
         html_content = f.read()
     
     # Insert the custom script just before the closing </body> tag
-    html_content = html_content.replace('</body>', ajout_script( nt) + '</body>')
+    html_content = html_content.replace('</body>', ajout_script() + '</body>')
 
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
@@ -217,21 +190,14 @@ def show_graphique(liste_key, dataUser):
 
 def show_graphique_author(liste_key):
 
-    def setAllNode(G):
-        cache_file = 'cache_doi.json'
-
-        if os.path.exists(cache_file):
-            with open(cache_file, 'r', encoding='utf-8') as f:
-                cache_data = json.load(f)
-
-       
+    def setAllNode(G):       
 
         # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         minTaille, maxTaille = find_min_max_values(cache_data)
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in cache_data.keys():
-            node = cache_data[nom.lower()]
+            node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
             print(node['authors'])
@@ -292,7 +258,7 @@ def show_graphique_author(liste_key):
         html_content = f.read()
     
     # Insert the custom script just before the closing </body> tag
-    html_content = html_content.replace('</body>', ajout_script( nt) + '</body>')
+    html_content = html_content.replace('</body>', ajout_script() + '</body>')
 
     # Write the modified content back to the file
     with open(html_file_path, 'w') as f:
