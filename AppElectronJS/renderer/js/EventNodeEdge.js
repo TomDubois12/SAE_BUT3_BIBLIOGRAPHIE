@@ -198,7 +198,7 @@ function createAside(nodeId) {
         const doi = document.createElement("a");
         doi.classList.add("pDOI");
         doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
-        doi.href = nodeData.citations || "#";
+        doi.href = nodeData.url || "#";
         doi.target = "_blank";
         doi.rel = "noopener noreferrer";
         aside.appendChild(doi);
