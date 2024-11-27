@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.test import search_by_author, search_by_keyword, find_similar_articles
+from BERT.search_utils import search_by_author, search_by_keyword, find_similar_articles
 import sys
 from bs4 import BeautifulSoup
 import os

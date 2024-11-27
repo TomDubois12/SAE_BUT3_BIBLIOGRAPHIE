@@ -8,7 +8,6 @@ from sentence_transformers import SentenceTransformer, util
 # Configurer la sortie de la console pour utiliser l'UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
 
-
 # Charger le modèle pré-entraîné
 model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 
