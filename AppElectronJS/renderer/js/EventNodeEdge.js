@@ -7,8 +7,6 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
-    const lightColor = lightenColor(color);
-
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -25,22 +23,13 @@ async function changeColorOnHover(nodeId, isOrigin) {
             borderWidth: 3,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
-
-
-    // Appliquer la couleur au nœud immédiatement
-    // network.body.data.nodes.update({
-    //     id: nodeId,
-    //     color: lightColor,
-    //     borderWidth: 3,
-    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    // });
-
-    // Si vous voulez vraiment que la couleur revienne après un certain délai, il faut 
-    // vous assurer que la couleur reste avant le retour à la couleur d'origine.
-
 }
 
 async function changeBlurColor(nodeId, isOrigin){
+
+    console.log(nodeId);
+    console.log(idSelectedNode);
+    if (nodeId == idSelectedNode) { return;} 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
 
@@ -75,8 +64,7 @@ async function changeColorOnClick(nodeId){
 
     const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
     const color = await getColorParamUser(isOrigin);
-    const lightColor = lightenColor(color);
-
+    
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -93,13 +81,6 @@ async function changeColorOnClick(nodeId){
             borderWidth: 3,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
-
-//     network.body.data.nodes.update({
-//         id: nodeId,
-//         color: lightColor,
-//         borderWidth: 3,
-//         shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-//     });
 }
 
 async function colorOnNodeSave(idNode){
@@ -125,14 +106,9 @@ async function colorOnNodeSave(idNode){
             borderWidth: 0,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
-
-    // network.body.data.nodes.update({
-    //     id:  idNode,
-    //     color: color,
-    //     borderWidth: 0,
-    //    shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-    // });
-    idSelectedNode = "";
+    if (idSelectedNode == nodeId) {
+        idSelectedNode = "";
+    }
 }
 
 function removeAsideOnNeutralClick(){
@@ -230,12 +206,13 @@ function onClick(params) {
     // Pour bloquer l'apparition de hover quand une est cliqué
 
     // Changer la couleur du nœud sur le clic
-
+    console.log(nodeId,idSelectedNode);
     if (nodeId !== idSelectedNode) {
         // Sauvegarde la couleur de l'ancien nœud
         colorOnNodeSave(idSelectedNode);
         idSelectedNode = nodeId; // met à jour le nœud sélectionné
     }
+    console.log(nodeId,idSelectedNode);
 
 
     AS_CLICK = true;
@@ -253,7 +230,6 @@ function onHover(params){
 
 function onBLur(params){
     const nodeId = params.node;
-
     if (!AS_CLICK){
         changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
     } else {
@@ -382,7 +358,6 @@ loadNodesColor();
 function addDynamicCSS() {
     const style = document.createElement('style');
     style.textContent = `
-
       .dynamic-div {
     width: 300px;
     height: 20px;
@@ -393,7 +368,6 @@ function addDynamicCSS() {
     border-radius: 2px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
       .legend {
         font-family: Arial, sans-serif;
         font-size: 14px;
@@ -462,7 +436,6 @@ async function setAllNodeDeg() {
         } else {
             legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
-        
 
         console.log("Legend updated:", maxDateOrigin, minDateOrigin);
         addDynamicCSS()
@@ -496,8 +469,6 @@ updateNetworkOptions({
         "hover": true
     },
 });
-
-
 
 
 
@@ -557,13 +528,6 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Appel initial pour vérifier si l'élément existe déjà
 initializeColorChangeListener();
-
-
-
-
-
-
-
 
 
 

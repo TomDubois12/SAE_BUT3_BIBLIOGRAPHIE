@@ -26,6 +26,8 @@
     </style>
 </head>
 <body>
+
+
 <div class="contenerNavbar">
 <div class="logoNavbar">
 <img alt="logo de l'application" class="logo" src="images/logo.png"/>
@@ -50,8 +52,15 @@
 <!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
     Elle stocke mon graphe grâce à un script python
 -->
+
 <div class="contenerCanvaAside">
 <div class="asideParam" id="asideParam">
+
+<div id="DivOrigin"></div>
+<div id="legend-textOr"></div>
+<div id="DivEnv"></div>
+<div id="legend-textEnv"></div>
+
 <button class="buttonAsideParam" onclick="hideFirstDiv()">Rendre visible les paramètres</button>
 <p class="titleParam">Paramètre</p>
 <div class="contenerListeParam">
@@ -71,7 +80,10 @@
 </div>
 <div class="TargetDiv"><div class="card" style="width: 100%">
 
-</div><div class="card-body" id="mynetwork"></div><div id="result"></div><script src="lib/bindings/utils.js"></script><script crossorigin="anonymous" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script><script crossorigin="anonymous" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script><script type="text/javascript">
+</div><div class="card-body" id="mynetwork"></div><div id="result"></div><script src="lib/bindings/utils.js"></script><script crossorigin="anonymous" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script>
+
+
+<script crossorigin="anonymous" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script><script type="text/javascript">
 
               // initialize global variables.
               var edges;
