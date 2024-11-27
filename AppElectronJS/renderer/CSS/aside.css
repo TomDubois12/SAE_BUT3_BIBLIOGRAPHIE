@@ -102,6 +102,11 @@
     overflow: hidden;
 }
 
+.echelle {
+    margin-top: 2vh;
+    margin-left: 1vw;
+}
+
 /* Canva */
 
 .TargetDiv {

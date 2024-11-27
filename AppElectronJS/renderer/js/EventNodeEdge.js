@@ -198,7 +198,7 @@ function createAside(nodeId) {
         const doi = document.createElement("a");
         doi.classList.add("pDOI");
         doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
-        doi.href = nodeData.url || "#";
+        doi.href = nodeData.citations || "#";
         doi.target = "_blank";
         doi.rel = "noopener noreferrer";
         aside.appendChild(doi);
@@ -379,34 +379,105 @@ function loadNodesColor() {
 loadNodesColor();
 
 
+function addDynamicCSS() {
+    const style = document.createElement('style');
+    style.textContent = `
 
-async function setAllNodeDeg(){
-
-    network.body.data.nodes.forEach(async (elem) => {
-        const isOrigin = elem.isOrigin;
-        const color = await getColorParamUser(isOrigin);
-
-        // console.log(color,elem.year);
-        // console.log(getColorForDate(elem.year,maxDateOrigin,minDateOrigin,color))
-        let minD;
-        let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
-        }
-
-        network.body.data.nodes.update({
-            id: elem.id,
-            color: getColorForDate(elem.year,maxD,minD,color),
-            borderWidth: 1,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-        });
-    });
-    console.log(maxDateOrigin,minDateOrigin,maxDateEnv,minDateEnv);
+      .dynamic-div {
+    width: 300px;
+    height: 20px;
+    display: flex;
+    align-items: center; /* Centre verticalement */
+    justify-content: flex-end; /* Aligne à droite */
+    border: 1px solid black;
+    border-radius: 2px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+      .legend {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 10px;
+      }
+    `;
+    document.head.appendChild(style); // Ajoute le style dans <head>
+  }
+
+async function setAllNodeDeg() {
+    // Mettre à jour les nœuds
+    network.body.data.nodes.forEach(async (elem) => {
+        try {
+            const isOrigin = elem.isOrigin;
+            const color = await getColorParamUser(isOrigin);
+
+            const { minD, maxD } = getDateRange(isOrigin);
+
+            network.body.data.nodes.update({
+                id: elem.id,
+                color: getColorForDate(elem.year, maxD, minD, color),
+                borderWidth: 1,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+            });
+        } catch (error) {
+            console.error(`Error updating node ${elem.id}:`, error);
+        }
+    });
+
+    // Appliquer le gradient et la légende
+    try {
+
+
+        const colorOrigin = await getColorParamUser(true);
+        const colorEnv = await getColorParamUser(false);
+
+
+
+        const DivOrigine = document.getElementById("DivOrigin");
+        DivOrigine.classList.add('dynamic-div');
+
+        const colorOrMin = getColorForDate(maxDateOrigin, maxDateOrigin, minDateOrigin, colorOrigin);
+        const colorOrMax = getColorForDate(minDateOrigin, maxDateOrigin, minDateOrigin, colorOrigin);
+
+
+        DivOrigine.style.background = `linear-gradient(to left, ${colorOrMin}, ${colorOrMax})`;
+        console.log("Gradient applied");
+
+        const legend = document.getElementById("legend-textOr");
+        legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
+        
+
+        const colorEnvMin = getColorForDate(maxDateEnv, maxDateEnv, minDateEnv, colorEnv);
+        const colorEnvMax = getColorForDate(minDateEnv, maxDateEnv, minDateEnv, colorEnv);
+
+
+
+        const DivEnv = document.getElementById("DivEnv");
+        DivEnv.classList.add('dynamic-div');
+
+        DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
+        const legendE = document.getElementById("legend-textEnv");
+        if (minDateEnv === undefined || maxDateEnv === undefined) {
+            legendE.textContent = "Node manquante";
+        } else {
+            legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
+        }
+        
+
+        console.log("Legend updated:", maxDateOrigin, minDateOrigin);
+        addDynamicCSS()
+    } catch (error) {
+        console.error("Error applying gradient or legend:", error);
+    }
+}
+
+// Fonction utilitaire pour obtenir les plages de dates
+function getDateRange(isOrigin) {
+    return isOrigin
+        ? { minD: minDateOrigin, maxD: maxDateOrigin }
+        : { minD: minDateEnv, maxD: maxDateEnv };
+}
+
 setAllNodeDeg();
 
 
@@ -463,6 +534,10 @@ function initializeColorChangeListener() {
         // Une fois trouvé et l'écouteur ajouté, on arrête l'observation
         observer.disconnect();
     }
+
+
+
+
 }
 
 
