@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.search_utils import search_by_author, search_by_keyword, find_similar_articles
+from BERT.search_utils import search_by_author, search_by_keyword, find_similar_articles, search_by_title
 import sys
 from bs4 import BeautifulSoup
 import os
@@ -224,7 +224,7 @@ def show_graphique_author(liste_key):
                 nb_citations=node['num_citations'],
                 citations=node['doi_citations'],
                 url=node['url'],
-                isOrigin=nom in originKeys
+                isOrigin="true"
             )
         return G
 
@@ -333,19 +333,22 @@ if __name__ == "__main__":
     if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
         mot_cle = sys.argv[1]
 
-        if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
-            liste_final = search_by_author(mot_cle)
-            show_graphique_author(liste_final)
-        else:
-            # Exécution de la recherche par mot clé
-            nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
-            NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
-            similarities = search_by_keyword(mot_cle,nbNodeOrigin)
-            liste_final = [t[0] for t in similarities]
-            liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
-            show_graphique(liste_final, dataUser)
-        
-        #read the file in the first param and write in the second param.
+        if len(sys.argv) >= 2:
+            match sys.argv[2]:
+                case "sujet":
+                    # Exécution de la recherche par mot clé
+                    nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+                    NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+                    similarities = search_by_keyword(mot_cle,nbNodeOrigin)
+                    liste_final = [t[0] for t in similarities]
+                    liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
+                    show_graphique(liste_final, dataUser)
+                case "auteur":
+                    liste_final = search_by_author(mot_cle)
+                    show_graphique_author(liste_final)
+                case "titre":
+                    liste_final = search_by_title(mot_cle)
+                    show_graphique_author(liste_final)
         readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
     else:
