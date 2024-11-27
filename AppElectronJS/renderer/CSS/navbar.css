@@ -1,7 +1,7 @@
 /* Style pour l'input de recherche */
 .input {
     padding: 10px;
-    border: 2px solid #166F7A;
+    border: 2px solid white;
     border-radius: 25px;
     font-size: 16px;
     width: 300px;
@@ -9,7 +9,7 @@
 }
 
 .input:focus {
-    border-color: #0A4A54;
+    border-color: #F9CE72;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 122, 139, 0.5);
 }
@@ -23,9 +23,10 @@
 /* Style de base pour les boutons */
 button {
     padding: 10px 20px;
-    background-color: #166F7A;
-    color: white;
-    border: none;
+    background-color: white;
+    color: black;
+    border: solid;
+    border-color: #F9CE72;
     border-radius: 25px;
     font-size: 16px;
     cursor: pointer;
@@ -35,53 +36,24 @@ button {
 
 /* Effet hover pour les boutons */
 button:hover {
-    background-color: #0A4A54;
+    background-color: #F9CE72;
     box-shadow: 0 5px 15px rgba(0, 122, 139, 0.3);
 }
 
 /* Effet de clic pour les boutons */
 button:active {
-    background-color: #094045;
+    background-color: #F9CE72;
     box-shadow: 0 3px 8px rgba(0, 122, 139, 0.2);
 }
 
 /* Style des boutons désactivés */
 button:disabled {
-    background-color: white;
-    color: #166F7A;
-    border: 2px solid #166F7A;
+    background-color: #F9CE72;
+    color: black;
+    border: 2px solid #F9CE72;
     cursor: not-allowed;
     box-shadow: none;
 }
-
-/* Active button styling */
-button.active {
-    background-color: #0A4A54;
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 122, 139, 0.2);
-}
-
-/* Adaptation pour le mode sombre */
-body.dark button {
-    background-color: #3A3A3A;
-    color: white;
-}
-
-body.dark button:hover {
-    background-color: #505050;
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-}
-
-body.dark button:active {
-    background-color: #2E2E2E;
-}
-
-body.dark button:disabled {
-    background-color: #1E1E1E;
-    color: #A0A0A0;
-}
-
-
 
 /* navbar */
 
@@ -94,7 +66,7 @@ body {
 
 .contenerNavbar {
     display: flex;
-    background-color: #48A6B5;
+    background-color: white;
     flex-basis: 100%;
     flex-grow: 1;
 }
@@ -120,8 +92,9 @@ body {
 
 .navbar input {
     flex-basis: 10%;
-    background-color: #166F7A;
-    color: white;
+    background-color: white;
+    color: black;
+    border: solid #F9CE72;
     margin: 2.5vh 1vw;
 }
 

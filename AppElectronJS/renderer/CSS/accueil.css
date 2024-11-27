@@ -28,7 +28,7 @@ body {
 /* Style pour l'input de recherche */
 .input {
     padding: 10px;
-    border: 2px solid #166F7A;
+    border: 2px solid #759BFF;
     border-radius: 25px;
     font-size: 16px;
     width: 300px;
@@ -36,9 +36,9 @@ body {
 }
 
 .input:focus {
-    border-color: #0A4A54;
+    border-color: #759BFF;
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 122, 139, 0.5);
+    box-shadow: 0 0 5px rgba(12, 194, 218, 0.5);
 }
 
 .input::placeholder {
@@ -50,7 +50,7 @@ body {
 /* Style de base pour les boutons */
 button {
     padding: 10px 20px;
-    background-color: #166F7A;
+    background-color: #759BFF;
     color: white;
     border: none;
     border-radius: 25px;
@@ -62,28 +62,28 @@ button {
 
 /* Effet hover pour les boutons */
 button:hover {
-    background-color: #0A4A54;
+    background-color: #F9CE72;
     box-shadow: 0 5px 15px rgba(0, 122, 139, 0.3);
 }
 
 /* Effet de clic pour les boutons */
 button:active {
-    background-color: #094045;
+    background-color: #759BFF;
     box-shadow: 0 3px 8px rgba(0, 122, 139, 0.2);
 }
 
 /* Style des boutons désactivés */
 button:disabled {
     background-color: white;
-    color: #166F7A;
-    border: 2px solid #166F7A;
+    color: #759BFF;
+    border: 2px solid #F9CE72;
     cursor: not-allowed;
     box-shadow: none;
 }
 
 /* Active button styling */
 button.active {
-    background-color: #0A4A54;
+    background-color: #759BFF;
     color: white;
     box-shadow: 0 4px 10px rgba(0, 122, 139, 0.2);
 }

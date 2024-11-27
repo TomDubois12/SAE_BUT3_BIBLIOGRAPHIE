@@ -7,7 +7,6 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
-    const lightColor = lightenColor(color);
 
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
@@ -75,7 +74,6 @@ async function changeColorOnClick(nodeId){
 
     const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
     const color = await getColorParamUser(isOrigin);
-    const lightColor = lightenColor(color);
 
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
@@ -93,13 +91,6 @@ async function changeColorOnClick(nodeId){
             borderWidth: 3,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
-
-//     network.body.data.nodes.update({
-//         id: nodeId,
-//         color: lightColor,
-//         borderWidth: 3,
-//         shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-//     });
 }
 
 async function colorOnNodeSave(idNode){
@@ -125,13 +116,6 @@ async function colorOnNodeSave(idNode){
             borderWidth: 0,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
-
-    // network.body.data.nodes.update({
-    //     id:  idNode,
-    //     color: color,
-    //     borderWidth: 0,
-    //    shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-    // });
     idSelectedNode = "";
 }
 
