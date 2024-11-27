@@ -358,7 +358,6 @@ loadNodesColor();
 function addDynamicCSS() {
     const style = document.createElement('style');
     style.textContent = `
-
       .dynamic-div {
     width: 300px;
     height: 20px;
@@ -369,7 +368,6 @@ function addDynamicCSS() {
     border-radius: 2px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
       .legend {
         font-family: Arial, sans-serif;
         font-size: 14px;
@@ -433,8 +431,11 @@ async function setAllNodeDeg() {
 
         DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
         const legendE = document.getElementById("legend-textEnv");
-        legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
-
+        if (minDateEnv === undefined || maxDateEnv === undefined) {
+            legendE.textContent = "Node manquante";
+        } else {
+            legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
+        }
 
         console.log("Legend updated:", maxDateOrigin, minDateOrigin);
         addDynamicCSS()

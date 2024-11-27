@@ -63,13 +63,16 @@
             <p class="texttitle">Vous allez continuer avec le CSV :</p>
             <p class="texttitle2" id="csv-file-name">"Nom du CSV"</p>
         </div>
-        <button id="access-btn" onclick="window.electronAPI.accessBiblioLectio();">Accéder à BiblioLectio</button>
+        <button id="access-btn" onclick="window.electronAPI.accessBiblioLectio();">Charger les données</button>
         <script>
-            const { ipcRenderer } = require('electron');
+            window.electronAPI.on('python-error', (errorMessage) => {
+                alert("Une erreur est survenue : " + errorMessage);
+            });
 
-            function accessBiblioLectio() {
-                ipcRenderer.send('load-search-page');
-            }
+            window.electronAPI.on('python-finished', () => {
+                console.log("La fonction Python est terminée.");
+                window.location.href = 'renderer/search.html';
+            });
         </script>
     </div>
 </body>

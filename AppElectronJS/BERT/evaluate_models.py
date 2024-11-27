@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer, util
 
 # Charger le modèle
 # model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
-model = SentenceTransformer('fine_tuned_model')
+model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 
 def evaluate_model(df):
     # Vérifier les colonnes disponibles
