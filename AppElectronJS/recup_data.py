@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 import numpy as np
 import pandas as pd
@@ -192,5 +193,20 @@ def load_or_compute_embeddings(model = SentenceTransformer('TomDubois12/fine-tun
     return data
 
 if __name__ == "__main__":
+    # Mesurer le temps pour recuperate_data
+    start_time = time.time()
     recuperate_data()
+    end_time = time.time()
+    time_recuperate_data = end_time - start_time
+    print(f"Temps d'exécution de recuperate_data: {time_recuperate_data:.2f} secondes")
+    
+    # Mesurer le temps pour load_or_compute_embeddings
+    start_time = time.time()
     load_or_compute_embeddings()
+    end_time = time.time()
+    time_load_or_compute_embeddings = end_time - start_time
+    print(f"Temps d'exécution de load_or_compute_embeddings: {time_load_or_compute_embeddings:.2f} secondes")
+    
+    # Calculer et afficher le temps total
+    total_time = time_recuperate_data + time_load_or_compute_embeddings
+    print(f"Temps total d'exécution: {total_time:.2f} secondes")
