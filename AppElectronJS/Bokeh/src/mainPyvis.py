@@ -385,7 +385,7 @@ if __name__ == "__main__":
 
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python3 -m Bokeh.src.mainPyvis "carbon" "false"
+#python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "richard l." "true"
+#python3 -m Bokeh.src.mainPyvis "richard l." "auteur"
