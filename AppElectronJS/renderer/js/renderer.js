@@ -4,12 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
+        keepSearchWord(query);
+
         let paramRecherche = "";
-      
         paramRecherche = document.getElementById("listBouton");
         
         console.log(paramRecherche.value)
+
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+
+        
+
         afficherResultat(); // Appelle la fonction pour afficher les résultats
     });
 
@@ -54,3 +59,23 @@ function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
         boutonAActiver.style.color = "white"; // Indique visuellement qu'il est actif
     }
 }
+
+function keepSearchWord(newWord){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+
+            // On prend le mot actuel et le remplace par le nouveau 
+            data.WordChoose = newWord
+
+            // On sauvegarde les modification
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {  
+            console.error('Erreur d’écriture :', err);
+            });
+        }
+    });
+}
+
+
+

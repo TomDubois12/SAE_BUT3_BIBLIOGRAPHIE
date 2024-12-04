@@ -558,3 +558,17 @@ function lightenColor(hexColor, factor = 0.5) {
     const lightenedColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
     return lightenedColor;
 }
+
+
+// On remet la valeur de la bar de recherche 
+// Init la valeur de la bar de recherche 
+function setWordSearch(){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+            document.getElementById('site-search').value = data.WordChoose;
+        }
+    });
+}
+setWordSearch();
