@@ -44,54 +44,18 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
-        
-        # case 'Citation':
-        #     allTheKeys = set(allTheKeys)
-        #     set_liaison_final = set()
-
-        #     for key in allTheKeys:
-        #         normalized_key = key.lower()
-
-        #         if normalized_key in cache_data:
-        #             liste_doi = cache_data[normalized_key].get("doi_citations", [])
-        #             for keyCite in liste_doi:
-        #                 if key in cache_data.keys() and keyCite in cache_data.keys() and keyCite in allTheKeys:
-        #                     set_liaison_final.add((key, keyCite))  # Add citation relationship
-
-        #     # Add the edges with arrows (for citation)
-        #     for couple in set_liaison_final:
-        #         G.add_edge(couple[0], couple[1], color=liaison['color'], arrows='to')
-                
-        # case 'Référence':
-        #     allGraphNode = set(allTheKeys)
-            
-        #     for node in allGraphNode:
-        #         print(f"{node}, nom : {cache_data[node].get("title")}\n")
-        #         normalized_key = node.lower()
-                
-        #         liste_references_du_node = cache_data[normalized_key].get("doi_references", [])
-        #         print(f"a comme source : {cache_data[node].get("doi_references",[])}\n")
-        #         for reference in liste_references_du_node:
-        #             if(reference != "DOI indisponible"):
-        #                 print(reference)
-        #                 if reference in allGraphNode:  
-        #                     print(f"LIEN DANS LE GRAPHE {reference}, nom : {cache_data[reference.lower()].get("title")}\n")
-        #                     if cache_data[node] == "10.1016/0008-6223(94)90158-9" and cache_data[reference] == "10.1063/1.330025":
-        #                         G.add_edge(node, reference, color='blue', arrows='from')
-        #                     else:    
-        #                         G.add_edge(node, reference, color='red', arrows='to')
+                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])    
 
         case 'Référence':
-            allGraphNode = set(allTheKeys)
-
-            for node in allGraphNode:
+            for node in allTheKeys:
+                premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
-                for node_second in allGraphNode:
-                    if node_second != node and node_second in liste_references_du_node:
-                        G.add_edge(node, node_second, color="red", arrows='to')
+                for ref in liste_references_du_node:
+                    if ref in allTheKeys:
+                        deuxieme_node = ref
+                        G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
 
-
+                        
         case 'Date de publication':
             # Group the articles by their publication year
             year_dict = {}
@@ -184,7 +148,7 @@ def show_graphique(liste_key, dataUser):
 
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
 
     df = json_normalize(cache_data)
@@ -259,7 +223,7 @@ def show_graphique_author(liste_key):
         return G
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
     df = json_normalize(cache_data)
 
