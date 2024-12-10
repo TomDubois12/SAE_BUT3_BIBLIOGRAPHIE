@@ -1,6 +1,11 @@
 // Assurez-vous que le DOM est complètement chargé avant d'attacher des événements
 document.addEventListener('DOMContentLoaded', () => {
-
+    document.addEventListener("keydown", function (event) {
+        console.log("Touche pressée : ", event.key); // Vérifie si l'événement est détecté
+        if (event.key === "Enter") {
+            research();
+        }
+    });
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
@@ -12,23 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(paramRecherche.value)
 
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
-
-        
-
-        afficherResultat(); // Appelle la fonction pour afficher les résultats
     });
 
-    // Fonction pour afficher le résultat
-    function afficherResultat() {
-        let filtre = "";
-        if (document.getElementById('auteur').disabled) {
-            filtre = "sujets";
-        } else {
-            filtre = "auteurs";
-        }
-        const inputValue = document.getElementById('site-search').value;
-        document.getElementById('result').innerHTML = "Résultat sur les " + filtre + " : " + inputValue;
-    }
+
 
     // Gestion de l'événement pour la touche "Entrée"
     document.getElementById('site-search').addEventListener('keypress', function(event) {
@@ -77,5 +68,15 @@ function keepSearchWord(newWord){
     });
 }
 
+async function research(){
+    const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
+    keepSearchWord(query);
 
+    let paramRecherche = "";
+    paramRecherche = document.getElementById("listBouton");
+    
+    console.log(paramRecherche.value)
+
+    const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+}
 
