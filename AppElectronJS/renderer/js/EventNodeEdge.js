@@ -358,22 +358,22 @@ loadNodesColor();
 function addDynamicCSS() {
     const style = document.createElement('style');
     style.textContent = `
-      .dynamic-div {
-    width: 300px;
-    height: 20px;
-    display: flex;
-    align-items: center; /* Centre verticalement */
-    justify-content: flex-end; /* Aligne à droite */
-    border: 1px solid black;
-    border-radius: 2px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-      .legend {
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        text-align: center;
-        margin-top: 10px;
-      }
+        .dynamic-div {
+            width: 300px;
+            height: 20px;
+            display: flex;
+            align-items: center; /* Centre verticalement */
+            justify-content: flex-end; /* Aligne à droite */
+            border: 1px solid black;
+            border-radius: 2px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .legend {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
     `;
     document.head.appendChild(style); // Ajoute le style dans <head>
   }
@@ -418,18 +418,20 @@ async function setAllNodeDeg() {
         console.log("Gradient applied");
 
         const legend = document.getElementById("legend-textOr");
-        legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
+        if (minDateOrigin === undefined || maxDateOrigin === undefined) {
+            legend.textContent = "Node manquante";
+        } else {
+            legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
+        }
         
-
         const colorEnvMin = getColorForDate(maxDateEnv, maxDateEnv, minDateEnv, colorEnv);
         const colorEnvMax = getColorForDate(minDateEnv, maxDateEnv, minDateEnv, colorEnv);
-
-
 
         const DivEnv = document.getElementById("DivEnv");
         DivEnv.classList.add('dynamic-div');
 
         DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
+        
         const legendE = document.getElementById("legend-textEnv");
         if (minDateEnv === undefined || maxDateEnv === undefined) {
             legendE.textContent = "Node manquante";
@@ -454,11 +456,6 @@ function getDateRange(isOrigin) {
 setAllNodeDeg();
 
 
-
-
-
-
-
 function updateNetworkOptions(newOptions) {
     network.setOptions(newOptions);
 }
@@ -469,8 +466,6 @@ updateNetworkOptions({
         "hover": true
     },
 });
-
-
 
 
 // Fonction pour initialiser l'écouteur d'événement sur l'élément quand il est trouvé
