@@ -25,6 +25,7 @@ def ajout_script():
     """
     return custom_script
 
+
 def get_list_xSimilaritie(listeKey, x=1):
     """
     Take a liste of key, for exemple 15 key similar from the keyWords and return a list of x similar article for each key.
@@ -36,33 +37,26 @@ def get_list_xSimilaritie(listeKey, x=1):
         liste_final += [[key, [(t[0],t[1]) for t in listeSimiliarities]]]
     return liste_final
 
+
 def setLiaison(G, liaison, allTheKeys, listeKeys):
     match liaison['liaisonName']:
         case 'Similarité':
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
-        
-        case 'Citation':
+                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])    
 
-            allTheKeys = set(allTheKeys)
-            set_liaison_final = set()
+        case 'Référence':
+            for node in allTheKeys:
+                premiere_node = node
+                liste_references_du_node = cache_data[node].get("doi_references", [])
+                for ref in liste_references_du_node:
+                    if ref in allTheKeys:
+                        deuxieme_node = ref
+                        G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
 
-            for key in allTheKeys:
-                normalized_key = key.lower()
-
-                if normalized_key in cache_data:
-                    liste_doi = cache_data[normalized_key].get("doi_citations", [])
-                    for keyCite in liste_doi:
-                        if key in cache_data.keys() and keyCite in cache_data.keys() and keyCite in allTheKeys:
-                            set_liaison_final.add((keyCite, key))
-            
-            for couple in set_liaison_final:
-                G.add_edge(couple[0], couple[1], color=liaison['color'])
-
+                        
         case 'Date de publication':
-            
             # Group the articles by their publication year
             year_dict = {}
             for doi, data in cache_data.items():
@@ -146,7 +140,7 @@ def show_graphique(liste_key, dataUser):
                 doi=nom,
                 color=color,
                 nb_citations=node['num_citations'],
-                citations=node['doi_citations'],
+                #citations=node['doi_citations'],
                 url=node['url'],
                 isOrigin=nom in originKeys
             )
@@ -154,7 +148,7 @@ def show_graphique(liste_key, dataUser):
 
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
 
     df = json_normalize(cache_data)
@@ -222,14 +216,14 @@ def show_graphique_author(liste_key):
                 doi=nom,
                 color=color,
                 nb_citations=node['num_citations'],
-                citations=node['doi_citations'],
+                #citations=node['doi_citations'],
                 url=node['url'],
                 isOrigin="true"
             )
         return G
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
     df = json_normalize(cache_data)
 
@@ -237,7 +231,6 @@ def show_graphique_author(liste_key):
     dfFinal = df.reindex(liste_key)
 
     noms = dfFinal.index  # Use the index (the keys)
-    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
 
@@ -356,7 +349,7 @@ if __name__ == "__main__":
 
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python3 -m Bokeh.src.mainPyvis "carbon" "false"
+#python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "richard l." "true"
+#python3 -m Bokeh.src.mainPyvis "richard l." "auteur"
