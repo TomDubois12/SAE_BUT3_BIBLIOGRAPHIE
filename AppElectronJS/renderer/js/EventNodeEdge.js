@@ -179,6 +179,15 @@ function createAside(nodeId) {
         doi.rel = "noopener noreferrer";
         aside.appendChild(doi);
 
+
+
+        const buttonCreateGraph = document.createElement("button");
+        buttonCreateGraph.classList.add("buttonGenerateGraph");
+        buttonCreateGraph.addEventListener("click", async () => {
+            const output = await window.api.callFunctionSearch([nodeData.doi, "titre"]);
+        });
+        aside.appendChild(buttonCreateGraph);
+
         aside.classList.add(className);
         aside.id = nodeId;
 
