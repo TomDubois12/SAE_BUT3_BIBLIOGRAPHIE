@@ -303,6 +303,7 @@ buttonModifCouleurs.onclick = function(){
                 {
                     typeC = "noeud";
                 }
+
             window.api.callFunctionSearch([data.WordChoose, typeC]);
 
         }
