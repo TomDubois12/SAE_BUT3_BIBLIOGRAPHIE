@@ -226,8 +226,22 @@ function createAside(nodeId) {
         const buttonCreateGraph = document.createElement("button");
         buttonCreateGraph.classList.add("buttonGenerateGraph");
         buttonCreateGraph.addEventListener("click", async () => {
-            const output = await window.api.callFunctionSearch([nodeData.doi, "titre"]);
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
         });
+        window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+            if (data) {
+                data = JSON.parse(data);
+                data.WordChoose = nodeData.doi;
+                data.TypeChoose = "noeud";
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    if (err) {
+                    console.error('Erreur d’écriture :', err);
+                    }
+                });
+            }
+        });
+
+        
         aside.appendChild(buttonCreateGraph);
 
         aside.classList.add(className);

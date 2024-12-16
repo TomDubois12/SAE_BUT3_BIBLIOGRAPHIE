@@ -458,9 +458,11 @@ if __name__ == "__main__":
                     liste_final = search_by_author(mot_cle)
                     show_graphique_author(liste_final)
                 case "titre":
-                    #liste_final = search_by_title(mot_cle)
+                    liste_final = search_by_title(mot_cle)
+                    show_graphique_author(liste_final)
+                case "noeud":
                     show_graphique_node(mot_cle)
-                    #show_graphique_author(liste_final)
+                    
         readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
     else:
