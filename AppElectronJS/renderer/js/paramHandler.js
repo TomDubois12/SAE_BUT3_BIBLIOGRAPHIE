@@ -99,11 +99,14 @@ function writePickerColor(elemntId, newColor){
                 if (element.NoeudsName === elemntId) {
                 
                     element.color = newColor;
+                    data.estRecharger = "false";
 
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                     if (err) {
                     console.error('Erreur d’écriture :', err);
                     }
+                    miseAjourTextAjour();
+
                 });
                 }
             });
@@ -119,11 +122,14 @@ function writeColor(elemntId, newColor){
                 if (element.liaisonName === elemntId) {
         
                     element.color = newColor;
+                    data.estRecharger = "false";
 
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                     if (err) {
                     console.error('Erreur d’écriture :', err);
                     }
+                    miseAjourTextAjour();
+
                 });
                 }
             });
@@ -142,11 +148,14 @@ function writeElementCheck(elementName, newValue){
                 let nV = ''
                 if (newValue){nV = 'true';} else{ nV = 'false';}
                 element.check = nV;
+                data.estRecharger = "false";
 
                 window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                 if (err) {
                 console.error('Erreur d’écriture :', err);
                 }
+                miseAjourTextAjour();
+
             });
             }
         });
@@ -165,11 +174,13 @@ function writeElementNumber(elementName, newValue){
                 if (newValue >=1 && newValue <= 10000 ) 
                 {
                     element.value = newValue;
+                    data.estRecharger = "false";
 
                 window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                 if (err) {
                 console.error('Erreur d’écriture :', err);
-                }
+                }                    miseAjourTextAjour();
+
             });
                 }
             }
@@ -178,7 +189,66 @@ function writeElementNumber(elementName, newValue){
 });
 }
 
+function miseAjourTextAjour(){
+    let texteAjour = document.getElementById("textRefresh");
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            let estAJour = data.estRecharger;
+            console.log(estAJour);
+            // On regarde si il y a besoin de recharger le graphe
+            if (estAJour === "false") {
+                texteAjour.className = "textEstPasAJour"
+                console.log(estAJour);
+            }
+            else {
+                texteAjour.className = "textEstAJour"
+                console.log(estAJour);
+            }
+        }
+    });
+}
+miseAjourTextAjour();
+
 const buttonModifCouleurs = document.getElementById('buttonModifCouleurs');
 buttonModifCouleurs.onclick = function(){
-    window.api.openWindoColor();
+    // Il ne modifie plus les couleurs mais s'occupe mtn de refresh le graphe si des nouveau paramètre sont activées ou désactivé.
+
+    let estAJour = "false";
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            estAJour = data.estRecharger;
+
+        // On regarde si il y a besoin de recharger le graphe
+        if (estAJour === "false" && data) {
+
+            data.estRecharger = "true";
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+                console.log("Mise a jour estchargée!")
+            });
+            let typeC = "sujet";
+            if (data.TypeChoose ==="Par auteur") {
+                typeC = "auteur";
+            }
+            else if (data.TypeChoose ==="Par titre")
+            {
+                typeC = "titre";
+            }
+            
+            console.log(data.WordChoose,typeC);
+            window.api.callFunctionSearch([data.WordChoose, typeC]);
+
+        }
+        miseAjourTextAjour();
+        }
+    });   
+    
+    
+
 }
+
+

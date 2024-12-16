@@ -571,9 +571,6 @@ function initializeColorChangeListener() {
 
 }
 
-
-
-
 // Créer un observer pour surveiller les modifications dans le DOM
 const observer = new MutationObserver((mutationsList, observer) => {
     for (const mutation of mutationsList) {
@@ -645,3 +642,25 @@ function setWordSearch(){
     });
 }
 setWordSearch();
+
+
+function setTextAJour(){
+    let texteAjour = document.getElementById("textRefresh");
+    let estAJour;
+
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+            estAJour = data.estRecharger;
+            console.log(estAJour);
+            if (estAJour === "true"){
+                texteAjour.textContent = "Les paramètres et le graphes sont à jours !";
+            }
+            else {
+                texteAjour.textContent = "Les paramètres et le graphe ne sont pas à jours...";
+            }
+        }
+    });
+}
+setTextAJour();
