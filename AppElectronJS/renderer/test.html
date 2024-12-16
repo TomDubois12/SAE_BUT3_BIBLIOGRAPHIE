@@ -46,6 +46,16 @@
 <option class="titre" value="titre">Par titre</option>
 </select>
 <button id="search-btn">Rechercher</button>
+
+<script>
+                document.getElementById('search-btn').addEventListener('click', function() {
+                    document.body.classList.add('loading');
+                    setTimeout(() => {
+                        document.body.classList.remove('loading');
+                    }, 20000);
+                });
+            </script>
+
 </nav>
 </div>
 <!-- <div id="result"></div> -->
@@ -62,7 +72,10 @@
 <button class="buttonAsideParam" onclick="hideFirstDiv()">Rendre visible les paramètres</button>
 <p class="titleParam">Paramètre</p>
 <div class="contenerListeParam">
+
 <p class="textEstAJour" id="textRefresh"> Les paramètres et le graphes sont à jours !</p>
+
+
 <p class="subtitleParam" id="subtitleParam">Nombre de nodes :</p>
 <p class="subtitleParam" id="titleEditColor">Couleur des nodes :</p>
 <input id="colorEdit" name="color-box" type="color"/>
@@ -70,6 +83,7 @@
 <p class="subtitleParam">Type de liaison :</p>
 <ul id="listeContainer"></ul>
 <button id="buttonModifCouleurs"> Recharger le graphe </button>
+
 </div>
 <div class="echelle">
 <div id="DivOrigin"></div>

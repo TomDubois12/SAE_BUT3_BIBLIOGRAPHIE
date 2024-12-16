@@ -299,6 +299,11 @@ buttonModifCouleurs.onclick = function(){
             {
                 typeC = "titre";
             }
+            else if (data.TypeChoose ==="noeud")
+                {
+                    typeC = "noeud";
+                }
+
             window.api.callFunctionSearch([data.WordChoose, typeC]);
 
         }

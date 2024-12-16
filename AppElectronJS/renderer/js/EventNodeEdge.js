@@ -17,12 +17,23 @@ async function changeColorOnHover(nodeId, isOrigin) {
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
+    if(network.body.data.nodes.get(nodeId).primaryNode){
+        network.body.data.nodes.update({
             id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 3,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+        });
+    }else{
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 4,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
+    }
+
+
 }
 
 async function changeBlurColor(nodeId, isOrigin){
@@ -43,12 +54,21 @@ async function changeBlurColor(nodeId, isOrigin){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
-            id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 0,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-        });
+        if(network.body.data.nodes.get(nodeId).primaryNode){
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 5,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            });
+        }else{
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 1,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+            });
+        }
 
 
     // network.body.data.nodes.update({
@@ -75,12 +95,23 @@ async function changeColorOnClick(nodeId){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
-            id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 3,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-        });
+        if(network.body.data.nodes.get(nodeId).primaryNode){
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 5,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            });
+        }else{
+            console.log("heyyyyy");
+
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 3,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+            });
+        }
 }
 
 async function colorOnNodeSave(idNode){
@@ -100,12 +131,23 @@ async function colorOnNodeSave(idNode){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
+    if(network.body.data.nodes.get(idNode).primaryNode){
+        console.log("heyyyyy");
+        network.body.data.nodes.update({
+            id: idNode,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+        });
+    }else{
+        console.log("ça passe");
+        network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 0,
+            borderWidth: 1,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
+    }
     if (idSelectedNode == nodeId) {
         idSelectedNode = "";
     }
@@ -178,6 +220,29 @@ function createAside(nodeId) {
         doi.target = "_blank";
         doi.rel = "noopener noreferrer";
         aside.appendChild(doi);
+
+
+
+        const buttonCreateGraph = document.createElement("button");
+        buttonCreateGraph.classList.add("buttonGenerateGraph");
+        buttonCreateGraph.addEventListener("click", async () => {
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
+        });
+        window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+            if (data) {
+                data = JSON.parse(data);
+                data.WordChoose = nodeData.doi;
+                data.TypeChoose = "noeud";
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    if (err) {
+                    console.error('Erreur d’écriture :', err);
+                    }
+                });
+            }
+        });
+
+        
+        aside.appendChild(buttonCreateGraph);
 
         aside.classList.add(className);
         aside.id = nodeId;
@@ -314,10 +379,12 @@ function getColorForDate(date, minDate , maxDate, baseColor) {
     //function getColorForDate(date, minDate = 1984, maxDate = 2015, baseColor = '#A62121') {
     // Normaliser l'année dans la plage de 0 à 1
     const normalizedYear = (date - minDate) / (maxDate - minDate);
-    
+    if (isNaN(normalizedYear)){
+        return adjustColorBrightness(baseColor, 0.2);
+    }
     // Calculer la luminosité en fonction de l'année : plus près de 1984, plus foncé, plus près de 2015, plus clair
     const factor = normalizedYear * 0.5; // Ajuste le facteur si nécessaire
-    
+
     // Retourner la couleur ajustée
     return adjustColorBrightness(baseColor, factor);
 }
@@ -384,15 +451,23 @@ async function setAllNodeDeg() {
         try {
             const isOrigin = elem.isOrigin;
             const color = await getColorParamUser(isOrigin);
-
+            
             const { minD, maxD } = getDateRange(isOrigin);
-
-            network.body.data.nodes.update({
-                id: elem.id,
-                color: getColorForDate(elem.year, maxD, minD, color),
-                borderWidth: 1,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-            });
+            if(elem.primaryNode){
+                network.body.data.nodes.update({
+                    id: elem.id,
+                    color: getColorForDate(elem.year, maxD, minD, color),
+                    borderWidth: 5,
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.7', size: 10, x: 7,y: 7},
+                });
+            }else{
+                network.body.data.nodes.update({
+                    id: elem.id,
+                    color: getColorForDate(elem.year, maxD, minD, color),
+                    borderWidth: 1,
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+                });
+            }
         } catch (error) {
             console.error(`Error updating node ${elem.id}:`, error);
         }
