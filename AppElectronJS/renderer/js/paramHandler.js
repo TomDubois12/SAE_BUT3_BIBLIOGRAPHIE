@@ -33,7 +33,6 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             li.appendChild(divColor);
                     
             divLiaison.appendChild(li);
-
             input.addEventListener('change', (event) => {
                 writeElementCheck(event.target.id,event.target.checked);
             });
@@ -117,7 +116,6 @@ function writeColor(elemntId, newColor){
         if (data) {
             data = JSON.parse(data);
             data.ColorPickerSettings.forEach(element => {
-                console.log("cc",elemntId,element.liaisonName);
                 if (element.liaisonName === elemntId) {
         
                     element.color = newColor;
@@ -134,52 +132,51 @@ function writeColor(elemntId, newColor){
 }
 
 
-        function writeElementCheck(elementName, newValue){
-            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
-            if (data) {
-                data = JSON.parse(data);
-                data.ColorPickerSettings.forEach(element => {
-                    if (element.liaisonName === elementName) {
-                
-                        var nV = ''
-                        if (newValue){nV = 'true';} else{ nV = 'false';}
-                        element.check = nV;
+function writeElementCheck(elementName, newValue){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+    if (data) {
+        data = JSON.parse(data);
+        data.ColorPickerSettings.forEach(element => {
+            if (element.liaisonName === elementName) {
+        
+                let nV = ''
+                if (newValue){nV = 'true';} else{ nV = 'false';}
+                element.check = nV;
 
-                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                        if (err) {
-                        console.error('Erreur d’écriture :', err);
-                        }
-                    });
-                    }
-                });
-            }
-        });
-        }
-
-        function writeElementNumber(elementName, newValue){
-            console.log('ici');
-            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
-            if (data) {
-                data = JSON.parse(data);
-                data.ListeNoeudSettings.forEach(element => {
-
-                    if (element.NoeudsName === elementName) {
-                
-                        if (newValue >=1 && newValue <= 50) 
-                        {
-                            element.value = newValue;
-
-                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                        if (err) {
-                        console.error('Erreur d’écriture :', err);
-                        }
-                    });
-                        }
-                    }
-                });
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+            });
             }
         });
     }
+});
+}
+
+function writeElementNumber(elementName, newValue){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+    if (data) {
+        data = JSON.parse(data);
+        data.ListeNoeudSettings.forEach(element => {
+
+            if (element.NoeudsName === elementName) {
+        
+                if (newValue >=1 && newValue <= 10000 ) 
+                {
+                    element.value = newValue;
+
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+            });
+                }
+            }
+        });
+    }
+});
+}
 
 const buttonModifCouleurs = document.getElementById('buttonModifCouleurs');
 buttonModifCouleurs.onclick = function(){
