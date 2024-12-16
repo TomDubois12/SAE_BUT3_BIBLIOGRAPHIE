@@ -129,22 +129,29 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
 });
 
 function writePickerColor(elemntId, newColor){
+    console.log(elemntId,newColor);
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
             data.ListeNoeudSettings.forEach(element => {
-                if (element.NoeudsName === elemntId) {
-                
+                if (elemntId === "color1" && element.NoeudsName === "Nombre de nodes environnant ") {
+
                     element.color = newColor;
-                    data.estRecharger = "false";
 
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                    if (err) {
-                    console.error('Erreur d’écriture :', err);
-                    }
-                    miseAjourTextAjour();
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
+                }
+                else if (elemntId === "color0" && element.NoeudsName === "Nombre de nodes à l'origine "){
+                    element.color = newColor;
 
-                });
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
                 }
             });
         }
@@ -152,6 +159,7 @@ function writePickerColor(elemntId, newColor){
 }
 
 function writeColor(elemntId, newColor){
+    console.log("lgozejgoinbiengpizsr");
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
@@ -176,6 +184,7 @@ function writeColor(elemntId, newColor){
 
 
 function writeElementCheck(elementName, newValue){
+
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
     if (data) {
         data = JSON.parse(data);
@@ -201,25 +210,42 @@ function writeElementCheck(elementName, newValue){
 }
 
 function writeElementNumber(elementName, newValue){
+    console.log(elementName,newValue);
+
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
     if (data) {
         data = JSON.parse(data);
         data.ListeNoeudSettings.forEach(element => {
 
-            if (element.NoeudsName === elementName) {
-        
+            console.log("Ça marche", elementName, element.NoeudsName);
+
+            if (elementName === "nb1" && element.NoeudsName === "Nombre de nodes environnant ") {
                 if (newValue >=1 && newValue <= 10000 ) 
                 {
                     element.value = newValue;
                     data.estRecharger = "false";
 
-                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                if (err) {
-                console.error('Erreur d’écriture :', err);
-                }                    miseAjourTextAjour();
-
-            });
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }                   
+                        miseAjourTextAjour();
+                    });
                 }
+            }
+            else if (elementName === "nb0" && element.NoeudsName === "Nombre de nodes à l'origine "){
+                if (newValue >=1 && newValue <= 10000 ) 
+                    {
+                        element.value = newValue;
+                        data.estRecharger = "false";
+    
+                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                            if (err) {
+                            console.error('Erreur d’écriture :', err);
+                            }                   
+                            miseAjourTextAjour();
+                        });
+                    }
             }
         });
     }
@@ -232,7 +258,6 @@ function miseAjourTextAjour(){
         if (data) {
             data = JSON.parse(data);
             let estAJour = data.estRecharger;
-            console.log(estAJour);
             // On regarde si il y a besoin de recharger le graphe
             if (estAJour === "false") {
                 texteAjour.className = "textEstPasAJour"
@@ -265,7 +290,6 @@ buttonModifCouleurs.onclick = function(){
                 if (err) {
                 console.error('Erreur d’écriture :', err);
                 }
-                console.log("Mise a jour estchargée!")
             });
             let typeC = "sujet";
             if (data.TypeChoose ==="Par auteur") {
@@ -275,8 +299,6 @@ buttonModifCouleurs.onclick = function(){
             {
                 typeC = "titre";
             }
-            
-            console.log(data.WordChoose,typeC);
             window.api.callFunctionSearch([data.WordChoose, typeC]);
 
         }

@@ -532,18 +532,17 @@ updateNetworkOptions({
 // Fonction pour initialiser l'écouteur d'événement sur l'élément quand il est trouvé
 function initializeColorChangeListener() {
 
-    const colorInputs = document.querySelectorAll("input[type='color']");
     // Filtrer pour trouver celui avec le bon ID
-    const colorOrigineChange = Array.from(colorInputs).find(input => input.id === "Nombre de nodes à l'origine ");    
-    const colorEnvironChange = Array.from(colorInputs).find(input => input.id === "Nombre de nodes environnant ");    
 
+    const colorOrigineChange = document.getElementById("color0");
+    const colorEnvironChange = document.getElementById("color1");  
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
-                }, 500);
+                }, 250);
             } else {
                 console.error("window.api.reloadGraph n'est pas disponible.");
             }
