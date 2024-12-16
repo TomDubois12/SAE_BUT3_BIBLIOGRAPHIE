@@ -480,7 +480,9 @@ function initializeColorChangeListener() {
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
-                window.api.reloadGraph();
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 500);
             } else {
                 console.error("window.api.reloadGraph n'est pas disponible.");
             }
@@ -492,7 +494,9 @@ function initializeColorChangeListener() {
     if (colorEnvironChange) {  // Si l'élément est trouvé
         colorEnvironChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
-                window.api.reloadGraph();
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 250);
             } else {
                 console.error("window.api.reloadGraph n'est pas disponible.");
             }
@@ -563,6 +567,19 @@ function setWordSearch(){
             // On récupère le fichier
             data = JSON.parse(data);
             document.getElementById('site-search').value = data.WordChoose;
+
+
+            // Mettre le type de recherche 
+            const selectElement = document.getElementById("listBouton");
+            if (data.TypeChoose && data.TypeChoose === "Par auteur") {
+                selectElement.value = "auteur";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par titre")){
+                selectElement.value = "titre";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
+                selectElement.value = "sujet";
+            }
         }
     });
 }

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
-        keepSearchWord(query);
+        keepResearchParam(query);
 
         let paramRecherche = "";
         paramRecherche = document.getElementById("listBouton");
@@ -51,14 +51,26 @@ function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
     }
 }
 
-function keepSearchWord(newWord){
+function keepResearchParam(newWord, newType){
+
+    let typeSearch = getSelectedOption()
+
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             // On récupère le fichier
             data = JSON.parse(data);
 
             // On prend le mot actuel et le remplace par le nouveau 
-            data.WordChoose = newWord
+            if (newWord && data.WordChoose)
+            {
+                data.WordChoose = newWord;
+            }
+            if (typeSearch && data.TypeChoose)
+            {
+                data.TypeChoose = typeSearch;
+            }
+            
+            console.log(data.WordChoose, data.TypeChoose);
 
             // On sauvegarde les modification
             window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {  
@@ -66,17 +78,32 @@ function keepSearchWord(newWord){
             });
         }
     });
+
+
+}
+
+function getSelectedOption() {
+    // Sélectionne l'élément <select> par son id
+    const selectElement = document.getElementById("listBouton");
+    
+    // Récupère la valeur sélectionnée
+    const selectedValue = selectElement.value;
+    console.log("Valeur sélectionnée : ", selectedValue);
+    
+    // Récupère le texte de l'option sélectionnée
+    const selectedText = selectElement.options[selectElement.selectedIndex].text;
+    return selectedText;
 }
 
 async function research(){
     const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
-    keepSearchWord(query);
+    keepResearchParam(query);
 
     let paramRecherche = "";
     paramRecherche = document.getElementById("listBouton");
     
     console.log(paramRecherche.value)
-
+    
     const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
 }
 
