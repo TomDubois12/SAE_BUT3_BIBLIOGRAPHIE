@@ -174,12 +174,6 @@ ipcMain.handle('openWindoColor', (event) => {
 
 ipcMain.handle("reloadPage", (event) => {
 
-  // if (graphWindo && graphWindo.webContents) {
-  //   graphWindo.webContents.reloadIgnoringCache();
-  // } else {
-  //   console.error("La fenêtre graphWindow n'est pas définie ou n'a pas de webContents");
-  // }
-
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.reloadIgnoringCache();
   } else {
