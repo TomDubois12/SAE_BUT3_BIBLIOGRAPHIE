@@ -1,8 +1,14 @@
+html{
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
 body {
     display: flex;
     flex-direction: column;
     margin: 0;
-    height: 100vh;
+    height: 100%;
 }
 
 /* navbar */
@@ -98,12 +104,14 @@ select{
 /*   _   */
 
 /* Style de base pour les boutons */
-button {
-    padding: 10px 20px;
-    font-size: 1.5vh;
+.contenerCanvaAside button {
+    padding: 0.5vw 1vw;
+    font-size: 2vh;
+    border-radius: 0%;
+    border: none;
+    color: black;
+    margin-bottom: 4vh;
 }
-
-
 
 /* aside  */
 
@@ -112,14 +120,21 @@ button {
     position: relative;
     flex-direction: row;
     max-width: 100%;
-    height: 100vh;
+    height: 90vh;
 }
 
-.buttonAsideParam{
+.legende{
     position: absolute;
     visibility: visible;
+    display: flex;
+    flex-wrap: nowrap;
+    top: 0%;
     left:100%;
-    display: block;
+}
+
+.echelle{
+    padding-left:2vh;
+    padding-top: 1vh;
 }
 
 .hide{
@@ -141,9 +156,8 @@ button {
 }
 
 .contenerListeParam {
-    background-color: #ece7e7;
+    border: 1px solid lightgray;
     padding: 2vw;
-    border-radius: 18px;
 }
 
 .contenerListeParam ul {
@@ -181,7 +195,7 @@ button {
 .contenerListeParam ul li p, label{
     font-size: 1.5em;
     margin: 0;
-    color: white;
+    color: rgb(58, 56, 56);
     font-weight: bolder;
 }
 
@@ -200,19 +214,9 @@ button {
     background-color: white;
     border: 1px solid lightgray;
     z-index: 10;
-    height: 100%;
     max-width: 25%; 
     padding: 0.5vw;
-}
-
-.hide{
-    visibility: hidden;
-    overflow: hidden;
-}
-
-.echelle {
-    margin-top: 2vh;
-    margin-left: 1vw;
+    height: 90vh;
 }
 
 /* Canva */
@@ -224,41 +228,35 @@ button {
 
 /* Aside infos */
 
+
 .generated-div {
     position: absolute;
     background-color: white;
     border: 1px solid lightgray;
     z-index: 10;
-    height: 100%;
     max-width: 25%;
     top: 0;
     right: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
     padding: 1vh;
+    overflow-x: auto;  /* Pour activer le défilement horizontal si nécessaire */
+    overflow-y: scroll;  /* Pour activer le défilement vertical si nécessaire */
+    box-sizing: border-box; /* Inclut les bordures et le padding dans la hauteur */
+    flex-direction: column; /* Assurez-vous que la direction est en colonne */
+    height: 90vh; /* Limite la hauteur à 100% de la hauteur de l'écran */
 }
 
-.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation {
+
+
+
+.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation, .pDOI {
     margin-left: 0.5vw;
 }
 
-.pDOI {
-    padding-left: 0.5vw;
-}
-
 .pTitle {
-    font-size: 32px;
+    font-size: 3.5vh;
 }
 
 .pYear, .pAuthor, .pAbstract, .pDOI, .pCitation {
-    font-size: 20px;
+    font-size: 2vh;
 }
 
-.pDOI {
-    display: block;
-    background-color: #F3F3F3;
-    border-radius: 0%;
-    color: black;
-    border: none;
-    margin:0;
-}
