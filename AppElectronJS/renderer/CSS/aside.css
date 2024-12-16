@@ -148,3 +148,28 @@
 .pDOI {
     display: block;
 }
+
+
+
+
+
+
+
+.textEstAJour {
+    
+    color: #28a745;             /* Vert vif */
+    font-weight: bold;          /* Texte en gras */
+    border: 2px solid #28a745;  /* Bordure verte */
+    padding: 5px;               /* Espacement interne pour le texte */
+    background-color: #e6f9eb;  /* Fond clair pour améliorer le contraste */ 
+
+}
+
+.textEstPasAJour {
+    color: #dc3545;             /* Rouge vif */
+    font-weight: bold;          /* Texte en gras */
+    border: 2px solid #dc3545;  /* Bordure rouge */
+    padding: 5px;               /* Espacement interne pour le texte */
+    background-color: #fce8e8;  /* Fond clair pour améliorer le contraste */
+  }
+  
