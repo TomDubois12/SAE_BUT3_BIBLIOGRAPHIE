@@ -48,44 +48,80 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         // La partie pour les nbNoeuds //
         /////////////////////////////////
         const divNoeuds = document.getElementById('listeNbNoeuds');
-        data.ListeNoeudSettings.forEach(element => {
+        data.ListeNoeudSettings.forEach((element, index) => {
             const li = document.createElement('li');
             li.className = "color-item";
-
+    
+        
             const divColor = document.createElement('input');
             divColor.type = "color";
-            divColor.id = element.NoeudsName;
+            divColor.id = `color${index}`;
             divColor.className = 'color-box';
             divColor.value = element.color;
-
-
-
+        
             const input = document.createElement('input');
             input.type = 'number';
-            input.id = element.NoeudsName;
+            input.id = `nb${index}`;
             input.step = 1;
             input.min = 1;
             input.max = 50;
             input.value = element.value;
-
+        
             const p = document.createElement('p')
             p.textContent = element.NoeudsName;
-
+            p.id = `p${index}`;
+        
             li.appendChild(p);
             li.appendChild(input);
             li.appendChild(divColor);
-                    
+        
             divNoeuds.appendChild(li);
-
+        
             input.addEventListener('change', (event) => {
-                writeElementNumber(event.target.id,event.target.value);
-            });         
-          
-            divColor.addEventListener('change',(event) => {
-                writePickerColor(event.target.id, event.target.value);
-            })
+                writeElementNumber(event.target.id, event.target.value);
+            });
 
-        });
+            divColor.addEventListener('change', (event) => {
+                writePickerColor(event.target.id, event.target.value);
+            });
+        });        
+
+        if (data.TypeChoose === 'Par auteur') {
+            
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
+
+            document.getElementById('subtitleParam').style.display = 'none';
+            document.getElementById('p0').style.display = 'none';
+            document.getElementById('nb0').style.display = 'none';
+            document.getElementById('color0').style.display = 'none';
+            document.getElementById('p1').style.display = 'none';
+            document.getElementById('nb1').style.display = 'none';
+            document.getElementById('color1').style.display = 'none';
+        }
+
+        if (data.TypeChoose === 'Par titre') {
+            
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
+
+            document.getElementById('subtitleParam').style.display = 'none';
+            document.getElementById('p0').style.display = 'none';
+            document.getElementById('nb0').style.display = 'none';
+            document.getElementById('color0').style.display = 'none';
+            document.getElementById('p1').style.display = 'none';
+            document.getElementById('nb1').style.display = 'none';
+            document.getElementById('color1').style.display = 'none';
+        }
+
+        if (data.TypeChoose === 'Par sujet') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
+        }
+        
+        if (typeChoose === 'Par noeud') {
+            //TODO
+        }
                    
     } else {
         console.error("Impossible de lire les paramètres utilisateur.");
