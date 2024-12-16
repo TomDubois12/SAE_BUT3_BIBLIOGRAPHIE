@@ -69,9 +69,7 @@ function keepResearchParam(newWord, newType){
             {
                 data.TypeChoose = typeSearch;
             }
-            
-            console.log(data.WordChoose, data.TypeChoose);
-
+            data.estRecharger = "true";
             // On sauvegarde les modification
             window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {  
             console.error('Erreur d’écriture :', err);
