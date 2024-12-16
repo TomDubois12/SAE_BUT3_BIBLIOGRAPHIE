@@ -122,7 +122,7 @@ def show_graphique_node(primaryKey):
         
         liste = [primaryKey, []]
         for key in all_key1:
-            liste[1].append((key, 1))
+            liste[1].append((key, 0.9))
         liste_final.append(liste)
         
         return all_key1+all_key2, all_key1, all_key2, liste_final
