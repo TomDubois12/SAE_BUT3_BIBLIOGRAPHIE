@@ -57,21 +57,21 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
 
                         
         case 'Date de publication':
-            # Group the articles by their publication year
-            year_dict = {}
-            for doi, data in cache_data.items():
-                publication_year = data.get('year')
-                if publication_year:  # Ensure there's a year available
-                    if publication_year not in year_dict:
-                        year_dict[publication_year] = []
-                    year_dict[publication_year].append(doi)
-            
-            # Add edges between articles published in the same year
-            for year, doais in year_dict.items():
-                for i in range(len(doais) - 1):
-                    if doais[i] in allTheKeys:
-                        for j in range(i + 1, len(doais)):
-                            G.add_edge(doais[i], doais[j], color=liaison['color'])
+                    # Group the articles by their publication year
+                    year_dict = {}
+                    for node in allTheKeys:
+                        publication_year = cache_data[node].get('year')
+                        if publication_year:
+                            if publication_year not in year_dict:
+                                year_dict[publication_year] = []
+                            year_dict[publication_year].append(node)
+
+
+                    for year, articles in year_dict.items():
+                        for i in range(len(articles)):
+                            for j in range(i + 1, len(articles)):
+                                if articles[i] != articles[j]:
+                                    G.add_edge(articles[i], articles[j], color=liaison['color'])
 
     return G
 
