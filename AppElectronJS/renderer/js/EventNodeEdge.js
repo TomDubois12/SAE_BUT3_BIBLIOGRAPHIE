@@ -24,22 +24,13 @@ async function changeColorOnHover(nodeId, isOrigin) {
             borderWidth: 3,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
-
-
-    // Appliquer la couleur au nœud immédiatement
-    // network.body.data.nodes.update({
-    //     id: nodeId,
-    //     color: lightColor,
-    //     borderWidth: 3,
-    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    // });
-
-    // Si vous voulez vraiment que la couleur revienne après un certain délai, il faut 
-    // vous assurer que la couleur reste avant le retour à la couleur d'origine.
-
 }
 
 async function changeBlurColor(nodeId, isOrigin){
+
+    console.log(nodeId);
+    console.log(idSelectedNode);
+    if (nodeId == idSelectedNode) { return;} 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
 
@@ -74,7 +65,6 @@ async function changeColorOnClick(nodeId){
 
     const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
     const color = await getColorParamUser(isOrigin);
-
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -116,7 +106,9 @@ async function colorOnNodeSave(idNode){
             borderWidth: 0,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
-    idSelectedNode = "";
+    if (idSelectedNode == nodeId) {
+        idSelectedNode = "";
+    }
 }
 
 function removeAsideOnNeutralClick(){
@@ -179,13 +171,21 @@ function createAside(nodeId) {
         abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
         aside.appendChild(abstract);
 
-        const doi = document.createElement("a");
+        const doi = document.createElement("button");
         doi.classList.add("pDOI");
-        doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
-        doi.href = nodeData.url || "#";
-        doi.target = "_blank";
-        doi.rel = "noopener noreferrer";
+        doi.textContent = `Ouvrir le lien`;
+
+        // Check if DOI or citation link is available
+        if (nodeData.citations) {
+            doi.addEventListener('click', () => {
+                window.open(nodeData.url, "_blank", "noopener noreferrer");
+            });
+        } else {
+            doi.setAttribute('disabled', true);  // Disable button if no citation
+        }
+
         aside.appendChild(doi);
+
 
         aside.classList.add(className);
         aside.id = nodeId;
@@ -214,12 +214,13 @@ function onClick(params) {
     // Pour bloquer l'apparition de hover quand une est cliqué
 
     // Changer la couleur du nœud sur le clic
-
+    console.log(nodeId,idSelectedNode);
     if (nodeId !== idSelectedNode) {
         // Sauvegarde la couleur de l'ancien nœud
         colorOnNodeSave(idSelectedNode);
         idSelectedNode = nodeId; // met à jour le nœud sélectionné
     }
+    console.log(nodeId,idSelectedNode);
 
 
     AS_CLICK = true;
@@ -237,7 +238,6 @@ function onHover(params){
 
 function onBLur(params){
     const nodeId = params.node;
-
     if (!AS_CLICK){
         changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
     } else {
@@ -363,34 +363,106 @@ function loadNodesColor() {
 loadNodesColor();
 
 
+function addDynamicCSS() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .dynamic-div {
+    width: 300px;
+    height: 20px;
+    display: flex;
+    align-items: center; /* Centre verticalement */
+    justify-content: flex-end; /* Aligne à droite */
+    border: 1px solid black;
+    border-radius: 2px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+      .legend {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 10px;
+      }
+    `;
+    document.head.appendChild(style); // Ajoute le style dans <head>
+  }
 
-async function setAllNodeDeg(){
-
+async function setAllNodeDeg() {
+    // Mettre à jour les nœuds
     network.body.data.nodes.forEach(async (elem) => {
-        const isOrigin = elem.isOrigin;
-        const color = await getColorParamUser(isOrigin);
+        try {
+            const isOrigin = elem.isOrigin;
+            const color = await getColorParamUser(isOrigin);
 
-        // console.log(color,elem.year);
-        // console.log(getColorForDate(elem.year,maxDateOrigin,minDateOrigin,color))
-        let minD;
-        let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
+            const { minD, maxD } = getDateRange(isOrigin);
+
+            network.body.data.nodes.update({
+                id: elem.id,
+                color: getColorForDate(elem.year, maxD, minD, color),
+                borderWidth: 1,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+            });
+        } catch (error) {
+            console.error(`Error updating node ${elem.id}:`, error);
+        }
+    });
+
+    // Appliquer le gradient et la légende
+    try {
+
+
+        const colorOrigin = await getColorParamUser(true);
+        const colorEnv = await getColorParamUser(false);
+
+
+
+        const DivOrigine = document.getElementById("DivOrigin");
+        DivOrigine.classList.add('dynamic-div');
+
+        const colorOrMin = getColorForDate(maxDateOrigin, maxDateOrigin, minDateOrigin, colorOrigin);
+        const colorOrMax = getColorForDate(minDateOrigin, maxDateOrigin, minDateOrigin, colorOrigin);
+
+
+        DivOrigine.style.background = `linear-gradient(to left, ${colorOrMin}, ${colorOrMax})`;
+        console.log("Gradient applied");
+
+        const legend = document.getElementById("legend-textOr");
+        if (minDateOrigin === undefined || maxDateOrigin === undefined) {
+            legend.textContent = "Node manquante";
+        } else {
+            legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
+        }
+        
+
+        const colorEnvMin = getColorForDate(maxDateEnv, maxDateEnv, minDateEnv, colorEnv);
+        const colorEnvMax = getColorForDate(minDateEnv, maxDateEnv, minDateEnv, colorEnv);
+
+
+
+        const DivEnv = document.getElementById("DivEnv");
+        DivEnv.classList.add('dynamic-div');
+
+        DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
+        const legendE = document.getElementById("legend-textEnv");
+        if (minDateEnv === undefined || maxDateEnv === undefined) {
+            legendE.textContent = "Node manquante";
+        } else {
+            legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
 
-        network.body.data.nodes.update({
-            id: elem.id,
-            color: getColorForDate(elem.year,maxD,minD,color),
-            borderWidth: 1,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-        });
-    });
-    console.log(maxDateOrigin,minDateOrigin,maxDateEnv,minDateEnv);
+        console.log("Legend updated:", maxDateOrigin, minDateOrigin);
+        addDynamicCSS()
+    } catch (error) {
+        console.error("Error applying gradient or legend:", error);
+    }
 }
+
+// Fonction utilitaire pour obtenir les plages de dates
+function getDateRange(isOrigin) {
+    return isOrigin
+        ? { minD: minDateOrigin, maxD: maxDateOrigin }
+        : { minD: minDateEnv, maxD: maxDateEnv };
+}
+
 setAllNodeDeg();
 
 
@@ -409,8 +481,6 @@ updateNetworkOptions({
         "hover": true
     },
 });
-
-
 
 
 
@@ -447,6 +517,10 @@ function initializeColorChangeListener() {
         // Une fois trouvé et l'écouteur ajouté, on arrête l'observation
         observer.disconnect();
     }
+
+
+
+
 }
 
 
@@ -466,13 +540,6 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Appel initial pour vérifier si l'élément existe déjà
 initializeColorChangeListener();
-
-
-
-
-
-
-
 
 
 

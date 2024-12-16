@@ -2,11 +2,12 @@ import json
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.test import search_by_author, search_by_keyword, find_similar_articles
+from BERT.search_utils import search_by_author, search_by_keyword, find_similar_articles, search_by_title
 import sys
 from bs4 import BeautifulSoup
 import os
 import math
+from pandas import json_normalize
 
 cache_file = 'cache_doi.json'
 if os.path.exists(cache_file):
@@ -54,7 +55,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                 if normalized_key in cache_data:
                     liste_doi = cache_data[normalized_key].get("doi_citations", [])
                     for keyCite in liste_doi:
-                        if key in cache_data.keys() and keyCite in cache_data.keys():
+                        if key in cache_data.keys() and keyCite in cache_data.keys() and keyCite in allTheKeys:
                             set_liaison_final.add((keyCite, key))
             
             for couple in set_liaison_final:
@@ -74,8 +75,9 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add edges between articles published in the same year
             for year, doais in year_dict.items():
                 for i in range(len(doais) - 1):
-                    for j in range(i + 1, len(doais)):
-                        G.add_edge(doais[i], doais[j], color=liaison['color'])
+                    if doais[i] in allTheKeys:
+                        for j in range(i + 1, len(doais)):
+                            G.add_edge(doais[i], doais[j], color=liaison['color'])
 
     return G
 
@@ -128,7 +130,7 @@ def show_graphique(liste_key, dataUser):
         minTaille, maxTaille = find_min_max_values(cache_data)
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-        for nom in cache_data.keys():
+        for nom in noms:
             node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
@@ -149,12 +151,20 @@ def show_graphique(liste_key, dataUser):
                 isOrigin=nom in originKeys
             )
         return G
-    
+
+
     # Create the graph
     G = nx.Graph()
     
+
+    df = json_normalize(cache_data)
+
     # Reindexer le DataFrame selon les clés trouvées
-    allTheKeys, originKeys, n = getListallKey(liste_key)
+    allTheKeys, originKeys, _childKeys = getListallKey(liste_key)
+    dfFinal = df.reindex(allTheKeys)
+
+    noms = dfFinal.index  # Use the index (the keys)
+    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
     originKeys = set(originKeys)#Transform the list in a set for faster reserch in the list
 
@@ -196,7 +206,7 @@ def show_graphique_author(liste_key):
         minTaille, maxTaille = find_min_max_values(cache_data)
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
-        for nom in cache_data.keys():
+        for nom in noms:
             node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
@@ -214,17 +224,22 @@ def show_graphique_author(liste_key):
                 nb_citations=node['num_citations'],
                 citations=node['doi_citations'],
                 url=node['url'],
-                isOrigin=nom in originKeys
+                isOrigin="true"
             )
         return G
 
     # Create the graph
     G = nx.Graph()
     
+    df = json_normalize(cache_data)
+
     # Reindexer le DataFrame selon les clés trouvées
-    allTheKeys = liste_key
+    dfFinal = df.reindex(liste_key)
+
+    noms = dfFinal.index  # Use the index (the keys)
+    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
-    originKeys = set(allTheKeys)  # Take the 15 keys from liste_key
+    originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
 
     G = setAllNode(G)
 
@@ -242,7 +257,7 @@ def show_graphique_author(liste_key):
         liste_cle1_cle2.append(newList)
     for liaison in liaisons:
         if liaison['check'] == 'true':
-            G = setLiaison(G, liaison, allTheKeys, liste_cle1_cle2)
+            G = setLiaison(G, liaison, liste_key, liste_cle1_cle2)
 
 
     nt = Network('100vh', '100vw', notebook=True)
@@ -318,19 +333,22 @@ if __name__ == "__main__":
     if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
         mot_cle = sys.argv[1]
 
-        if len(sys.argv) >= 2 and sys.argv[2] == "true":  # Vérification du second argument
-            liste_final = search_by_author(mot_cle)
-            show_graphique_author(liste_final)
-        else:
-            # Exécution de la recherche par mot clé
-            nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
-            NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
-            similarities = search_by_keyword(mot_cle,nbNodeOrigin)
-            liste_final = [t[0] for t in similarities]
-            liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
-            show_graphique(liste_final, dataUser)
-        
-        #read the file in the first param and write in the second param.
+        if len(sys.argv) >= 2:
+            match sys.argv[2]:
+                case "sujet":
+                    # Exécution de la recherche par mot clé
+                    nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+                    NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+                    similarities = search_by_keyword(mot_cle,nbNodeOrigin)
+                    liste_final = [t[0] for t in similarities]
+                    liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
+                    show_graphique(liste_final, dataUser)
+                case "auteur":
+                    liste_final = search_by_author(mot_cle)
+                    show_graphique_author(liste_final)
+                case "titre":
+                    liste_final = search_by_title(mot_cle)
+                    show_graphique_author(liste_final)
         readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
     else:

@@ -4,7 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
-        const output = await window.api.callFunctionSearch([query, document.getElementById('auteur').disabled == true]);
+        let paramRecherche = "";
+      
+        paramRecherche = document.getElementById("listBouton");
+        
+        console.log(paramRecherche.value)
+        const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
         afficherResultat(); // Appelle la fonction pour afficher les résultats
     });
 
