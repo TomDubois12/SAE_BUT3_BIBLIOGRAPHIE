@@ -1,1 +1,41 @@
-{"userName":"Nathan","ColorPickerSettings":[{"liaisonName":"Similarité","color":"#0025e0","check":"true"},{"liaisonName":"Référence","color":"#12ca40","check":"true"},{"liaisonName":"Nom de conférence","color":"#ab1212","check":"false"},{"liaisonName":"Date de publication","color":"#00ccff","check":"false"}],"ListeNoeudSettings":[{"NoeudsName":"Nombre de nodes à l'origine ","color":"#a62121","value":"50"},{"NoeudsName":"Nombre de nodes environnant ","color":"#6d7411","value":"3"}],"pathDirectoryCSV":"./Data","CSVChoose":"Bibliographie_moyen.csv"}
+{
+    "userName": "Nathan",
+    "ColorPickerSettings": [
+        {
+            "liaisonName": "Similarité",
+            "color": "#a6aabf",
+            "check": "true"
+        },
+        {
+            "liaisonName": "Référence",
+            "color": "#4b7756",
+            "check": "true"
+        },
+        {
+            "liaisonName": "Nom de conférence",
+            "color": "#ab1212",
+            "check": "false"
+        },
+        {
+            "liaisonName": "Date de publication",
+            "color": "#00ccff",
+            "check": "false"
+        }
+    ],
+    "ListeNoeudSettings": [
+        {
+            "NoeudsName": "Nombre de nodes à l'origine ",
+            "color": "#cf4a4a",
+            "value": "20"
+        },
+        {
+            "NoeudsName": "Nombre de nodes environnant ",
+            "color": "#08af3a",
+            "value": "5"
+        }
+    ],
+    "pathDirectoryCSV": "./Data",
+    "CSVChoose": "Bibliographie_moyen.csv",
+    "WordChoose": "Oxyde ",
+    "TypeChoose": "Par titre"
+}
