@@ -1,3 +1,8 @@
+
+body.loading {
+    cursor: wait;
+}
+
 /* Style de base pour la navigation */
 
 body {
