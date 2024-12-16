@@ -118,8 +118,9 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('colorEdit').style.display = 'none';
         }
         
-        if (typeChoose === 'Par noeud') {
-            //TODO
+        if (data.TypeChoose === 'Par noeud') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
         }
                    
     } else {
