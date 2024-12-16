@@ -138,7 +138,6 @@ def show_graphique(liste_key, dataUser):
                 abstract=node['abstract'],
                 author=node['authors'],
                 doi=nom,
-                color=color,
                 nb_citations=node['num_citations'],
                 #citations=node['doi_citations'],
                 url=node['url'],
