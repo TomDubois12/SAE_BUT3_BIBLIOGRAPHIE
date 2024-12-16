@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>PyVis Graph in Electron</title>
-<link href="CSS/themeDarkLight.css" rel="stylesheet" type="text/css"/>
-<link href="CSS/navbar.css" rel="stylesheet"/>
-<link href="CSS/aside.css" rel="stylesheet"/>
-<!-- <link href="CSS/param.css" rel="stylesheet"/> -->
-<style type="text/css">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PyVis Graph in Electron</title>
+    <link href="CSS/themeDarkLight.css" rel="stylesheet" type="text/css" />
+    <link href="CSS/navbar.css" rel="stylesheet" />
+    <link href="CSS/aside.css" rel="stylesheet" />
+    <!-- <link href="CSS/param.css" rel="stylesheet"/> -->
+    <style type="text/css">
         #mynetwork {
             height: 100vh;
             background-color: #ffffff;
@@ -25,15 +26,14 @@
         }
     </style>
 </head>
+
 <body>
-
-
-<div class="contenerNavbar">
-<div class="logoNavbar">
-<img alt="logo de l'application" class="logo" src="images/logo.png"/>
-</div>
-<nav class="navbar">
-<script>
+    <div class="contenerNavbar">
+        <div class="logoNavbar">
+            <img alt="logo de l'application" class="logo" src="images/logo.png" />
+        </div>
+        <nav class="navbar">
+            <script>
                 function hideFirstDiv() {
                     const div1 = document.getElementById("asideParam");
                     const btn1 = document.getElementsByClassName("buttonAsideParam");
@@ -41,143 +41,156 @@
                     div1.classList.toggle("hide");
                 }
             </script>
-<input class="input" id="site-search" minlength="4" name="q" placeholder="Indiquez un mot clé" type="search"/>
-<select id="listBouton" onchange="changerChoix(this)">
-    <option class="auteur" value="auteur">Par auteur</option>
-    <option class="sujet" value="sujet">Par sujet</option>
-    <option class="titre" value="titre">Par titre</option>
-</select>
-<button id="search-btn">Rechercher</button>
-</nav>
-</div>
-<!-- <div id="result"></div> -->
-<script src="js/renderer.js"></script>
-<!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
+            <input class="input" id="site-search" minlength="4" name="q" placeholder="Indiquez un mot clé"
+                type="search" />
+            <select id="listBouton" onchange="changerChoix(this)">
+                <option class="auteur" value="auteur">Par auteur</option>
+                <option class="sujet" value="sujet">Par sujet</option>
+                <option class="titre" value="titre">Par titre</option>
+            </select>
+            <button id="search-btn">Rechercher</button>
+        </nav>
+    </div>
+    <!-- <div id="result"></div> -->
+    <script src="js/renderer.js"></script>
+    <!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
     Elle stocke mon graphe grâce à un script python
 -->
+    <div class="contenerCanvaAside">
+        <div class="asideParam" id="asideParam">
+            <div id="DivOrigin"></div>
+            <div id="legend-textOr"></div>
+            <div id="DivEnv"></div>
+            <div id="legend-textEnv"></div>
+            <button class="buttonAsideParam" onclick="hideFirstDiv()">Rendre visible les paramètres</button>
+            <p class="titleParam">Paramètre</p>
+            <div class="contenerListeParam">
+                <p class="subtitleParam" id="subtitleParam">Nombre de nodes :</p>
+                <p class="subtitleParam" id="titleEditColor">Couleur des nodes :</p>
+                <input id="colorEdit" name="color-box" type="color" />
+                <ul id="listeNbNoeuds"></ul>
+                <p class="subtitleParam">Type de liaison :</p>
+                <ul id="listeContainer"></ul>
+                <button id="buttonModifCouleurs"> Modifier les couleurs </button>
+            </div>
+            <div class="echelle">
+                <div id="DivOrigin"></div>
+                <div id="legend-textOr"></div>
+                <div id="DivEnv"></div>
+                <div id="legend-textEnv"></div>
+            </div>
+            <script src="js/paramHandler.js"> </script>
+        </div>
+        <div class="TargetDiv">
+            <div class="card" style="width: 100%">
 
-<div class="contenerCanvaAside">
-<div class="asideParam" id="asideParam">
+            </div>
+            <div class="card-body" id="mynetwork"></div>
+            <div id="result"></div>
+            <script src="lib/bindings/utils.js"></script>
+            <script crossorigin="anonymous"
+                integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ=="
+                referrerpolicy="no-referrer"
+                src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script>
+            <script crossorigin="anonymous"
+                integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="text/javascript">
 
-<div id="DivOrigin"></div>
-<div id="legend-textOr"></div>
-<div id="DivEnv"></div>
-<div id="legend-textEnv"></div>
-
-<button class="buttonAsideParam" onclick="hideFirstDiv()">Rendre visible les paramètres</button>
-<p class="titleParam">Paramètre</p>
-<div class="contenerListeParam">
-<p class="subtitleParam">Nombre de nodes :</p>
-<ul id="listeNbNoeuds"></ul>
-<p class="subtitleParam">Type de liaison :</p>
-<ul id="listeContainer"></ul>
-<button id="buttonModifCouleurs"> Modifier les couleurs </button>
-</div>
-<div class="echelle">
-<div id="DivOrigin"></div>
-<div id="legend-textOr"></div>
-<div id="DivEnv"></div>
-<div id="legend-textEnv"></div>
-</div>
-<script src="js/paramHandler.js"> </script>
-</div>
-<div class="TargetDiv"><div class="card" style="width: 100%">
-
-</div><div class="card-body" id="mynetwork"></div><div id="result"></div><script src="lib/bindings/utils.js"></script><script crossorigin="anonymous" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script>
-
-
-<script crossorigin="anonymous" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script><script type="text/javascript">
-
-              // initialize global variables.
-              var edges;
-              var nodes;
-              var allNodes;
-              var allEdges;
-              var nodeColors;
-              var originalNodes;
-              var network;
-              var container;
-              var options, data;
-              var filter = {
-                  item : '',
-                  property : '',
-                  value : []
-              };
-
-              
-
-              
-
-              // This method is responsible for drawing the graph, returns the drawn network
-              function drawGraph() {
-                  var container = document.getElementById('mynetwork');
-
-                  
-
-                  // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([]);
-                  edges = new vis.DataSet([]);
-
-                  nodeColors = {};
-                  allNodes = nodes.get({ returnType: "Object" });
-                  for (nodeId in allNodes) {
-                    nodeColors[nodeId] = allNodes[nodeId].color;
-                  }
-                  allEdges = edges.get({ returnType: "Object" });
-                  // adding nodes and edges to the graph
-                  data = {nodes: nodes, edges: edges};
-
-                  var options = {
-    "configure": {
-        "enabled": false
-    },
-    "edges": {
-        "color": {
-            "inherit": true
-        },
-        "smooth": {
-            "enabled": true,
-            "type": "dynamic"
-        }
-    },
-    "interaction": {
-        "dragNodes": true,
-        "hideEdgesOnDrag": false,
-        "hideNodesOnDrag": false
-    },
-    "physics": {
-        "enabled": true,
-        "stabilization": {
-            "enabled": true,
-            "fit": true,
-            "iterations": 1000,
-            "onlyDynamicEdges": false,
-            "updateInterval": 50
-        }
-    }
-};
-
-                  
+                // initialize global variables.
+                var edges;
+                var nodes;
+                var allNodes;
+                var allEdges;
+                var nodeColors;
+                var originalNodes;
+                var network;
+                var container;
+                var options, data;
+                var filter = {
+                    item: '',
+                    property: '',
+                    value: []
+                };
 
 
-                  
-
-                  network = new vis.Network(container, data, options);
-
-                  
-
-                  
-
-                  
 
 
-                  
 
-                  return network;
+                // This method is responsible for drawing the graph, returns the drawn network
+                function drawGraph() {
+                    var container = document.getElementById('mynetwork');
 
-              }
-              drawGraph();
-        </script><script src="Bokeh/bin/lib/binding/utils.js" type="text/javascript"></script><script src="js/EventNodeEdge.js"> </script></div>
-</div>
+
+
+                    // parsing and collecting nodes and edges from the python
+                    nodes = new vis.DataSet([{ "abstract": "Kinetic heterogeneity on highly ordered pyrolytic graphite (HOPG) electrodes was characterized by using electrogenerated chemiluminescence imaging. The reaction of luminol in alkaline peroxide was used with a sensitive microscope-based imaging system to monitor the course of electron transfer at various regions on the HOPG surface. The ability to image with temporal resolution provided for the construction of local voltammograms, so that estimates of kinetic differences between plane and defect-rich HOPG could be obtained. Electrochemical pretreatment of basal plane HOPG produced a surface electrochemically similar to a defect-rich surface", "author": "Robert J. Bowling, R. McCreery, C. Pharr, R. Engstrom", "color": "red", "doi": "10.1021/ac00199a016", "id": "10.1021/ac00199a016", "isOrigin": "true", "label": "Robert J. Bowling 1989", "nb_citations": 36, "shape": "dot", "size": 20, "title": "Observation of kinetic heterogeneity on highly ordered pyrolytic graphite using electrogenerated chemiluminescence", "url": "https://www.semanticscholar.org/paper/4e1d65f3960794a0b4518969b59bca6ee2309dfa", "year": 1989 }, { "abstract": "The electrochemical and vibrational spectroscopic properties of highly ordered pyrolytic graphite (HOPG) were determined before and after modification by anodization or pulsed laser irradiation. Both treatments greatly accelerated the heterogeneous electron-transfer-rate constants for the Fe(CN)6(3-/4-) and dopamine redox systems on HOPG by approximately six orders of magnitude. At intermediate electrochemical pretreatment (ECP) potentials, a spatially heterogeneous surface resulted, with surface regions exhibiting the 1360/cm band being separated by tens of microns. The results clearly indicate that graphitic edge plane is necessary for fast electron transfer, and that the pretreatment procedures accelerate k0 by generating edge-plane defects in the HOPG lattice. The mechanisms of defect generation for the two procedures appear very different, with ECP appearing to follow a nucleation process leading to a spatially heterogeneous surface, while the laser pulse appears to shatter the HOPG lattice, leading to a more uniform distribution of active sites. The results provide important conclusions about the relationship between carbon electrode microstructure and heterogeneous electron transfer activity. Of particular interest is the heterogeneous electron transfer rate between carbon electrodes and various well-known redox systems such as ascorbic acid, ferri/ferrocyanide, and the catecholamines. Not only are these systems of significant analytical interest, but they serve asmore\u00a0\u00bb benchmarks for comparisons of electrode performance.\u00ab\u00a0less", "author": "Robert J. Bowling, R. Packard, R. McCreery", "color": "red", "doi": "10.1021/ja00186a008", "id": "10.1021/ja00186a008", "isOrigin": "true", "label": "Robert J. Bowling 1989", "nb_citations": 259, "shape": "dot", "size": 24, "title": "Activation of highly ordered pyrolytic graphite for heterogeneous electron transfer: relationship between electrochemical performance and carbon microstructure", "url": "https://www.semanticscholar.org/paper/6ab331dd916845aba0923bbec6237e0e00ce42ac", "year": 1989 }, { "abstract": "By use of Raman spectroscopy as a probe, the relationship between carbon microstructure and increases in the heterogeneous electron-transfer rate for carbon electrodes was examined. A distinctive Raman band at 1360/cm is proportional to the density of graphitic edge planes and may be used to monitor changes in edge plane density induced by carbon pretreatment procedures. It was shown that electrochemical oxidation of highly ordered pyrolytic graphite (HOPG) caused fracturing of the graphite lattice, thus increasing edge plane density. This result is consistent with other reports from laser activation of HOPG, which correlate increased edge plane density with increased electron-transfer rate. Creation of edge plane is a phenomenon common to both oxidative and nonoxidative activation procedures and is responsible for HOPG activation. Arguments about the involvement of graphitic oxide or oxygen containing functional groups in electron-transfer activation are presented. After the present results are combined with those from the literature, it appears unlikely the oxygen functional groups are involved in electron-transfer activation of several benchmark redox systems on carbon electrodes.", "author": "Robert J. Bowling, R. Packard, R. McCreery", "color": "red", "doi": "10.1021/la00087a022", "id": "10.1021/la00087a022", "isOrigin": "true", "label": "Robert J. Bowling 1989", "nb_citations": 132, "shape": "dot", "size": 22, "title": "Mechanism of electrochemical activation of carbon electrodes: role of graphite lattice defects", "url": "https://www.semanticscholar.org/paper/03c55b7d8299905a987257cf02e933818a2f5920", "year": 1989 }, { "abstract": "Heterogeneous electron transfer kinetics for several catechols were examined on glassy carbon (GC) electrodes in aqueous solution. Electrode preparations yielded GC surfaces with low levels of oxides or adsorbed impurities, which exhibited strong adsorption of dopamine (DA) and related catechols. Conversely, modification of GC with an organic monolayer suppressed DA adsorption and in many cases prevented electron transfer. By relating catechol adsorption to observed electron transfer, it was concluded that an adsorbed layer of catechol acts as an electrocatalyst for solution-phase redox components. Physisorbed or chemisorbed monolayers of several quinones, including duroquinone, anthraquinone, and dopamine itself, are catalytic toward dopamine oxidation and reduction, but nitrophenyl, trifluoromethylphenyl, and methylene blue monolayers severely inhibit electron transfer. The magnitude of inhibition was affected by electrostatic attraction or repulsion between the surface and the redox system, but the maj...", "author": "S. And, R. McCreery", "color": "red", "doi": "10.1021/ja000227u", "id": "10.1021/ja000227u", "isOrigin": "true", "label": "S. And 2000", "nb_citations": 187, "shape": "dot", "size": 23, "title": "Self-catalysis by Catechols and Quinones during Heterogeneous Electron Transfer at Carbon Electrodes", "url": "https://www.semanticscholar.org/paper/90df645d33a8e65d20ab999c020325aa0b78053b", "year": 2000 }, { "abstract": "The electrochemical oxidation of dopamine, 4-methylcatechol, dihydroxyphenylacetic acid, dihydroxyphenyl ethylene glycol, and hydroquinone was examined on several native and modified glassy carbon (GC) surfaces. Treatment of polished GC with pyridine yielded small \u0394Ep values for cyclic voltammetry of all systems studied, implying fast electron-transfer kinetics. Changes in surface oxide coverage had little effect on kinetics, nor did the charge of the catechol species or the solution pH. Small \u0394Ep values correlated with catechol adsorption, and surface pretreatments that decreased adsorption also increased \u0394Ep. Electron transfer from catechols was profoundly inhibited by a monolayer of nitrophenyl or (trifluoromethyl)phenyl (TFMP) groups on the GC surface, so that voltammetric waves were not observed. The \u0394Ep increased monotonically with surface coverage of TFMP groups. The results indicate that catechol adsorption to GC is required for fast electron transfer for the redox systems studied. Unlike Ru(NH3)6...", "author": "S. And, R. McCreery", "color": "red", "doi": "10.1021/ac990399d", "id": "10.1021/ac990399d", "isOrigin": "true", "label": "S. And 1999", "nb_citations": 211, "shape": "dot", "size": 24, "title": "Control of Catechol and Hydroquinone Electron-Transfer Kinetics on Native and Modified Glassy Carbon Electrodes", "url": "https://www.semanticscholar.org/paper/343036b98bfb08b3d4b9a18c71a693adcf73cbf0", "year": 1999 }, { "abstract": "Glassy carbon (GC) surfaces modified with monolayers of biphenyl and nitrobiphenyl molecules were examined as voltammetric electrodes for ferrocene, benzoquinone, and tetracyanoquinodimethane electrochemistry in acetonitrile. The modified electrodes exhibited slower electron transfer than unmodified GC, by factors that varied with the monolayer and redox system. However, after a negative potential excursion to approximately -2.0 V versus Ag+/Ag, the modified electrodes exhibited much faster electron-transfer kinetics, approaching those observed on unmodified GC. The effect is attributed to an apparently irreversible structural change in the biphenyl or nitrobiphenyl monolayer, which increases the rate of electron tunneling. The transition to the \"ON\" state is associated with electron injection into the monolayer similar to that observed in previous spectroscopic investigations and causes a significant decrease in the calculated HOMO-LUMO gap for the monolayer molecule. Once the monolayer is switched ON, it supports rapid electron exchange with outer-sphere redox systems, but not with dopamine, which requires adsorption to the GC surface. The increase in electron-transfer rate with electron injection is consistent with an increase in electron tunneling rate through the monolayer, caused by a significant decrease in tunneling barrier height. The ON electrode can reduce biphenyl- or nitrobiphenyldiazonium reagent in solution to permit formation of a second modification layer of biphenyl or nitrobiphenyl molecules. This \"double derivatization\" procedure was used to prepare tetraphenyl- and nitrotetraphenyl-modified electrodes, which exhibit significantly slower electron transfer than their biphenyl and nitrobiphenyl counterparts. A \"switching\" electrode may have useful properties for electroanalytical applications and possibly in electrocatalysis. In addition, the ON state represents an \"organic electrode\" in which electron transfer occurs at an interface between an organic conductor and a solution rather than an interface between a solution and a metal or carbon electrode.", "author": "A. Solak, Laura R Eichorst, W. J. Clark, R. McCreery", "color": "red", "doi": "10.1021/ac026107h", "id": "10.1021/ac026107h", "isOrigin": "true", "label": "A. Solak 2003", "nb_citations": 103, "shape": "dot", "size": 22, "title": "Modified carbon surfaces as \"organic electrodes\" that exhibit conductance switching.", "url": "https://www.semanticscholar.org/paper/a34167ad6a538064984564a935a65bce78d22404", "year": 2003 }, { "abstract": "Various well-established and novel surface modification procedures were used on glassy carbon (GC) electrodes to yield surfaces with low oxide content or which lack specific oxide functional groups. In addition, monolayers of several different adsorbates were formed on GC surfaces before electrochemical evaluation. Both the nonspecific monolayer adsorbates and reagents which chemisorb to specific functional groups were observed on the surface with Raman and photoelectron spectroscopy. The various GC surfaces were then evaluated for their electron transfer reactivity with nine redox systems in aqueous electrolyte, including Ru(NH3)62+/3+, Fe(CN6)3-/4-, ascorbic acid, and Feaq3+/2+. The nine systems were categorized according to their kinetic sensitivity to surface modification. Several, including Ru(NH3)62+/3+, are insensitive to surface modifications and are considered outer sphere. Feaq3+/2+, Vaq2+/3+, and Euaq2+/3+ are catalyzed by surface carbonyl groups and are very sensitive to the removal of surface...", "author": "P. C. and, R. McCreery", "color": "red", "doi": "10.1021/ac960492r", "id": "10.1021/ac960492r", "isOrigin": "true", "label": "P. C. and 1996", "nb_citations": 636, "shape": "dot", "size": 30, "title": "Control of Electron Transfer Kinetics at Glassy Carbon Electrodes by Specific Surface Modification", "url": "https://www.semanticscholar.org/paper/d98841e86f62f7c1b926b4bc26bacdd5fde8d168", "year": 1996 }, { "abstract": "The electron transfer (El\u0027) kinetics of Ru(NH~)~~+/~+, II-C~~~-/~-, Fc?(CN)~~-/~-, Feaq2+/3+, and Vaq2+l3+ were examined on several modified glassy carbon surfaces. The kinetics of the aquated ions were very sensitive to the density of surface oxides, while those of the other redox systems were not. In particular, chemical derhalization of surface carbonyl groups decreased the rate of electron transfer with Fe3+l2+ by 2-3 orders of magnitude but had little effect on Ru(NH~)~~+/~+ or Ircl~~-/~-. The electron trader rates for Fe31/2+ correlated with surface C=O density determined by resonance Raman spectroscopy. Neutral, cationic, and anionic nonspecific adsorbers decreased the rates of ET with the aquated ions ap proximately equally but had little effect on Ru(NH3)62-/3f. The redox systems studied were classified into two groups: those which are catalyzed by surface carbonyl groups and those which are not. Possible catalytic mechanisms are considered. A significant effort by many laboratories has been directed toward understanding the relationship between surface structure and electron transfer reactivity for carbon Complex surface chemistry and an often unknown level of surface impurities have made it difticult to determine the important structural variables controlling carbon electrode reactivity. At least three major phenomena affect electron transfer (m? reactivity, and these vary in importance for different redox systems and solution conditions. First, many redox systems (e.g., Fe(CN),j3-14-, ascorbic acid, dopamine) are very sensitive to surface cleanliness, and observed ET rates are strongly dependent on surface hist~ry.~.\u0027~ Second, the microstructure of the carbon has a large effect on most redox systems, with the basal plane of highly ordered pyrolytic graphite (HOPG) exhibiting much slower ET", "author": "Piehong. Chen, Mark A. Fryling, R. McCreery", "color": "red", "doi": "10.1021/ac00114a004", "id": "10.1021/ac00114a004", "isOrigin": "true", "label": "Piehong. Chen 1995", "nb_citations": 283, "shape": "dot", "size": 25, "title": "Electron Transfer Kinetics at Modified Carbon Electrode Surfaces: The Role of Specific Surface Sites", "url": "https://www.semanticscholar.org/paper/f3a59371366c71e2d6740a2acb0150effbcc5a22", "year": 1995 }, { "abstract": "Raman spectra, capacitance (C{degree}), phenanthrenequinone (PQ) adsorption, and heterogeneous electron-transfer rates for ferri/ferrocyanide, dopamine, and ascorbic acid were monitored after fracturing, polishing, and laser activating glassy carbon electrodes (GC-30). Alterations in the Raman spectrum indicate changes in carbon microstructure, while PQ adsorption and C{degree} provide measures of microscopic surface area. It was observed that polishing caused minor changes in carbon disorder and microscopic surface area, but the polished surface had poor electron-transfer kinetics. A k{degree} of above 0.5 cm s{sup {minus}1} was observed for Fe(CN){sub 6} for the first time. A clean, fractured GC surface exhibited a k{degree} of 0.5 cm s{sup {minus}1} and was very active toward ascorbic acid and dopamine oxidation. The results are consistent with a surface-cleaning mechanism for laser activation, accompanied by little or no observable surface restructuring or roughening.", "author": "R. J. Rice, N. Pontikos, R. McCreery", "color": "red", "doi": "10.1021/ja00168a001", "id": "10.1021/ja00168a001", "isOrigin": "true", "label": "R. J. Rice 1990", "nb_citations": 139, "shape": "dot", "size": 22, "title": "Quantitative correlations of heterogeneous electron-transfer kinetics with surface properties of glassy carbon electrodes", "url": "https://www.semanticscholar.org/paper/c9ee0c3b125a50832eda317582257f69c5aa8469", "year": 1990 }, { "abstract": "The basal plane of hlghly ordered pyrolytlc graphtte (HOPG) serves as an ordered model of more commonly used electrode surfaces such as glassy carbon (GC) and pyrolytlc graphite. The defect denslty on the basal plane HOPG was reduced by careful cieavlng and cell design and was verified to be low by requiring that AEP for Fe(CN),S-\u0027C (1 M KCI) be greater than 700 mV for a 0.2 V/s scan rate. Then a variety of redox systems were examined on \"validated\" HOPG surfaces, and varlatlons In the electron transfer rate constant, kbo, were observed. All 13 redox systems exhlblted relatively fast klnetlcs on laser activated GC (ko \u003e 0.03 cm/s for elght Inorganic systems), and In several cases ko exceeded the Instrumental Ilmlt. On HOPG, however, AEP varled greatly for the 13 systems, ranging from 66 to \u003e1200 mV. The reasons for thls varlatlon fall Into three general ciasslfications. First, reactlons Involving proton transfer (e.g. catechols) were all slow on HOPG, implylng some role of the surface In mediating multlstep processes. Second, the observed rate correlated wlth the exchange rate for homogeneous electron transfer, but the heterogeneous rates on HOPG were 3-5 orders of magnltude slower than that predicted from simple Marcus theory. Thlrd, the physical properties of HOPG, such as den* of electronic states and hydrophobicity, may depress ko relative to GC and metals.", "author": "Kristin R. Kneten, R. McCreery", "color": "red", "doi": "10.1021/ac00045a011", "id": "10.1021/ac00045a011", "isOrigin": "true", "label": "Kristin R. Kneten 1992", "nb_citations": 209, "shape": "dot", "size": 24, "title": "Effects of Redox System Structure on Electron-Transfer Kinetics at Ordered Graphite and Glassy Carbon Electrodes", "url": "https://www.semanticscholar.org/paper/3a498cc97b0187c879f726e56289cea1428dc76d", "year": 1992 }, { "abstract": "Electron-transfer rates for 17 inorganic redox systems plus methyl viologen were determined on highly ordered pyrolytic graphite (HOPG) and glassy carbon (GC). Provided the HOPG defect density is low, the electrontransfer rates of all systems are much slower on the basal plane of HOPG than on GC. The slow rates on HOPG show a trend with the homogenous self-exchange rate constants, but in all cases the HOPG rate constants are substantially lower than that calculated via Marcus theory from self-exchange rates. The low HOPG rates do not exhibit any trends with redox system charge or E1/2, as might be expected in the presence of double-layer or hydrophobic effects. The results are consistent with the semimetal properties of HOPG, which have been invoked to explain its low interfacial capacitance. Both the density of electronic states (DOS) and carrier density for HOPG are much lower than those for metals. By analogy to theories developed for electron transfer at semiconductor electrodes, the rate depends on an effectively bimolecular reaction between the redox system and carriers in the electrode. The low DOS and carrier density of HOPG leads to low electron-transfer rates compared to those of metals, or to those predicted from exchange rates. Disorder in the graphite increases electron-transfer rates and the DOS, thus yielding much faster rates on both GC and defective HOPG. For the 14 outer-sphere systems studied here, this electronic factor is much more important than any interaction with specific surface sites present at defects. The evidence indicates that, for Fe(CN)i3I4, Eu:tJt3, Fet2It3, and V:l/+3, specific surface interactions provide inner-sphere routes which have a large effect on the observed rate constant. aq", "author": "Kristin K. Cline, M. McDermott, R. McCreery", "color": "red", "doi": "10.1021/j100071a023", "id": "10.1021/j100071a023", "isOrigin": "true", "label": "Kristin K. Cline 1994", "nb_citations": 223, "shape": "dot", "size": 24, "title": "Anomalously Slow Electron Transfer at Ordered Graphite Electrodes: Influence of Electronic Factors and Reactive Sites", "url": "https://www.semanticscholar.org/paper/0015b966cdab2e7c077b9a83ccfef4998a97aa13", "year": 1994 }, { "abstract": "Highly oriented pyrolytic graphite (HOPG) has been studied by several groups as an electrode material, due mainly to its well-defined surface structure compared to more commonly used materials such as glassy carbon. The basal plane of HOPG is also a common standard for scanning tunneling microscopy because it is atomically flat over regions up to at least 104 A 2 and is generally free of gross microstructural defects. Thus, HOPG serves well as a nearly perfect single-crystal surface for studies of the chemical properties of basal plane sp 2 carbon. In previous reports on laser activation of HOPG, it was demonstrated that electrode capacitance, electron transfer kinetics, and Raman spectrum depend on laser-induced disorder, particularly edge plane defects. The present work was undertaken to describe surface defects on HOPG at the STM level for two grades of HOPG and the laser-activated surface. Capacitance, k ~ for Fe(CN)~ 3j-4, and anthraquinone disulfonate adsorption all correlate with the presence of STM observable defects. In addition, STM of the laser-activated surface is consistent with a damage mechanism driven by thermal expansion. The results confirm the importance of edge plane defects to the electrochemical behavior of carbon electrodes.", "author": "R. S. Robinson, K. D. Sternitzke, M. McDermott, R. McCreery", "color": "red", "doi": "10.1149/1.2085987", "id": "10.1149/1.2085987", "isOrigin": "true", "label": "R. S. Robinson 1991", "nb_citations": 64, "shape": "dot", "size": 21, "title": "Morphology and Electrochemical Effects of Defects on Highly Oriented Pyrolytic Graphite", "url": "https://www.semanticscholar.org/paper/7cf35bccd2a93d9a12a120fb19657e11e7994d68", "year": 1991 }, { "abstract": "Prevlous lnvestlgatlons demonstrate that Increases In electron transfer rate constant, ko, on hlghly ordered pyrolytic graphlte (HOPG) basal plane correlate wlth the appearance of edge plane defects and that such defects may be created wlth laser or electrochemlcal pretreatment. In the current work both capacltance (C Ob) and k Ob for Fe(CN),s\u0027C on HOPG were measured as functions of power density of the actlvatlng laser. Over a power density range from 0 to 130 MW cm-2, ko* Increased by more than 5 orders of magnitude whlle Cow Increased by a factor of 8. Both kob and Cob may be expressed as linear comblnatlons of the basal and edge plane ko and Co values, welghted by the fractlonal coverage of edge plane on the electrode surface (t,). Determinations of f, from both k0* and C\u0027,,,,, are quantltatlvely conslstent and In both cases Increase wlth power density above a threshold of 45 MW cm-2. Although effects of surface roughness may also be Involved, the results Indicate that the electron transfer actlvlty of laser-modlfled HOPG Is predominantly dependent on edge plane denslty.", "author": "R. J. Rice, R. McCreery", "color": "red", "doi": "10.1021/ac00190a010", "id": "10.1021/ac00190a010", "isOrigin": "true", "label": "R. J. Rice 1989", "nb_citations": 184, "shape": "dot", "size": 23, "title": "Quantitative relationship between electron transfer rate and surface microstructure of laser-modified graphite electrodes", "url": "https://www.semanticscholar.org/paper/d75963232e36067981e22dc1ffa86a3180ae5474", "year": 1989 }, { "abstract": "Dinitrophenylhydrazine (DNPH) was used to form hydrazone derivatives of carbonyl groups on glassy carbon (GC) and pyrolytic graphite surfaces. The DNPH adducts of benzoquinone and acetone have cross sections of 488 nm, much larger than those of either DNPH or the underivatized carbonyl group. The result of this enhancement is that the Raman spectrum of DNPH-modified GC is dominated by adduct features and is not sensitive to residual adsorbed reagents. In addition, resonance Raman active adducts were not formed from DNPH reactions with model compounds containing lactone, phenol, or carboxylate groups. Assuming that the cross section of surface carbonyl adducts on GC is comparable to that of the benzoquinone adduct, the detection limit for carbonyl groups on GC is less than 1% of a monolayer. The coverage of carbonyl groups increases significantly following electrochemical oxidation of both GC and highly ordered pyrolytic graphite. Analysis of the spectra of the benzoquinone/DNPH adduct permitted assignment of prominent resonance Raman and IR features and revealed that the electrons in the hydrazone linkage are delocalized extensively", "author": "Mark A. Fryling, Jun Zhao, R. McCreery", "color": "red", "doi": "10.1021/ac00101a026", "id": "10.1021/ac00101a026", "isOrigin": "true", "label": "Mark A. Fryling 1995", "nb_citations": 39, "shape": "dot", "size": 20, "title": "Resonance Raman Observation of Surface Carbonyl Groups on Carbon Electrodes Following Dinitrophenylhydrazine Derivatization", "url": "https://www.semanticscholar.org/paper/8c1573ffb92582d7cefdc6fa73fa102cb8900003", "year": 1995 }, { "abstract": "Azobenzene (AB) and 4-nitroazobenzene (NAB) were covalently bonded to carbon surfaces by electrochemical reduction of their diazonium derivatives. The N(1s) features of XPS spectra of modified surfaces had intensities expected for monolayer coverage. However, the Raman spectra were significantly more intense than expected, implying an increase in scattering cross section upon chemisorption. A likely explanation is resonance enhancement of the carbon/adsorbate chromophore analogous to that reported earlier for dinitrophenylhydrazine (DNPH) chemisorption. Vibrational assignments indicate that the C-C vibration between azobenzene and the carbon surface is in the 1240-1280 cm(-1) region, and this conclusion is supported by spectra obtained from [(13)C]graphite. Observation of depolarization ratios for 4-nitroazobenzene and DNPH on graphite edge plane indicate that NAB is able to rotate about the NAB/carbon C-C bond, while chemisorbed DNPH is not. The partial multiple bond character of the DNPH linkage to graphite is consistent with the observation that the DNPH \u03c0 system remains parallel to the graphitic planes.", "author": "Y. Liu, R. McCreery", "color": "red", "doi": "10.1021/ac961305s", "id": "10.1021/ac961305s", "isOrigin": "true", "label": "Y. Liu 1997", "nb_citations": 70, "shape": "dot", "size": 21, "title": "Raman spectroscopic determination of the structure and orientation of organic monolayers chemisorbed on carbon electrode surfaces.", "url": "https://www.semanticscholar.org/paper/8e6e21058e3374611760e1ef246c5c956dbc3b28", "year": 1997 }, { "abstract": "Five organic redox systems were examined in aqueous electrolytes on polished and chemically modified glassy carbon (GC), to evaluate the effects of surface structure on the heterogeneous transfer rate constant, k\u00b0. Methyl viologen reduction to its cation radical exhibited a voltammetric peak potential difference which was insensitive to surface modification, with k\u00b0 decreasing by only 50% when a chemisorbed monolayer was present. Methylene blue and three other phenothiazines adsorbed to polished GC, but the adsorption was suppressed by surface modification. For all four phenothiazines, chemisorbed or physisorbed monolayers of electroinactive species had minor effects on k\u00b0, with a compact nitrophenyl monolayer decreasing k\u00b0 by 50%. This minor change in k\u00b0 was accompanied by a major decrease in adsorption, apparently due to inhibition of dipole\u2212dipole or \u03c0-\u03c0 interactions between the phenothiazine and GC. Chlorpromazine oxidation to its cation radical was studied in more detail, under conditions where adsor...", "author": "Hseuh-Hui Yang, R. McCreery", "color": "red", "doi": "10.1021/ac9902392", "id": "10.1021/ac9902392", "isOrigin": "true", "label": "Hseuh-Hui Yang 1999", "nb_citations": 69, "shape": "dot", "size": 21, "title": "Effects of Surface Monolayers on the Electron-Transfer Kinetics and Adsorption of Methyl Viologen and Phenothiazine Derivatives on Glassy Carbon Electrodes", "url": "https://www.semanticscholar.org/paper/049313c7990ca68ec1a98f51380de70df8b61d63", "year": 1999 }, { "abstract": "3.6.1. Polishing and Cleaning 2663 3.6.2. Vacuum and Heat Treatments 2664 3.6.3. Carbon Electrode Activation 2665 3.7. Summary and Generalizations 2666 4. Advanced Carbon Electrode Materials 2666 4.1. Microfabricated Carbon Thin Films 2666 4.2. Boron-Doped Diamond for Electrochemistry 2668 4.3. Fibers and Nanotubes 2669 4.4. Carbon Composite Electrodes 2674 5. Carbon Surface Modification 2675 5.1. Diazonium Ion Reduction 2675 5.2. Thermal and Photochemical Modifications 2679 5.3. Amine and Carboxylate Oxidation 2680 5.4. Modification by \u201cClick\u201d Chemistry 2681 6. Synopsis and Outlook 2681 7. Acknowledgments 2682 8. References 2682", "author": "R. McCreery", "color": "red", "doi": "10.1021/cr068076m", "id": "10.1021/cr068076m", "isOrigin": "true", "label": "R. McCreery 2008", "nb_citations": 2259, "shape": "dot", "size": 49, "title": "Advanced carbon electrode materials for molecular electrochemistry.", "url": "https://www.semanticscholar.org/paper/167d8a3763ad6c24ede2b72ace5b144bfe0cf0bc", "year": 2008 }, { "abstract": "The adsorption of anthraquinone-2,6-disulfonate, disodium salt (AQDS), was found to be well behaved at glassy carbon (GC) and highly oriented pyrolytic graphite (HOPG) electrodes. On laser-activated GC, the surface excess obeys a Langmuirian isotherm in the concentration range of 5\u00d710 -8 to 1\u00d710 -5 M with a saturation coverage of 228 pmol/cm 2 . AQDS at untreated HOPG electrodes was studied more extensively", "author": "M. McDermott, Kristin R. Kneten, R. McCreery", "color": "red", "doi": "10.1021/j100186a063", "id": "10.1021/j100186a063", "isOrigin": "true", "label": "M. McDermott 1992", "nb_citations": 141, "shape": "dot", "size": 22, "title": "Anthraquinonedisulfonate adsorption, electron-transfer kinetics, and capacitance on ordered graphite electrodes: the important role of surface defects", "url": "https://www.semanticscholar.org/paper/db773ed8d071c1522fa8ec6af281de7f525dcf6a", "year": 1992 }, { "abstract": "Adsorption was examined on STM-characterized graphite and glassy carbon surfaces, in order to relate adsorption behavior to specific surface structures. The adsorption of four electroactive quinones was determined voltammetrically on highly ordered pyrolytic graphite (HOPG) and fractured glassy carbon (GC). The average surface coverage on HOPG was 0.25-0.50, while that on GC was 2.7-4.0, consistent with GC surface roughness. STM of a large number of defects on HOPG yielded an average defect coverage of 0.01 f 0.004, much too low to account for the observed adsorption by a simple geometric model. STM and adsorption measurements on identical HOPG surfaces showed that adsorption tracks observed defect area, but with the adsorption about 30 times higher than expected. High-resolution STM ofHOPG revealed an electronic perturbation near the step defects which was larger than the defect itself by a factor of about 8. The results are consistent with quinone adsorption to the entire electronically perturbed region rather than to only the physical defect. The results are inconsistent with an adsorption mechanism based on specific chemical sites such as oxides or surface radicals. The results imply that adsorption of quinones on GC and defective HOPG depends on an electronic effect such as an electrostatic attraction between the adsorbate and partial surface charges, rather than a specific chemical effect.", "author": "M. McDermott, R. McCreery", "color": "red", "doi": "10.1021/la00023a062", "id": "10.1021/la00023a062", "isOrigin": "true", "label": "M. McDermott 1994", "nb_citations": 114, "shape": "dot", "size": 22, "title": "Scanning Tunneling Microscopy of Ordered Graphite and Glassy Carbon Surfaces: Electronic Control of Quinone Adsorption", "url": "https://www.semanticscholar.org/paper/3c70699703617d68f4322d177ad864968cf15042", "year": 1994 }, { "abstract": "Aper\u00e7u indisponible", "author": "N. Pontikos, R. McCreery", "color": "red", "doi": "10.1016/0022-0728(92)80048-9", "id": "10.1016/0022-0728(92)80048-9", "isOrigin": "true", "label": "N. Pontikos 1992", "nb_citations": 36, "shape": "dot", "size": 20.864068625167036, "title": "Microstructural and morphological changes induced in glassy carbon electrodes by laser irradiation", "url": "https://www.semanticscholar.org/paper/4064a11a6c84a04939ce16f6f4c35eb1f180caf2", "year": 1992 }, { "abstract": "calculations of the phonon density of states, Al-Jishi and Dresselha~s~~~~~ have attributed the second-order bands", "author": "Yan. Wang, D. Alsmeyer, R. McCreery", "color": "red", "doi": "10.1021/cm00011a018", "id": "10.1021/cm00011a018", "isOrigin": "true", "label": "Yan. Wang 1990", "nb_citations": 1472, "shape": "dot", "size": 41.38036870133519, "title": "Raman Spectroscopy of Carbon Materials: Structural Basis of Observed Spectra", "url": "https://www.semanticscholar.org/paper/6cec800cf9222c4a309547e87a45dbba9c32e8db", "year": 1990 }, { "abstract": "Physicochemical and electrochemical characterization of carbon films obtained by pyrolyzing a commercially available photoresist has been performed. Photoresist spin-coated on to a silicon wafer was pyrolyzed at 1,000 degrees C in a reducing atmosphere (95% nitrogen and 5% hydrogen) to produce conducting carbon films. The pyrolyzed photoresist films (PPF) show unusual surface properties compared to other carbon electrodes. The surfaces are nearly atomically smooth with a root-mean-square roughness of \u003c0.5 nm. PPF have a very low background current and oxygen/carbon atomic ratio compared to conventional glassy carbon and show relatively weak adsorption of methylene blue and anthraquinone-2,6-disulfonate. The low oxygen/carbon ratio and the relative stability of PPF indicate that surfaces may be partially hydrogen terminated. The pyrolyzed films were compared to glassy carbon (GC) heat treated under the same conditions as pyrolysis to evaluate the electroanalytical utility of PPF. Heterogeneous electron-transfer kinetics of various redox systems were evaluated. For Ru(NH3)6(3+/2+), Fe(CN)6(3-/4-), and chlorpromazine, fresh PPF surfaces show electron-transfer rates similar to those on GC, but for redox systems such as Fe3+/2+, ascorbic acid, dopamine, and oxygen, the kinetics on PPF are slower. Very weak interactions between the PPF surface and these redox systems lead to their slow electron-transfer kinetics. Electrochemical anodization results in a simultaneous increase in background current, adsorption, and electron-transfer kinetics. The PPF surfaces can be chemically modified via diazonium ion reduction to yield a covalently attached monolayer. Such a modification could help in the preparation of low-cost, high-volume analyte-specific electrodes for diverse electroanalytical applications. Overall, pyrolysis of the photoresist yields an electrode surface with properties similar to a very smooth version of glassy carbon, with some important differences in surface chemistry.", "author": "Srikanth Ranganathan, R. McCreery", "color": "red", "doi": "10.1021/ac0007534", "id": "10.1021/ac0007534", "isOrigin": "true", "label": "Srikanth Ranganathan 2001", "nb_citations": 191, "shape": "dot", "size": 23.80867956568924, "title": "Electroanalytical performance of carbon films with near-atomic flatness.", "url": "https://www.semanticscholar.org/paper/941369a21f39a94adc9ef10a1ffea34dca864022", "year": 2001 }, { "abstract": "Aper\u00e7u indisponible", "author": "R. McCreery, R. Packard", "color": "red", "doi": "10.1021/ac00188a001", "id": "10.1021/ac00188a001", "isOrigin": "true", "label": "R. McCreery 1989", "nb_citations": 22, "shape": "dot", "size": 20.555769187496754, "title": "Raman monitoring of dynamic electrochemical events", "url": "https://www.semanticscholar.org/paper/f28dfd359ab627ebb9dcea0b3de226573d4343a2", "year": 1989 }, { "abstract": "High sensitivity surface Raman spectroscopy was used to acquire spectra from monolayers of nitrophenyl groups covalently bonded to glassy carbon (GC) and ordered graphite. 4-Nitrophenyl radical was generated by electroreduction of 4-nitrophenyl diazonium ion in acetonitrile, then the radical covalently bonded to the carbon surface. Raman spectroscopy with a 488 nm laser and a CCD spectrograph revealed spectral features characteristic of the nitrophenyl group. Voltammetry, XPS, and Raman spectroscopic data established that the surface coverage was 6.5 x mol/cm2 on the basal plane of highly ordered pyrolytic graphite (HOPG). Electrochemical reduction of the nitrophenyl surface yielded significant spectral changes, perhaps due to formation of an amine. The similarity of the Raman results for modified HOPG and GC surface indicates that the nitrophenyl radical is quite aggressive, apparently attacking both edge plane and basal plane sites.", "author": "Yi-chun Liu, R. McCreery", "color": "red", "doi": "10.1021/ja00150a024", "id": "10.1021/ja00150a024", "isOrigin": "true", "label": "Yi-chun Liu 1995", "nb_citations": 261, "shape": "dot", "size": 25.006561410463366, "title": "Reactions of Organic Monolayers on Carbon Surfaces Observed with Unenhanced Raman Spectroscopy", "url": "https://www.semanticscholar.org/paper/8563ce515bb737f2412c86a944c084a90ca36519", "year": 1995 }, { "abstract": "Aper\u00e7u indisponible", "author": "Wenhua Huang, R. McCreery", "color": "red", "doi": "10.1016/0022-0728(92)80499-t", "id": "10.1016/0022-0728(92)80499-t", "isOrigin": "true", "label": "Wenhua Huang 1992", "nb_citations": 47, "shape": "dot", "size": 21.096809062551465, "title": "Electron transfer kinetics of Fe(CN)63\u22124\u2212 on laser-activated and CN\u2212-modified Pt electrodes", "url": "https://www.semanticscholar.org/paper/b23a5fe1de5c1aed355e7c05de056306ee6eea3e", "year": 1992 }]);
+                    edges = new vis.DataSet([{ "color": "#a6aabf", "from": "10.1021/ac00199a016", "length": 222.37131118774408, "to": "10.1021/ja00186a008", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ja00186a008", "length": 219.28932189941406, "to": "10.1021/la00087a022", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ja000227u", "length": 156.70463562011713, "to": "10.1021/ac990399d", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ja000227u", "length": 645.3516197204589, "to": "10.1021/ac026107h", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac960492r", "length": 413.25370788574213, "to": "10.1021/ac026107h", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac960492r", "length": 477.6586723327636, "to": "10.1021/ac00114a004", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac960492r", "length": 479.9662780761718, "to": "10.1021/ja00168a001", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00045a011", "length": 222.5415420532226, "to": "10.1021/j100071a023", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00045a011", "length": 290.511531829834, "to": "10.1021/ja00186a008", "width": 1 }, { "arrows": "to", "color": "#4b7756", "from": "10.1021/ac00045a011", "to": "10.1149/1.2085987", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00190a010", "length": 465.2272415161132, "to": "10.1021/ac00045a011", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00190a010", "length": 614.6495056152343, "to": "10.1021/j100071a023", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00190a010", "length": 628.0396652221679, "to": "10.1021/ja00168a001", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ja00168a001", "length": 451.9765090942382, "to": "10.1021/ac00114a004", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ja00168a001", "length": 478.23268890380854, "to": "10.1021/ac990399d", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00101a026", "length": 598.500747680664, "to": "10.1021/ac961305s", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac00101a026", "length": 736.0912513732909, "to": "10.1021/ac9902392", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/j100071a023", "length": 245.6745338439941, "to": "10.1021/ja00186a008", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/la00087a022", "length": 318.8851547241211, "to": "10.1021/ac00045a011", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/cr068076m", "length": 562.1085357666014, "to": "10.1021/ac026107h", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac961305s", "length": 624.6616554260253, "to": "10.1021/ac9902392", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac9902392", "length": 642.4315643310546, "to": "10.1021/ac990399d", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/ac990399d", "length": 494.4017601013183, "to": "10.1021/ac026107h", "width": 1 }, { "color": "#a6aabf", "from": "10.1149/1.2085987", "length": 333.3868217468262, "to": "10.1021/ac00199a016", "width": 1 }, { "color": "#a6aabf", "from": "10.1149/1.2085987", "length": 437.61569976806635, "to": "10.1021/ja00186a008", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/j100186a063", "length": 408.94157409667963, "to": "10.1021/la00023a062", "width": 1 }, { "color": "#a6aabf", "from": "10.1021/j100186a063", "length": 678.863067626953, "to": "10.1021/ja00186a008", "width": 1 }]);
+
+                    nodeColors = {};
+                    allNodes = nodes.get({ returnType: "Object" });
+                    for (nodeId in allNodes) {
+                        nodeColors[nodeId] = allNodes[nodeId].color;
+                    }
+                    allEdges = edges.get({ returnType: "Object" });
+                    // adding nodes and edges to the graph
+                    data = { nodes: nodes, edges: edges };
+
+                    var options = {
+                        "configure": {
+                            "enabled": false
+                        },
+                        "edges": {
+                            "color": {
+                                "inherit": true
+                            },
+                            "smooth": {
+                                "enabled": true,
+                                "type": "dynamic"
+                            }
+                        },
+                        "interaction": {
+                            "dragNodes": true,
+                            "hideEdgesOnDrag": false,
+                            "hideNodesOnDrag": false
+                        },
+                        "physics": {
+                            "enabled": true,
+                            "stabilization": {
+                                "enabled": true,
+                                "fit": true,
+                                "iterations": 1000,
+                                "onlyDynamicEdges": false,
+                                "updateInterval": 50
+                            }
+                        }
+                    };
+
+
+
+
+
+
+                    network = new vis.Network(container, data, options);
+
+
+
+
+
+
+
+
+
+
+                    return network;
+
+                }
+                drawGraph();
+            </script>
+            <script src="Bokeh/bin/lib/binding/utils.js" type="text/javascript"></script>
+            <script src="js/EventNodeEdge.js"> </script>
+        </div>
+    </div>
 </body>
+
 </html>
