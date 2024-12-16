@@ -1,3 +1,7 @@
+body.loading {
+    cursor: wait;
+}
+
 /* Style pour l'input de recherche */
 .input {
     padding: 10px;
