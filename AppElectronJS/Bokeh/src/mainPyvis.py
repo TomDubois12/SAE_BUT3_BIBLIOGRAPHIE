@@ -59,11 +59,11 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
         case 'Date de publication':
             # Group the articles by their publication year
             year_dict = {}
-            for doi, data in cache_data.items():
-                publication_year = data.get('year')
+            for doi in allTheKeys:
+                publication_year = cache_data[doi].get("year")
                 if publication_year:  # Ensure there's a year available
                     if publication_year not in year_dict:
-                        year_dict[publication_year] = []
+                        year_dict[publication_year] = [] 
                     year_dict[publication_year].append(doi)
             
             # Add edges between articles published in the same year
@@ -110,11 +110,22 @@ def show_graphique_node(primaryKey):
         """return:
             all_key: (List): A list of the primaryKey + all the ChildKeys
         """  
-        all_key = find_similar_articles(primaryKey, 10)
-        childSimilarities = [t[1] for t in all_key]
-        all_key = [t[0] for t in all_key]
+        nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+        NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+        similarities = search_by_keyword(mot_cle,nbNodeOrigin)
+        liste_final = [t[0] for t in similarities]
+        liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
         
-        return all_key, childSimilarities
+        all_key1 = [t[0] for t in liste_final] #List of originNode, the node with the more similarities with the subject.
+        all_key2 = [t[1] for t in liste_final] #List of the childs of all the originNode.
+        all_key2 = [t[0] for _t in all_key2 for t in _t]
+        
+        liste = [primaryKey, []]
+        for key in all_key1:
+            liste[1].append((key, 1))
+        liste_final.append(liste)
+        
+        return all_key1+all_key2, all_key1, all_key2, liste_final
     
     def setAllNode(G):
 
@@ -123,26 +134,43 @@ def show_graphique_node(primaryKey):
         
             # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
         for nom in noms:
-            print(nom)
             node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom == primaryKey else 'blue'  # Red for origin nodes, blue otherwise
-    
-            G.add_node(
-                nom,
-                size=nodeTaille,
-                label=node['authors'].split(",")[0] +" "+ str(node['year']),
-                year=node['year'],
-                title=node['title'],
-                abstract=node['abstract'],
-                author=node['authors'],
-                doi=nom,
-                color=color,
-                nb_citations=node['num_citations'],
-                #citations=node['doi_citations'],
-                url=node['url'],
-                isOrigin=nom == primaryKey
-            )
+            if nom == primaryKey:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=True,
+                    primaryNode= True
+                )
+            else:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=nom in originKeys,
+                    primaryNode= False
+                )
         return G
     
 
@@ -151,8 +179,9 @@ def show_graphique_node(primaryKey):
 
     df = json_normalize(cache_data)
 
-    childKey, childSimilarities = getListallKey()
-    allTheKeys = [primaryKey] + childKey
+    
+    allTheKeys, originKeys, _childKeys,liste_final = getListallKey()
+    allTheKeys = [primaryKey] + allTheKeys
     print(allTheKeys)
     # Reindexer le DataFrame selon les clés trouvées
     
@@ -167,8 +196,8 @@ def show_graphique_node(primaryKey):
     liaisons = dataUser["ColorPickerSettings"]
 
     for liaison in liaisons:
-        if liaison['check'] == 'true' and liaison['liaisonName'] != "Similarité":
-            G = setLiaison(G, liaison, allTheKeys, allTheKeys)
+        if liaison['check'] == 'true':
+            G = setLiaison(G, liaison, allTheKeys, liste_final)
 
     nt = Network('100vh', '100vw', notebook=True)
     # nt.show_buttons(filter_=['physics'])
