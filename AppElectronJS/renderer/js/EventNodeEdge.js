@@ -499,6 +499,8 @@ async function setAllNodeDeg() {
         const legend = document.getElementById("legend-textOr");
         if (minDateOrigin === undefined || maxDateOrigin === undefined) {
             legend.textContent = "Node manquante";
+            document.getElementById('DivOrigin').style.display = 'none';
+            document.getElementById('legend-textOr').style.display = 'none';
         } else {
             legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
         }
@@ -514,6 +516,8 @@ async function setAllNodeDeg() {
         const legendE = document.getElementById("legend-textEnv");
         if (minDateEnv === undefined || maxDateEnv === undefined) {
             legendE.textContent = "Node manquante";
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
         } else {
             legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
