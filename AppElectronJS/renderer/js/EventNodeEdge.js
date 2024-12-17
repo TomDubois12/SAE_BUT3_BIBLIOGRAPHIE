@@ -39,8 +39,6 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
 async function changeBlurColor(nodeId, isOrigin){
 
-    console.log(nodeId);
-    console.log(idSelectedNode);
     if (nodeId == idSelectedNode) { return;} 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
@@ -70,15 +68,6 @@ async function changeBlurColor(nodeId, isOrigin){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
             });
         }
-
-
-    // network.body.data.nodes.update({
-    //     id: nodeId,
-    //     color: color,
-    //     borderWidth: 0,
-    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    // });
-    // Délai avant de remettre la couleur d'origine (si nécessaire)
 }
 
 async function changeColorOnClick(nodeId){
@@ -103,8 +92,6 @@ async function changeColorOnClick(nodeId){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
             });
         }else{
-            console.log("heyyyyy");
-
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -132,7 +119,6 @@ async function colorOnNodeSave(idNode){
             maxD = maxDateEnv;
         }
     if(network.body.data.nodes.get(idNode).primaryNode){
-        console.log("heyyyyy");
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year, maxD, minD, color),
@@ -140,7 +126,6 @@ async function colorOnNodeSave(idNode){
             shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
         });
     }else{
-        console.log("ça passe");
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year,maxD,minD,color),
@@ -231,13 +216,26 @@ function createAside(nodeId) {
         buttonCreateGraph.textContent = "Générer le graphe de cet article"
         buttonCreateGraph.classList.add("buttonGenerateGraph");
         buttonCreateGraph.addEventListener("click", async () => {
+            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+                if (data) {
+                    data = JSON.parse(data);
+                    data.WordChoose = nodeData.doi;
+                    data.TypeChoose = "Par noeud";
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
+                }
+            });
+
             const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
         });
+        
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             if (data) {
                 data = JSON.parse(data);
-                data.WordChoose = nodeData.doi;
-                data.TypeChoose = "noeud";
+                data.asideDOI = nodeData.doi;
                 window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                     if (err) {
                     console.error('Erreur d’écriture :', err);
@@ -325,6 +323,13 @@ function getColorParamUser(isOrigin) {
                 // Initialisation de la couleur par défaut
                 let colorToReturn = "#000000"; 
 
+                // Si recherche par auteur ou titre, on renvoi la couleur unique
+                if (data.TypeChoose === "Par titre" || data.TypeChoose === "Par auteur") {
+                    colorToReturn = data.ColorNodesSpecialType;
+                    resolve(colorToReturn);  // Résoudre avec la couleur appropriée
+                }
+
+                // Sinon on cherche il faut laquelle
                 // Recherche dans "ListeNoeudSettings" en fonction de la propriété isOrigin
                 if (isOrigin) {
                     // Trouver la couleur pour le nœud à l'origine
@@ -393,9 +398,6 @@ function getColorForDate(date, minDate , maxDate, baseColor) {
     // Retourner la couleur ajustée
     return adjustColorBrightness(baseColor, factor);
 }
-
-
-
 
 let maxDateOrigin;
 let minDateOrigin;
@@ -500,6 +502,8 @@ async function setAllNodeDeg() {
         const legend = document.getElementById("legend-textOr");
         if (minDateOrigin === undefined || maxDateOrigin === undefined) {
             legend.textContent = "Node manquante";
+            document.getElementById('DivOrigin').style.display = 'none';
+            document.getElementById('legend-textOr').style.display = 'none';
         } else {
             legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
         }
@@ -515,6 +519,8 @@ async function setAllNodeDeg() {
         const legendE = document.getElementById("legend-textEnv");
         if (minDateEnv === undefined || maxDateEnv === undefined) {
             legendE.textContent = "Node manquante";
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
         } else {
             legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
@@ -655,6 +661,9 @@ function setWordSearch(){
             }
             else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
                 selectElement.value = "sujet";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par noeud")){
+                selectElement.value = "noeud";
             }
         }
     });

@@ -1,1 +1,39 @@
-{"userName":"Nathan","ColorPickerSettings":[{"liaisonName":"Similarité","color":"#0025e0","check":"true"},{"liaisonName":"Citation","color":"#fa4b00","check":"true"},{"liaisonName":"Date de publication","color":"#00ccff","check":"false"}],"ListeNoeudSettings":[{"NoeudsName":"Nombre de nodes à l'origine ","color":"#a62121","value":"15"},{"NoeudsName":"Nombre de nodes environnant ","color":"#6d7411","value":"3"}],"pathDirectoryCSV":"./Data","CSVChoose":"Bibliographie_mini.csv","WordChoose":"Carbon","TypeChoose":"Par sujet","estRecharger":"false"}
+{
+    "userName": "Nathan",
+    "ColorPickerSettings": [
+        {
+            "liaisonName": "Similarité",
+            "color": "#0025e0",
+            "check": "true"
+        },
+        {
+            "liaisonName": "Citation",
+            "color": "#fa4b00",
+            "check": "false"
+        },
+        {
+            "liaisonName": "Date de publication",
+            "color": "#00ccff",
+            "check": "false"
+        }
+    ],
+    "ListeNoeudSettings": [
+        {
+            "NoeudsName": "Nombre de nodes à l'origine ",
+            "color": "#a62121",
+            "value": "7"
+        },
+        {
+            "NoeudsName": "Nombre de nodes environnant ",
+            "color": "#6d7411",
+            "value": "3"
+        }
+    ],
+    "ColorNodesSpecialType": "#111a97",
+    "pathDirectoryCSV": "./Data",
+    "CSVChoose": "Bibliographie_mini.csv",
+    "WordChoose": "Javier Díaz",
+    "asideDOI": "10.1103/physrevb.54.8064",
+    "TypeChoose": "Par auteur",
+    "estRecharger": "true"
+}
