@@ -206,20 +206,20 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         abstract_length = len(abstracts[dois_to_process.index(doi)].split())
 
         # Ajustement dynamique des poids
-        if not abstract:  # Titre présent mais pas d'abstract 
-            if len(title.split()) < 10:
-                title_weight, abstract_weight = 0.5, 0.0
-            else:
-                title_weight, abstract_weight = 0.9, 0.0
+        if len(title.split()) < 10 and not abstract: # Titre court mais pas d'abstract 
+            title_weight, abstract_weight = 0.4, 0.0
             
+        if len(title.split()) < 10 and abstract: # Titre court et abstract présent
+            title_weight, abstract_weight = 0.3, 0.7
+            
+        if len(title.split()) >= 10 and not abstract: # Titre assez long mais pas d'abstract
+            title_weight, abstract_weight = 0.6, 0.0
+            
+        if len(title.split()) >= 10 and abstract: # Titre assez long et abstract présent
+            title_weight, abstract_weight = 0.5, 0.5
+        
         if not title and abstract:  # Pas de titre et abstract présent
             title_weight, abstract_weight = 0.0, 0.9
-        
-        if len(title.split()) < 5 and abstract:  # Titre court et abstract présent
-            title_weight, abstract_weight = 0.3, 0.7
-
-        # Sinon poids classique
-        title_weight, abstract_weight = 0.4, 0.6
 
         # Combinaison des embeddings avec pondérations
         if title_emb == [0] * model.get_sentence_embedding_dimension():
@@ -235,7 +235,6 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     return data
-
 
 
 if __name__ == "__main__":
