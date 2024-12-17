@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="CSS/ajoutarticle.css">
+</head>
+
+<body>
+    <a href="search.html"><img src="images/retour.png" alt="flèche retour"></a>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div>
+    
+    <div class="text">
+        <p class="texttitle">Ajouter un article par son titre ou DOI</p>
+        <p class="textsubtitle">(ou faites le glisser depuis semanticscholar)</p>
+        <textarea id="textarea-id"></textarea>
+        <div class="contenerButton">
+            <button id="ajout-btn" onclick="ajouterArticle()">Ajouter l'article</button>
+        </div>
+    </div>
+
+    <script>
+        function ajouterArticle() {
+            var contenu = document.getElementById('textarea-id').value;
+            
+            console.log('Contenu du textarea:', contenu);
+            
+            alert('Contenu de l\'article ajouté: ' + contenu);
+            window.electronAPI.addArticle(contenu);
+        }
+    </script>
+</body>
+
+</html>

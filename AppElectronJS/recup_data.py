@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import time
 import requests
 import numpy as np
@@ -7,6 +8,78 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+def is_valid_doi(doi):
+    """
+    Vérifie si une chaîne de caractères correspond à un DOI valide.
+    
+    Args:
+        doi (str): La chaîne de caractères à vérifier.
+        
+    Returns:
+        bool: True si la chaîne est un DOI valide, False sinon.
+    """
+    # Expression régulière pour vérifier un DOI de base (format 10.xxxx/xxxxx)
+    doi_pattern = r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$"
+    
+    # Applique l'expression régulière en insensibilité à la casse
+    if re.match(doi_pattern, doi, re.IGNORECASE):
+        return True
+    else:
+        return False
+    
+def get_response(doi_url):
+    base_url = "https://api.semanticscholar.org/v1/paper/"
+    if is_valid_doi(doi_url):
+        response = requests.get(f"{base_url}{doi_url}")
+    else:
+        print("hi")
+        search_url = "https://api.semanticscholar.org/v1/paper/search/"
+        params = {"query": doi_url}
+        response = requests.get(search_url, params=params)
+        if response.ok:
+            search_results = response.json()
+            if search_results['data']:
+                paper_id = search_results['data'][0]['paperId']
+                response = requests.get(f"{base_url}{paper_id}")
+                print("let's go")
+    return response
+    
+def ajout_article(doi_url):
+    response = get_response(doi_url)
+
+    if response.ok:
+        data = response.json()
+        title = data.get('title', None)
+        abstract = data.get('abstract', None)
+        authors = ', '.join([author['name'] for author in data.get('authors', [])])
+        doi = data.get('doi', None)
+        year = data.get('year', None)
+
+        # Vérification des citations
+        citations = data.get('citations', [])
+        references = data.get('references', [])
+        num_citations = len(citations)
+        citation_dois = []
+        references_doi = []
+
+        # Récupérer les DOI des citations, s'ils existent
+        for citation in citations:
+            citation_doi = citation.get('doi', None)
+            citation_dois.append(citation_doi if citation_doi else "DOI indisponible")
+        
+        for reference in references:
+            reference_doi = reference.get('doi',None)
+            references_doi.append(reference_doi if reference_doi else "DOI indisponible")
+        
+        # Si des citations ont été trouvées, retourne leur DOI
+        doi_citations = citation_dois if citation_dois else ["Aucun DOI disponible"] # ?
+        references_doi = references_doi if references_doi else ["Aucun DOI disponible"] # ?
+        url = data.get('url', None)
+
+        # Retourne toujours 7 valeurs
+        cache(doi, title, abstract, authors, year, url, num_citations, doi_citations, references_doi)
+        load_or_compute_embeddings()
 
 def semantic_scholar_research(doi=None, title=None):
     """
