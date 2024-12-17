@@ -122,7 +122,7 @@ def recuperate_data(cache_file='cache_doi.json'):
         # Vérification si DOI est une chaîne et s'il existe dans le cache
         if isinstance(doi, str) and doi.lower() in cache_data:
             num_citations = cache_data[doi.lower()]['num_citations']
-            doi_citations = cache_data[doi.lower()]['doi_citations']
+            # doi_citations = cache_data[doi.lower()]['doi_citations']
         elif isinstance(doi, str) and pd.notna(doi):
             # Appel à Semantic Scholar pour obtenir les informations si DOI est une chaîne et non NaN
             title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(
