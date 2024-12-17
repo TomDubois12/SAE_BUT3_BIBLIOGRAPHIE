@@ -6,7 +6,7 @@
     </head>
     <body>
         <div class="logo">
-            <img src="images/logo.webp" alt="logo de l'application" class="logo">
+            <img src="images/logo.png" alt="logo de l'application" class="logo">
         </div> 
         <div class="text">
             <p class="title">Explorez les articles connectés sous forme de graphe</p>
@@ -15,7 +15,7 @@
 
         <nav class="navbar">
             <input class="input" type="search" id="site-search" name="q" minlength="1"
-                placeholder="Indiquez un mot clé, un nom d’auteur"  
+                placeholder="Indiquez un mot clé, un nom d’auteur, un titre ou encore un doi..."  
             />
             <select id="listBouton" onchange="changerChoix(this)">
                 <option class="auteur" value="auteur">Par auteur</option>
@@ -23,14 +23,6 @@
                 <option class="titre" value="titre">Par titre</option>
             </select>
             <button id="search-btn">Rechercher</button>
-            <script>
-                document.getElementById('search-btn').addEventListener('click', function() {
-                    document.body.classList.add('loading');
-                    setTimeout(() => {
-                        document.body.classList.remove('loading');
-                    }, 20000);
-                });
-            </script>
         </nav>
         
         <div class="textIcons">
@@ -40,7 +32,7 @@
             <li>
                 <div>
                     <img src="images/Key_alt.png" alt="Un T" class="key">
-                    <div class="text-auteur">
+                    <div class="text">
                         <p>
                             Un ou plusieurs mots clés
                         </p>
@@ -50,7 +42,7 @@
             <li>
                 <div>
                     <img src="images/File_alt.png" alt="Un fichier" class="file">
-                    <div class="text-auteur">
+                    <div class="text">
                         <p>
                             Un titre d'article
                         </p>
@@ -60,9 +52,19 @@
             <li>
                 <div>
                     <img src="images/User_alt.png" alt="Un utilisateur" class="user">
-                    <div class="text-auteur">
+                    <div class="text">
                         <p>
                             Un nom d'auteur
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <img src="images/doi.png" alt="Un doi" class="doi">
+                    <div class="text">
+                        <p>
+                            Un doi
                         </p>
                     </div>
                 </div>

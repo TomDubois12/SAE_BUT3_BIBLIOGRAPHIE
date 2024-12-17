@@ -45,3 +45,9 @@ button {
     text-align: center;
     margin-top: 5vh;
 }
+
+a img{
+    margin-top: 2vh;
+    margin-left: 2vh;
+    max-width: 2vw;
+}
