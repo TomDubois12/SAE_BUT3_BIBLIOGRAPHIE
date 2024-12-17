@@ -218,7 +218,7 @@ function createAside(nodeId) {
         doi.textContent = `Ouvrir le lien`;
 
         // Check if DOI or citation link is available
-        if (nodeData.citations) {
+        if (nodeData.url) {
             doi.addEventListener('click', () => {
                 window.open(nodeData.url, "_blank", "noopener noreferrer");
             });
@@ -228,6 +228,7 @@ function createAside(nodeId) {
 
         aside.appendChild(doi);
         const buttonCreateGraph = document.createElement("button");
+        buttonCreateGraph.textContent = "Générer le graphe de cet article"
         buttonCreateGraph.classList.add("buttonGenerateGraph");
         buttonCreateGraph.addEventListener("click", async () => {
             const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);

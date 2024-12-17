@@ -25,10 +25,10 @@ body {
 }
 
 .logoNavbar img {
-    max-width: 15vw;
-    max-height: 10vh;
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+    max-width: 12vw;
+    max-height: 8vh;
+    margin-top: 2vh;
+    margin-left: 1vh;
 }
 
 .navbar {
@@ -130,6 +130,7 @@ select{
     flex-wrap: nowrap;
     top: 0%;
     left:100%;
+    z-index: 10;
 }
 
 .echelle{
@@ -142,6 +143,10 @@ select{
 }
 
 /* Aside param */
+
+.criteres{
+    overflow: auto;
+}
 
 .titleParam {
     font-size: 4vh;
@@ -248,7 +253,7 @@ select{
 
 
 
-.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation, .pDOI {
+.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation, .pDOI, .buttonGenerateGraph {
     margin-left: 0.5vw;
 }
 
@@ -256,7 +261,7 @@ select{
     font-size: 3.5vh;
 }
 
-.pYear, .pAuthor, .pAbstract, .pDOI, .pCitation {
+.pYear, .pAuthor, .pAbstract, .pDOI, .pCitation, .buttonGenerateGraph {
     font-size: 2vh;
 }
 
