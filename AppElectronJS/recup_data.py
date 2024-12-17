@@ -22,31 +22,58 @@ def is_valid_doi(doi):
     # Expression régulière pour vérifier un DOI de base (format 10.xxxx/xxxxx)
     doi_pattern = r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$"
     
-    # Applique l'expression régulière en insensibilité à la casse
     if re.match(doi_pattern, doi, re.IGNORECASE):
         return True
     else:
         return False
     
-def get_response(doi_url):
-    base_url = "https://api.semanticscholar.org/v1/paper/"
-    if is_valid_doi(doi_url):
-        response = requests.get(f"{base_url}{doi_url}")
-    else:
-        print("hi")
-        search_url = "https://api.semanticscholar.org/v1/paper/search/"
-        params = {"query": doi_url}
-        response = requests.get(search_url, params=params)
-        if response.ok:
-            search_results = response.json()
-            if search_results['data']:
-                paper_id = search_results['data'][0]['paperId']
-                response = requests.get(f"{base_url}{paper_id}")
-                print("let's go")
-    return response
+def is_valid_url(url):
+    """
+    Vérifie si une chaîne de caractères correspond à une URL valide.
     
+    Args:
+        url (str): La chaîne de caractères à vérifier.
+        
+    Returns:
+        bool: True si la chaîne est une URL valide, False sinon.
+    """
+    # Expression régulière pour vérifier une URL valide
+    url_pattern = r'^https://www.semanticscholar.org/paper/'
+    
+    match = re.match(url_pattern, url)
+    if match:
+        return True
+    else:
+        return False
+
+def get_response(doi_url):
+    """
+    Obtient la réponse de l'API Semantic Scholar en fonction du DOI ou de l'URL.
+    
+    Args:
+        doi_url (str): DOI ou URL pour récupérer les informations de l'article.
+        
+    Returns:
+        Response: La réponse de l'API Semantic Scholar.
+    """
+    base_url = "https://api.semanticscholar.org/v1/paper/"
+    
+    if is_valid_doi(doi_url):
+        # Si le DOI est valide, on effectue la requête avec le DOI
+        response = requests.get(f"{base_url}{doi_url}")
+    elif is_valid_url(doi_url):
+        # Si l'URL est valide, on extrait la dernière partie de l'URL après le dernier '/'
+        paper_id = doi_url.split('/')[-1]  # Récupérer l'ID après le dernier '/'
+        print(paper_id)
+        response = requests.get(f"{base_url}{paper_id}")
+    else:
+        return None
+    
+    return response
+
 def ajout_article(doi_url):
     response = get_response(doi_url)
+    print(response)
 
     if response.ok:
         data = response.json()
