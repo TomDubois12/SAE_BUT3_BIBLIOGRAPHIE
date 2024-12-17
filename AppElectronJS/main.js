@@ -120,21 +120,37 @@ function runPythonFunction(params) {
   return err;
 }
 
+function openOtherWindow(){
+  graphWindo = new BrowserWindow({
+    width: isDev ? 1000: 500,
+    height: 600,
+    icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+    webPreferences: webPref
+  });
+  graphWindo.loadFile('./renderer/test.html');
+}
 
+ipcMain.handle('callFunctionSearch', (event, query, specialEvent = false) => {
 
-ipcMain.handle('callFunctionSearch', (event, query) => {
-  // Appel de la fonction Python avec les paramètres fournis
-  return runPythonFunction(query)
-      .then((output) => {
-          // Une fois le processus Python terminé, charger la nouvelle page HTML
-          mainWindow.loadFile('renderer/test.html'); 
-          return output;  // Renvoyer la sortie du script Python
-      })
-      .catch((error) => {
-          // En cas d'erreur, renvoyer l'erreur
-          // !!! ne pas changer le texte Error en dessous, important pour la gestion d'erreur dans renderer.js
-          return `Error: ${error}`;
-      });
+  if(query.length == 3 && query[2]){
+    
+    runPythonFunction(query).then( () => {openOtherWindow();});
+    
+  }else{
+
+    // Appel de la fonction Python avec les paramètres fournis
+    return runPythonFunction(query)
+    .then((output) => {
+        // Une fois le processus Python terminé, charger la nouvelle page HTML
+        mainWindow.loadFile('renderer/test.html'); 
+        return output;  // Renvoyer la sortie du script Python
+    })
+    .catch((error) => {
+        // En cas d'erreur, renvoyer l'erreur
+        // !!! ne pas changer le texte Error en dessous, important pour la gestion d'erreur dans renderer.js
+        return `Error: ${error}`;
+    });
+  }
 });
 
 app.whenReady().then(() => {
