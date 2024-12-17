@@ -39,8 +39,6 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
 async function changeBlurColor(nodeId, isOrigin){
 
-    console.log(nodeId);
-    console.log(idSelectedNode);
     if (nodeId == idSelectedNode) { return;} 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
@@ -217,13 +215,26 @@ function createAside(nodeId) {
         const buttonCreateGraph = document.createElement("button");
         buttonCreateGraph.classList.add("buttonGenerateGraph");
         buttonCreateGraph.addEventListener("click", async () => {
+            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+                if (data) {
+                    data = JSON.parse(data);
+                    data.WordChoose = nodeData.doi;
+                    data.TypeChoose = "Par noeud";
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
+                }
+            });
+
             const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
         });
+        
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             if (data) {
                 data = JSON.parse(data);
-                data.WordChoose = nodeData.doi;
-                data.TypeChoose = "noeud";
+                data.asideDOI = nodeData.doi;
                 window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                     if (err) {
                     console.error('Erreur d’écriture :', err);
@@ -311,6 +322,13 @@ function getColorParamUser(isOrigin) {
                 // Initialisation de la couleur par défaut
                 let colorToReturn = "#000000"; 
 
+                // Si recherche par auteur ou titre, on renvoi la couleur unique
+                if (data.TypeChoose === "Par titre" || data.TypeChoose === "Par auteur") {
+                    colorToReturn = data.ColorNodesSpecialType;
+                    resolve(colorToReturn);  // Résoudre avec la couleur appropriée
+                }
+
+                // Sinon on cherche il faut laquelle
                 // Recherche dans "ListeNoeudSettings" en fonction de la propriété isOrigin
                 if (isOrigin) {
                     // Trouver la couleur pour le nœud à l'origine
@@ -379,9 +397,6 @@ function getColorForDate(date, minDate , maxDate, baseColor) {
     // Retourner la couleur ajustée
     return adjustColorBrightness(baseColor, factor);
 }
-
-
-
 
 let maxDateOrigin;
 let minDateOrigin;
@@ -641,6 +656,9 @@ function setWordSearch(){
             }
             else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
                 selectElement.value = "sujet";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par noeud")){
+                selectElement.value = "noeud";
             }
         }
     });

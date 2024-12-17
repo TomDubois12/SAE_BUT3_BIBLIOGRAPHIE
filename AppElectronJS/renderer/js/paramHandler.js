@@ -115,13 +115,60 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('colorEdit').style.display = 'none';
         }
                    
+
+        const ulNode = document.getElementById('ulNode');
+        if (data.TypeChoose === 'Par titre' || data.TypeChoose === 'Par auteur' ) {
+            // On s'occupe du cas où c'est par titre ou part auteur, pour avoir la couleur des nodes 
+
+            //La div de couleur a changer 
+            let divColor = document.getElementById('colorEdit');
+
+            //La couleur stocker dans le json
+            let colorNode = data.ColorNodesSpecialType;
+
+            const li = document.createElement('li');
+            li.className = "color-item";
+            
+            divColor.className = 'color-box';
+            divColor.value = colorNode;
+
+            li.appendChild(divColor);
+            ulNode.appendChild(li);
+
+            //On ajoute un event pour le changement de valeur de la couleur
+            divColor.addEventListener('change', (event) => {
+                writeColorNodes(event.target.value);
+            });
+
+        }
     } else {
         console.error("Impossible de lire les paramètres utilisateur.");
     }
 });
 
+function isHexColor(value) {
+    const hexColorRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{8})$/;
+    return hexColorRegex.test(value);
+}
+
+function writeColorNodes(newColor){
+    console.log(newColor,isHexColor(newColor));
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data && isHexColor(newColor)) {
+            
+            data = JSON.parse(data);
+            data.ColorNodesSpecialType = newColor;
+
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+            });
+        }
+    });
+}
+
 function writePickerColor(elemntId, newColor){
-    console.log(elemntId,newColor);
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
