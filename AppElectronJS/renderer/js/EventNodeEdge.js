@@ -655,6 +655,9 @@ function setWordSearch(){
             else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
                 selectElement.value = "sujet";
             }
+            else if ((data.TypeChoose && data.TypeChoose === "Par noeud")){
+                selectElement.value = "noeud";
+            }
         }
     });
 }
