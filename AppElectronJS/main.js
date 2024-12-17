@@ -132,6 +132,7 @@ ipcMain.handle('callFunctionSearch', (event, query) => {
       })
       .catch((error) => {
           // En cas d'erreur, renvoyer l'erreur
+          // !!! ne pas changer le texte Error en dessous, important pour la gestion d'erreur dans renderer.js
           return `Error: ${error}`;
       });
 });

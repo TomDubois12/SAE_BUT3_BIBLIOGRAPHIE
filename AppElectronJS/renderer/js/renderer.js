@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
-        keepResearchParam(query);
 
         let paramRecherche = "";
         paramRecherche = document.getElementById("listBouton");
@@ -17,6 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(paramRecherche.value)
 
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+
+        if(!output.includes("Error")){
+            keepResearchParam(query);
+        }
     });
 
 
@@ -95,7 +98,6 @@ function getSelectedOption() {
 
 async function research(){
     const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
-    keepResearchParam(query);
 
     let paramRecherche = "";
     paramRecherche = document.getElementById("listBouton");
@@ -103,5 +105,8 @@ async function research(){
     console.log(paramRecherche.value)
     
     const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+    if(!output.includes("Error")){
+        keepResearchParam(query);
+    }
 }
 
