@@ -25,6 +25,7 @@ def ajout_script():
     """
     return custom_script
 
+
 def get_list_xSimilaritie(listeKey, x=1):
     """
     Take a liste of key, for exemple 15 key similar from the keyWords and return a list of x similar article for each key.
@@ -36,48 +37,42 @@ def get_list_xSimilaritie(listeKey, x=1):
         liste_final += [[key, [(t[0],t[1]) for t in listeSimiliarities]]]
     return liste_final
 
+
 def setLiaison(G, liaison, allTheKeys, listeKeys):
     match liaison['liaisonName']:
         case 'Similarité':
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])
-        
-        case 'Citation':
+                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])    
 
-            allTheKeys = set(allTheKeys)
-            set_liaison_final = set()
+        case 'Référence':
+            for node in allTheKeys:
+                premiere_node = node
+                liste_references_du_node = cache_data[node].get("doi_references", [])
+                for ref in liste_references_du_node:
+                    if ref in allTheKeys:
+                        deuxieme_node = ref
+                        G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
 
-            for key in allTheKeys:
-                normalized_key = key.lower()
-
-                if normalized_key in cache_data:
-                    liste_doi = cache_data[normalized_key].get("doi_citations", [])
-                    for keyCite in liste_doi:
-                        if key in cache_data.keys() and keyCite in cache_data.keys() and keyCite in allTheKeys:
-                            set_liaison_final.add((keyCite, key))
-            
-            for couple in set_liaison_final:
-                G.add_edge(couple[0], couple[1], color=liaison['color'])
-
+                        
         case 'Date de publication':
-            
-            # Group the articles by their publication year
-            year_dict = {}
-            for doi, data in cache_data.items():
-                publication_year = data.get('year')
-                if publication_year:  # Ensure there's a year available
-                    if publication_year not in year_dict:
-                        year_dict[publication_year] = []
-                    year_dict[publication_year].append(doi)
-            
-            # Add edges between articles published in the same year
-            for year, doais in year_dict.items():
-                for i in range(len(doais) - 1):
-                    if doais[i] in allTheKeys:
-                        for j in range(i + 1, len(doais)):
-                            G.add_edge(doais[i], doais[j], color=liaison['color'])
+              # Group the articles by their publication year
+              year_dict = {}
+              for node in allTheKeys:
+                  publication_year = cache_data[node].get('year')
+                  if publication_year:
+                      if publication_year not in year_dict:
+                          year_dict[publication_year] = []
+                      year_dict[publication_year].append(node)
+
+
+              for year, articles in year_dict.items():
+                  for i in range(len(articles)):
+                      for j in range(i + 1, len(articles)):
+                          if articles[i] != articles[j]:
+                              G.add_edge(articles[i], articles[j], color=liaison['color'])
+
 
     return G
 
@@ -107,6 +102,125 @@ def transform_value_log(value, original_min, original_max, target_min=20, target
     print(transformed_value)
     return transformed_value
 
+
+def show_graphique_node(primaryKey):
+    """
+    liste_key: list of list [[onePrincipaleKey, [(childKey1, similaritieWithParent), (...)]]]
+    """
+    def getListallKey():
+        """return:
+            all_key: (List): A list of the primaryKey + all the ChildKeys
+        """  
+        nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+        NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+        similarities = search_by_keyword(mot_cle,nbNodeOrigin)
+        liste_final = [t[0] for t in similarities]
+        liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
+        
+        all_key1 = [t[0] for t in liste_final] #List of originNode, the node with the more similarities with the subject.
+        all_key2 = [t[1] for t in liste_final] #List of the childs of all the originNode.
+        all_key2 = [t[0] for _t in all_key2 for t in _t]
+        
+        liste = [primaryKey, []]
+        for key in all_key1:
+            liste[1].append((key, 0.9))
+        liste_final.append(liste)
+        
+        return all_key1+all_key2, all_key1, all_key2, liste_final
+    
+    def setAllNode(G):
+
+        # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(cache_data)
+        
+            # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        for nom in noms:
+            node = cache_data[nom]
+            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
+            color = 'red' if nom == primaryKey else 'blue'  # Red for origin nodes, blue otherwise
+            if nom == primaryKey:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=True,
+                    primaryNode= True
+                )
+            else:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=nom in originKeys,
+                    primaryNode= False
+                )
+        return G
+    
+
+    # Create the graph
+    G = nx.DiGraph()
+
+    df = json_normalize(cache_data)
+
+    
+    allTheKeys, originKeys, _childKeys,liste_final = getListallKey()
+    allTheKeys = [primaryKey] + allTheKeys
+    print(allTheKeys)
+    # Reindexer le DataFrame selon les clés trouvées
+    
+    dfFinal = df.reindex(allTheKeys)
+
+    noms = dfFinal.index  # Use the index (the keys)
+
+
+    G = setAllNode(G)
+
+
+    liaisons = dataUser["ColorPickerSettings"]
+
+    for liaison in liaisons:
+        if liaison['check'] == 'true':
+            G = setLiaison(G, liaison, allTheKeys, liste_final)
+
+    nt = Network('100vh', '100vw', notebook=True)
+    # nt.show_buttons(filter_=['physics'])
+    nt.from_nx(G)
+
+    # Create the HTML file
+    html_file_path = 'Bokeh/bin/nx.html'
+    nt.save_graph(html_file_path)
+
+    # Manually modify the HTML to include the JavaScript functionality
+    with open(html_file_path, 'r') as f:
+        html_content = f.read()
+    
+    # Insert the custom script just before the closing </body> tag
+    html_content = html_content.replace('</body>', ajout_script() + '</body>')
+
+    # Write the modified content back to the file
+    with open(html_file_path, 'w') as f:
+        f.write(html_content)
+    
+    
+    
 
 def show_graphique(liste_key, dataUser):
     """
@@ -144,9 +258,8 @@ def show_graphique(liste_key, dataUser):
                 abstract=node['abstract'],
                 author=node['authors'],
                 doi=nom,
-                color=color,
                 nb_citations=node['num_citations'],
-                citations=node['doi_citations'],
+                #citations=node['doi_citations'],
                 url=node['url'],
                 isOrigin=nom in originKeys
             )
@@ -154,7 +267,7 @@ def show_graphique(liste_key, dataUser):
 
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
 
     df = json_normalize(cache_data)
@@ -222,14 +335,14 @@ def show_graphique_author(liste_key):
                 doi=nom,
                 color=color,
                 nb_citations=node['num_citations'],
-                citations=node['doi_citations'],
+                #citations=node['doi_citations'],
                 url=node['url'],
                 isOrigin="true"
             )
         return G
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
     
     df = json_normalize(cache_data)
 
@@ -237,7 +350,6 @@ def show_graphique_author(liste_key):
     dfFinal = df.reindex(liste_key)
 
     noms = dfFinal.index  # Use the index (the keys)
-    infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
 
@@ -349,6 +461,9 @@ if __name__ == "__main__":
                 case "titre":
                     liste_final = search_by_title(mot_cle)
                     show_graphique_author(liste_final)
+                case "noeud":
+                    show_graphique_node(mot_cle)
+                    
         readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
     else:
@@ -356,7 +471,7 @@ if __name__ == "__main__":
 
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python3 -m Bokeh.src.mainPyvis "carbon" "false"
+#python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "richard l." "true"
+#python3 -m Bokeh.src.mainPyvis "richard l." "auteur"

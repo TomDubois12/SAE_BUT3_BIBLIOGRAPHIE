@@ -33,7 +33,6 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             li.appendChild(divColor);
                     
             divLiaison.appendChild(li);
-
             input.addEventListener('change', (event) => {
                 writeElementCheck(event.target.id,event.target.checked);
             });
@@ -48,44 +47,81 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         // La partie pour les nbNoeuds //
         /////////////////////////////////
         const divNoeuds = document.getElementById('listeNbNoeuds');
-        data.ListeNoeudSettings.forEach(element => {
+        data.ListeNoeudSettings.forEach((element, index) => {
             const li = document.createElement('li');
             li.className = "color-item";
-
+    
+        
             const divColor = document.createElement('input');
             divColor.type = "color";
-            divColor.id = element.NoeudsName;
+            divColor.id = `color${index}`;
             divColor.className = 'color-box';
             divColor.value = element.color;
-
-
-
+        
             const input = document.createElement('input');
             input.type = 'number';
-            input.id = element.NoeudsName;
+            input.id = `nb${index}`;
             input.step = 1;
             input.min = 1;
             input.max = 50;
             input.value = element.value;
-
+        
             const p = document.createElement('p')
             p.textContent = element.NoeudsName;
-
+            p.id = `p${index}`;
+        
             li.appendChild(p);
             li.appendChild(input);
             li.appendChild(divColor);
-                    
+        
             divNoeuds.appendChild(li);
-
+        
             input.addEventListener('change', (event) => {
-                writeElementNumber(event.target.id,event.target.value);
-            });         
-          
-            divColor.addEventListener('change',(event) => {
-                writePickerColor(event.target.id, event.target.value);
-            })
+                writeElementNumber(event.target.id, event.target.value);
+            });
 
-        });
+            divColor.addEventListener('change', (event) => {
+                writePickerColor(event.target.id, event.target.value);
+            });
+        });        
+
+        if (data.TypeChoose === 'Par auteur') {
+            
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
+
+            document.getElementById('subtitleParam').style.display = 'none';
+            document.getElementById('p0').style.display = 'none';
+            document.getElementById('nb0').style.display = 'none';
+            document.getElementById('color0').style.display = 'none';
+            document.getElementById('p1').style.display = 'none';
+            document.getElementById('nb1').style.display = 'none';
+            document.getElementById('color1').style.display = 'none';
+        }
+
+        if (data.TypeChoose === 'Par titre') {
+            
+            document.getElementById('DivEnv').style.display = 'none';
+            document.getElementById('legend-textEnv').style.display = 'none';
+
+            document.getElementById('subtitleParam').style.display = 'none';
+            document.getElementById('p0').style.display = 'none';
+            document.getElementById('nb0').style.display = 'none';
+            document.getElementById('color0').style.display = 'none';
+            document.getElementById('p1').style.display = 'none';
+            document.getElementById('nb1').style.display = 'none';
+            document.getElementById('color1').style.display = 'none';
+        }
+
+        if (data.TypeChoose === 'Par sujet') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
+        }
+        
+        if (data.TypeChoose === 'Par noeud') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
+        }
                    
     } else {
         console.error("Impossible de lire les paramètres utilisateur.");
@@ -93,19 +129,29 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
 });
 
 function writePickerColor(elemntId, newColor){
+    console.log(elemntId,newColor);
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
             data.ListeNoeudSettings.forEach(element => {
-                if (element.NoeudsName === elemntId) {
-                
+                if (elemntId === "color1" && element.NoeudsName === "Nombre de nodes environnant ") {
+
                     element.color = newColor;
 
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                    if (err) {
-                    console.error('Erreur d’écriture :', err);
-                    }
-                });
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
+                }
+                else if (elemntId === "color0" && element.NoeudsName === "Nombre de nodes à l'origine "){
+                    element.color = newColor;
+
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }
+                    });
                 }
             });
         }
@@ -113,19 +159,22 @@ function writePickerColor(elemntId, newColor){
 }
 
 function writeColor(elemntId, newColor){
+    console.log("lgozejgoinbiengpizsr");
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
             data.ColorPickerSettings.forEach(element => {
-                console.log("cc",elemntId,element.liaisonName);
                 if (element.liaisonName === elemntId) {
         
                     element.color = newColor;
+                    data.estRecharger = "false";
 
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                     if (err) {
                     console.error('Erreur d’écriture :', err);
                     }
+                    miseAjourTextAjour();
+
                 });
                 }
             });
@@ -134,54 +183,136 @@ function writeColor(elemntId, newColor){
 }
 
 
-        function writeElementCheck(elementName, newValue){
-            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
-            if (data) {
-                data = JSON.parse(data);
-                data.ColorPickerSettings.forEach(element => {
-                    if (element.liaisonName === elementName) {
-                
-                        var nV = ''
-                        if (newValue){nV = 'true';} else{ nV = 'false';}
-                        element.check = nV;
+function writeElementCheck(elementName, newValue){
 
-                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                        if (err) {
-                        console.error('Erreur d’écriture :', err);
-                        }
-                    });
-                    }
-                });
-            }
-        });
-        }
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+    if (data) {
+        data = JSON.parse(data);
+        data.ColorPickerSettings.forEach(element => {
+            if (element.liaisonName === elementName) {
+        
+                let nV = ''
+                if (newValue){nV = 'true';} else{ nV = 'false';}
+                element.check = nV;
+                data.estRecharger = "false";
 
-        function writeElementNumber(elementName, newValue){
-            console.log('ici');
-            window.api.readFile('renderer/json/userSettings.json', (err, data) => {
-            if (data) {
-                data = JSON.parse(data);
-                data.ListeNoeudSettings.forEach(element => {
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+                miseAjourTextAjour();
 
-                    if (element.NoeudsName === elementName) {
-                
-                        if (newValue >=1 && newValue <= 50) 
-                        {
-                            element.value = newValue;
-
-                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
-                        if (err) {
-                        console.error('Erreur d’écriture :', err);
-                        }
-                    });
-                        }
-                    }
-                });
+            });
             }
         });
     }
+});
+}
+
+function writeElementNumber(elementName, newValue){
+    console.log(elementName,newValue);
+
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+    if (data) {
+        data = JSON.parse(data);
+        data.ListeNoeudSettings.forEach(element => {
+
+            console.log("Ça marche", elementName, element.NoeudsName);
+
+            if (elementName === "nb1" && element.NoeudsName === "Nombre de nodes environnant ") {
+                if (newValue >=1 && newValue <= 10000 ) 
+                {
+                    element.value = newValue;
+                    data.estRecharger = "false";
+
+                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                        if (err) {
+                        console.error('Erreur d’écriture :', err);
+                        }                   
+                        miseAjourTextAjour();
+                    });
+                }
+            }
+            else if (elementName === "nb0" && element.NoeudsName === "Nombre de nodes à l'origine "){
+                if (newValue >=1 && newValue <= 10000 ) 
+                    {
+                        element.value = newValue;
+                        data.estRecharger = "false";
+    
+                        window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                            if (err) {
+                            console.error('Erreur d’écriture :', err);
+                            }                   
+                            miseAjourTextAjour();
+                        });
+                    }
+            }
+        });
+    }
+});
+}
+
+function miseAjourTextAjour(){
+    let texteAjour = document.getElementById("textRefresh");
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            let estAJour = data.estRecharger;
+            // On regarde si il y a besoin de recharger le graphe
+            if (estAJour === "false") {
+                texteAjour.className = "textEstPasAJour"
+                console.log(estAJour);
+            }
+            else {
+                texteAjour.className = "textEstAJour"
+                console.log(estAJour);
+            }
+        }
+    });
+}
+miseAjourTextAjour();
 
 const buttonModifCouleurs = document.getElementById('buttonModifCouleurs');
 buttonModifCouleurs.onclick = function(){
-    window.api.openWindoColor();
+    // Il ne modifie plus les couleurs mais s'occupe mtn de refresh le graphe si des nouveau paramètre sont activées ou désactivé.
+
+    let estAJour = "false";
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            data = JSON.parse(data);
+            estAJour = data.estRecharger;
+
+        // On regarde si il y a besoin de recharger le graphe
+        if (estAJour === "false" && data) {
+
+            data.estRecharger = "true";
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+            });
+            let typeC = "sujet";
+            if (data.TypeChoose ==="Par auteur") {
+                typeC = "auteur";
+            }
+            else if (data.TypeChoose ==="Par titre")
+            {
+                typeC = "titre";
+            }
+            else if (data.TypeChoose ==="noeud")
+                {
+                    typeC = "noeud";
+                }
+
+            window.api.callFunctionSearch([data.WordChoose, typeC]);
+
+        }
+        miseAjourTextAjour();
+        }
+    });   
+    
+    
+
 }
+
+

@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 import numpy as np
 import pandas as pd
@@ -24,11 +25,11 @@ def semantic_scholar_research(doi=None, title=None):
                 paper_id = search_results['data'][0]['paperId']
                 response = requests.get(f"{base_url}{paper_id}")
             else:
-                return None, None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, None, None
         else:
-            return None, None, None, None, None, None, None, None
+            return None, None, None, None, None, None, None, None, None
     else:
-        return None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None
 
     if response.ok:
         data = response.json()
@@ -40,25 +41,32 @@ def semantic_scholar_research(doi=None, title=None):
 
         # Vérification des citations
         citations = data.get('citations', [])
+        references = data.get('references', [])
         num_citations = len(citations)
         citation_dois = []
+        references_doi = []
 
         # Récupérer les DOI des citations, s'ils existent
         for citation in citations:
             citation_doi = citation.get('doi', None)
             citation_dois.append(citation_doi if citation_doi else "DOI indisponible")
         
+        for reference in references:
+            reference_doi = reference.get('doi',None)
+            references_doi.append(reference_doi if reference_doi else "DOI indisponible")
+        
         # Si des citations ont été trouvées, retourne leur DOI
-        doi_citations = citation_dois if citation_dois else ["Aucun DOI disponible"]
+        doi_citations = citation_dois if citation_dois else ["Aucun DOI disponible"] # ?
+        references_doi = references_doi if references_doi else ["Aucun DOI disponible"] # ?
         url = data.get('url', None)
 
         # Retourne toujours 7 valeurs
-        return title, abstract, authors, doi, year, num_citations, doi_citations, url
+        return title, abstract, authors, doi, year, num_citations, doi_citations, references_doi, url
     else:
-        return None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None
 
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, cache_file='cache_doi.json'):
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, references_doi=None, cache_file='cache_doi.json'):
     if not os.path.exists(cache_file):
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({}, f)
@@ -73,7 +81,7 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'authors': authors,
             'year': year,
             'num_citations': num_citations,
-            'doi_citations': doi_citations,
+            'doi_references' : references_doi,
             'url': url
         }
 
@@ -92,7 +100,6 @@ def recuperate_data(cache_file='cache_doi.json'):
     data = pd.read_csv("./Data/"+ csv_name)
     
     # Initialiser les dictionnaires pour stocker les informations
-    node_title = dict(zip(data['Title'], data['Title']))
     node_doi = dict(zip(data['Title'], data['DOI']))
 
     # Initialiser les variables pour stocker les citations et URL
@@ -118,7 +125,7 @@ def recuperate_data(cache_file='cache_doi.json'):
             doi_citations = cache_data[doi.lower()]['doi_citations']
         elif isinstance(doi, str) and pd.notna(doi):
             # Appel à Semantic Scholar pour obtenir les informations si DOI est une chaîne et non NaN
-            title, abstract, author, doi, year, num_citations, doi_citations, url = semantic_scholar_research(
+            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(
                 doi=doi,
                 title=nom if pd.notna(nom) else None
             )
@@ -131,11 +138,12 @@ def recuperate_data(cache_file='cache_doi.json'):
             year = year or "Année inconnue"
             num_citations = num_citations if num_citations is not None else 0
             doi_citations = doi_citations or ["Pas de citations"]
+            doi_references = doi_references or ["Pas de références"]
             url = url or "URL indisponible"
             
             # Mettre à jour le cache
             if doi:
-                cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations)
+                cache(doi.lower(), title, abstract, author, year, url, num_citations, doi_citations, doi_references)
 
     return data  # Retourne les données mises à jour du CSV (facultatif, selon l'utilisation)
 
@@ -192,5 +200,20 @@ def load_or_compute_embeddings(model = SentenceTransformer('TomDubois12/fine-tun
     return data
 
 if __name__ == "__main__":
+    # Mesurer le temps pour recuperate_data
+    start_time = time.time()
     recuperate_data()
+    end_time = time.time()
+    time_recuperate_data = end_time - start_time
+    print(f"Temps d'exécution de recuperate_data: {time_recuperate_data:.2f} secondes")
+    
+    # Mesurer le temps pour load_or_compute_embeddings
+    start_time = time.time()
     load_or_compute_embeddings()
+    end_time = time.time()
+    time_load_or_compute_embeddings = end_time - start_time
+    print(f"Temps d'exécution de load_or_compute_embeddings: {time_load_or_compute_embeddings:.2f} secondes")
+    
+    # Calculer et afficher le temps total
+    total_time = time_recuperate_data + time_load_or_compute_embeddings
+    print(f"Temps total d'exécution: {total_time:.2f} secondes")

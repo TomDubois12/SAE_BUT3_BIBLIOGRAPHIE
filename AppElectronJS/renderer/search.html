@@ -23,6 +23,14 @@
                 <option class="titre" value="titre">Par titre</option>
             </select>
             <button id="search-btn">Rechercher</button>
+            <script>
+                document.getElementById('search-btn').addEventListener('click', function() {
+                    document.body.classList.add('loading');
+                    setTimeout(() => {
+                        document.body.classList.remove('loading');
+                    }, 20000);
+                });
+            </script>
         </nav>
         
         <div class="textIcons">

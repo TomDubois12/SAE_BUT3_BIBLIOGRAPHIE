@@ -18,12 +18,23 @@ async function changeColorOnHover(nodeId, isOrigin) {
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
+    if(network.body.data.nodes.get(nodeId).primaryNode){
+        network.body.data.nodes.update({
             id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 3,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+        });
+    }else{
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 4,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
         });
+    }
+
+
 }
 
 async function changeBlurColor(nodeId, isOrigin){
@@ -44,12 +55,21 @@ async function changeBlurColor(nodeId, isOrigin){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
-            id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 0,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-        });
+        if(network.body.data.nodes.get(nodeId).primaryNode){
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 5,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            });
+        }else{
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 1,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+            });
+        }
 
 
     // network.body.data.nodes.update({
@@ -75,12 +95,23 @@ async function changeColorOnClick(nodeId){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
-            id: nodeId,
-            color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 3,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-        });
+        if(network.body.data.nodes.get(nodeId).primaryNode){
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 5,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            });
+        }else{
+            console.log("heyyyyy");
+
+            network.body.data.nodes.update({
+                id: nodeId,
+                color: getColorForDate(year, maxD, minD, color),
+                borderWidth: 3,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+            });
+        }
 }
 
 async function colorOnNodeSave(idNode){
@@ -100,12 +131,23 @@ async function colorOnNodeSave(idNode){
             minD = minDateEnv;
             maxD = maxDateEnv;
         }
-    network.body.data.nodes.update({
+    if(network.body.data.nodes.get(idNode).primaryNode){
+        console.log("heyyyyy");
+        network.body.data.nodes.update({
+            id: idNode,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+        });
+    }else{
+        console.log("ça passe");
+        network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year,maxD,minD,color),
-            borderWidth: 0,
+            borderWidth: 1,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
+    }
     if (idSelectedNode == nodeId) {
         idSelectedNode = "";
     }
@@ -185,7 +227,26 @@ function createAside(nodeId) {
         }
 
         aside.appendChild(doi);
+        const buttonCreateGraph = document.createElement("button");
+        buttonCreateGraph.classList.add("buttonGenerateGraph");
+        buttonCreateGraph.addEventListener("click", async () => {
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
+        });
+        window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+            if (data) {
+                data = JSON.parse(data);
+                data.WordChoose = nodeData.doi;
+                data.TypeChoose = "noeud";
+                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    if (err) {
+                    console.error('Erreur d’écriture :', err);
+                    }
+                });
+            }
+        });
 
+        
+        aside.appendChild(buttonCreateGraph);
 
         aside.classList.add(className);
         aside.id = nodeId;
@@ -322,10 +383,12 @@ function getColorForDate(date, minDate , maxDate, baseColor) {
     //function getColorForDate(date, minDate = 1984, maxDate = 2015, baseColor = '#A62121') {
     // Normaliser l'année dans la plage de 0 à 1
     const normalizedYear = (date - minDate) / (maxDate - minDate);
-    
+    if (isNaN(normalizedYear)){
+        return adjustColorBrightness(baseColor, 0.2);
+    }
     // Calculer la luminosité en fonction de l'année : plus près de 1984, plus foncé, plus près de 2015, plus clair
     const factor = normalizedYear * 0.5; // Ajuste le facteur si nécessaire
-    
+
     // Retourner la couleur ajustée
     return adjustColorBrightness(baseColor, factor);
 }
@@ -366,22 +429,22 @@ loadNodesColor();
 function addDynamicCSS() {
     const style = document.createElement('style');
     style.textContent = `
-      .dynamic-div {
-    width: 300px;
-    height: 20px;
-    display: flex;
-    align-items: center; /* Centre verticalement */
-    justify-content: flex-end; /* Aligne à droite */
-    border: 1px solid black;
-    border-radius: 2px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-      .legend {
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        text-align: center;
-        margin-top: 10px;
-      }
+        .dynamic-div {
+            width: 300px;
+            height: 20px;
+            display: flex;
+            align-items: center; /* Centre verticalement */
+            justify-content: flex-end; /* Aligne à droite */
+            border: 1px solid black;
+            border-radius: 2px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .legend {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
     `;
     document.head.appendChild(style); // Ajoute le style dans <head>
   }
@@ -392,15 +455,23 @@ async function setAllNodeDeg() {
         try {
             const isOrigin = elem.isOrigin;
             const color = await getColorParamUser(isOrigin);
-
+            
             const { minD, maxD } = getDateRange(isOrigin);
-
-            network.body.data.nodes.update({
-                id: elem.id,
-                color: getColorForDate(elem.year, maxD, minD, color),
-                borderWidth: 1,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
-            });
+            if(elem.primaryNode){
+                network.body.data.nodes.update({
+                    id: elem.id,
+                    color: getColorForDate(elem.year, maxD, minD, color),
+                    borderWidth: 5,
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.7', size: 10, x: 7,y: 7},
+                });
+            }else{
+                network.body.data.nodes.update({
+                    id: elem.id,
+                    color: getColorForDate(elem.year, maxD, minD, color),
+                    borderWidth: 1,
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+                });
+            }
         } catch (error) {
             console.error(`Error updating node ${elem.id}:`, error);
         }
@@ -432,16 +503,14 @@ async function setAllNodeDeg() {
             legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
         }
         
-
         const colorEnvMin = getColorForDate(maxDateEnv, maxDateEnv, minDateEnv, colorEnv);
         const colorEnvMax = getColorForDate(minDateEnv, maxDateEnv, minDateEnv, colorEnv);
-
-
 
         const DivEnv = document.getElementById("DivEnv");
         DivEnv.classList.add('dynamic-div');
 
         DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
+        
         const legendE = document.getElementById("legend-textEnv");
         if (minDateEnv === undefined || maxDateEnv === undefined) {
             legendE.textContent = "Node manquante";
@@ -466,11 +535,6 @@ function getDateRange(isOrigin) {
 setAllNodeDeg();
 
 
-
-
-
-
-
 function updateNetworkOptions(newOptions) {
     network.setOptions(newOptions);
 }
@@ -483,21 +547,20 @@ updateNetworkOptions({
 });
 
 
-
-
 // Fonction pour initialiser l'écouteur d'événement sur l'élément quand il est trouvé
 function initializeColorChangeListener() {
 
-    const colorInputs = document.querySelectorAll("input[type='color']");
     // Filtrer pour trouver celui avec le bon ID
-    const colorOrigineChange = Array.from(colorInputs).find(input => input.id === "Nombre de nodes à l'origine ");    
-    const colorEnvironChange = Array.from(colorInputs).find(input => input.id === "Nombre de nodes environnant ");    
 
+    const colorOrigineChange = document.getElementById("color0");
+    const colorEnvironChange = document.getElementById("color1");  
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
-                window.api.reloadGraph();
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 250);
             } else {
                 console.error("window.api.reloadGraph n'est pas disponible.");
             }
@@ -509,7 +572,9 @@ function initializeColorChangeListener() {
     if (colorEnvironChange) {  // Si l'élément est trouvé
         colorEnvironChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
-                window.api.reloadGraph();
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 250);
             } else {
                 console.error("window.api.reloadGraph n'est pas disponible.");
             }
@@ -522,9 +587,6 @@ function initializeColorChangeListener() {
 
 
 }
-
-
-
 
 // Créer un observer pour surveiller les modifications dans le DOM
 const observer = new MutationObserver((mutationsList, observer) => {
@@ -570,3 +632,52 @@ function lightenColor(hexColor, factor = 0.5) {
     const lightenedColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
     return lightenedColor;
 }
+
+
+// On remet la valeur de la bar de recherche 
+// Init la valeur de la bar de recherche 
+function setWordSearch(){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+            document.getElementById('site-search').value = data.WordChoose;
+
+
+            // Mettre le type de recherche 
+            const selectElement = document.getElementById("listBouton");
+            if (data.TypeChoose && data.TypeChoose === "Par auteur") {
+                selectElement.value = "auteur";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par titre")){
+                selectElement.value = "titre";
+            }
+            else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
+                selectElement.value = "sujet";
+            }
+        }
+    });
+}
+setWordSearch();
+
+
+function setTextAJour(){
+    let texteAjour = document.getElementById("textRefresh");
+    let estAJour;
+
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+            estAJour = data.estRecharger;
+            console.log(estAJour);
+            if (estAJour === "true"){
+                texteAjour.textContent = "Les paramètres et le graphes sont à jours !";
+            }
+            else {
+                texteAjour.textContent = "Les paramètres et le graphe ne sont pas à jours...";
+            }
+        }
+    });
+}
+setTextAJour();

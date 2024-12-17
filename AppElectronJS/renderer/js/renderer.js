@@ -1,29 +1,25 @@
 // Assurez-vous que le DOM est complètement chargé avant d'attacher des événements
 document.addEventListener('DOMContentLoaded', () => {
-
+    document.addEventListener("keydown", function (event) {
+        console.log("Touche pressée : ", event.key); // Vérifie si l'événement est détecté
+        if (event.key === "Enter") {
+            research();
+        }
+    });
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
+        keepResearchParam(query);
+
         let paramRecherche = "";
-      
         paramRecherche = document.getElementById("listBouton");
         
         console.log(paramRecherche.value)
+
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
-        afficherResultat(); // Appelle la fonction pour afficher les résultats
     });
 
-    // Fonction pour afficher le résultat
-    function afficherResultat() {
-        let filtre = "";
-        if (document.getElementById('auteur').disabled) {
-            filtre = "sujets";
-        } else {
-            filtre = "auteurs";
-        }
-        const inputValue = document.getElementById('site-search').value;
-        document.getElementById('result').innerHTML = "Résultat sur les " + filtre + " : " + inputValue;
-    }
+
 
     // Gestion de l'événement pour la touche "Entrée"
     document.getElementById('site-search').addEventListener('keypress', function(event) {
@@ -54,3 +50,58 @@ function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
         boutonAActiver.style.color = "white"; // Indique visuellement qu'il est actif
     }
 }
+
+function keepResearchParam(newWord, newType){
+
+    let typeSearch = getSelectedOption()
+
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data) {
+            // On récupère le fichier
+            data = JSON.parse(data);
+
+            // On prend le mot actuel et le remplace par le nouveau 
+            if (newWord && data.WordChoose)
+            {
+                data.WordChoose = newWord;
+            }
+            if (typeSearch && data.TypeChoose)
+            {
+                data.TypeChoose = typeSearch;
+            }
+            data.estRecharger = "true";
+            // On sauvegarde les modification
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {  
+            console.error('Erreur d’écriture :', err);
+            });
+        }
+    });
+
+
+}
+
+function getSelectedOption() {
+    // Sélectionne l'élément <select> par son id
+    const selectElement = document.getElementById("listBouton");
+    
+    // Récupère la valeur sélectionnée
+    const selectedValue = selectElement.value;
+    console.log("Valeur sélectionnée : ", selectedValue);
+    
+    // Récupère le texte de l'option sélectionnée
+    const selectedText = selectElement.options[selectElement.selectedIndex].text;
+    return selectedText;
+}
+
+async function research(){
+    const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
+    keepResearchParam(query);
+
+    let paramRecherche = "";
+    paramRecherche = document.getElementById("listBouton");
+    
+    console.log(paramRecherche.value)
+    
+    const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+}
+

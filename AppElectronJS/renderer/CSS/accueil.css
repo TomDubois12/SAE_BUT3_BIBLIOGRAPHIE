@@ -1,4 +1,8 @@
-/* Style de base pour la page d'accueil */
+body.loading {
+    cursor: wait;
+}
+
+/* Style de base pour la navigation */
 
 body {
     background-color: white;
@@ -24,12 +28,12 @@ body {
 }
 
 .title {
-    font-size: 35px;
+    font-size: 3.5vw;
     font-weight: bold;
 }
 
 .textsearch {
-    font-size: 25px;
+    font-size: 2.5vw;
 }
 
 /*****************/
@@ -67,10 +71,10 @@ body {
     flex-basis: 70%;
     margin: 0.5vw 1vw 0.5vw 1vw;
     padding: 10px;
-    border: 2px solid #759BFF;
-    border-radius: 25px;
+    border: 0.2vw solid #759BFF;
+    border-radius: 2.5vw;
     font-size: 1em;
-    width: 300px;
+    width: 30vw;
     transition: all 0.3s ease;
 }
 
@@ -88,7 +92,7 @@ body {
 
 /* Style de base pour les boutons */
 button {
-    padding: 10px 20px;
+    padding: 1vw 2vw;
     background-color: #759BFF;
     color: white;
     border: none;
@@ -102,20 +106,20 @@ button {
 /* Effet hover pour les boutons */
 button:hover {
     background-color: #F9CE72;
-    box-shadow: 0 5px 15px rgba(0, 122, 139, 0.3);
+    box-shadow: 0 0.5vw 1.5vw rgba(0, 122, 139, 0.3);
 }
 
 /* Effet de clic pour les boutons */
 button:active {
     background-color: #759BFF;
-    box-shadow: 0 3px 8px rgba(0, 122, 139, 0.2);
+    box-shadow: 0 0.3vw 0.8vw rgba(0, 122, 139, 0.2);
 }
 
 /* Style des boutons désactivés */
 button:disabled {
     background-color: white;
     color: #759BFF;
-    border: 2px solid #F9CE72;
+    border: 0.2vw solid #F9CE72;
     cursor: not-allowed;
     box-shadow: none;
 }
@@ -124,7 +128,7 @@ button:disabled {
 button.active {
     background-color: #759BFF;
     color: white;
-    box-shadow: 0 4px 10px rgba(0, 122, 139, 0.2);
+    box-shadow: 0 0.4vw 1vw rgba(0, 122, 139, 0.2);
 }
 
 
@@ -140,7 +144,7 @@ button.active {
 }
 
 .textIcons p {
-    font-size: 25px;
+    font-size: 2.5vw;
 }
 
 /********************/
@@ -168,7 +172,7 @@ button.active {
 }
 
 .groupIcons li div p {
-    font-size: 20px;
+    font-size: 2vw;
 }
 
 .text-auteur p{
@@ -179,8 +183,8 @@ button.active {
 }
 
 .key, .file, .user {
-    width: 60px;
-    height: 60px;
+    width: 6vw;
+    height: 6vw;
     margin-bottom: 2vh;
 }
 
