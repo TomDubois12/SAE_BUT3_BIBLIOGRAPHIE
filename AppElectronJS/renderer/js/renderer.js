@@ -41,12 +41,12 @@ function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
     if (boutonADesactiver) {
         boutonADesactiver.disabled = true;
         boutonADesactiver.style.backgroundColor = "white"; // Indique visuellement qu'il est désactivé
-        boutonADesactiver.style.color = "#166F7A"; // Indique visuellement qu'il est désactivé
+        boutonADesactiver.style.color = "black"; // Indique visuellement qu'il est désactivé
     }
 
     if (boutonAActiver) {
         boutonAActiver.disabled = false;
-        boutonAActiver.style.backgroundColor = "#166F7A"; // Indique visuellement qu'il est actif
+        boutonAActiver.style.backgroundColor = "#759BFF"; // Indique visuellement qu'il est actif
         boutonAActiver.style.color = "white"; // Indique visuellement qu'il est actif
     }
 }

@@ -7,6 +7,7 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
     // Obtenir la couleur associée au nœud (origine ou non)
     const color = await getColorParamUser(isOrigin);
+
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -84,7 +85,6 @@ async function changeColorOnClick(nodeId){
 
     const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
     const color = await getColorParamUser(isOrigin);
-    
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -213,16 +213,20 @@ function createAside(nodeId) {
         abstract.textContent = `Abstract : ${nodeData.abstract || "Abstract non disponible"}`;
         aside.appendChild(abstract);
 
-        const doi = document.createElement("a");
+        const doi = document.createElement("button");
         doi.classList.add("pDOI");
-        doi.textContent = `DOI : ${nodeData.doi || "DOI non disponible"}`;
-        doi.href = nodeData.citations || "#";
-        doi.target = "_blank";
-        doi.rel = "noopener noreferrer";
+        doi.textContent = `Ouvrir le lien`;
+
+        // Check if DOI or citation link is available
+        if (nodeData.citations) {
+            doi.addEventListener('click', () => {
+                window.open(nodeData.url, "_blank", "noopener noreferrer");
+            });
+        } else {
+            doi.setAttribute('disabled', true);  // Disable button if no citation
+        }
+
         aside.appendChild(doi);
-
-
-
         const buttonCreateGraph = document.createElement("button");
         buttonCreateGraph.classList.add("buttonGenerateGraph");
         buttonCreateGraph.addEventListener("click", async () => {
