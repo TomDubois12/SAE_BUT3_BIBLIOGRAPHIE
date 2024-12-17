@@ -16,13 +16,8 @@ body {
 }
 
 .texttitle {
-    font-size: 25px;
+    font-size: 4vh;
     margin: 0;
-}
-
-.texttitle2 {
-    font-size: 25px;
-    margin-bottom: 5vh;
 }
 
 button {

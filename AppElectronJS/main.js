@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog } = require('elec
 const path = require('node:path');
 const { spawn, exec } = require('child_process');
 const fs = require("fs");
+const { stdout, stderr } = require('node:process');
 
 
 let mainWindow;
@@ -283,3 +284,19 @@ ipcMain.on('send-csv-path', (event, csvPath) => {
   });
 });
 
+ipcMain.on('add-article', (event, newArticle) => {
+  console.log(`Ǹouvel article: ${newArticle}`);
+
+  const command = `python -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.error(`Erreur standard : ${stderr}`);
+        return;
+    }
+    console.log(`Sortie du script Python : ${stdout}`);
+  });
+})

@@ -68,6 +68,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.on(event, (event, ...args) => callback(...args)); // Permet d'écouter des événements
     },
     sendCSVPath: (csvFilePath) => ipcRenderer.send('load-search-page', csvFilePath),
+    addArticle: (newArticle) => ipcRenderer.send('add-article', newArticle),
 
 
 });
