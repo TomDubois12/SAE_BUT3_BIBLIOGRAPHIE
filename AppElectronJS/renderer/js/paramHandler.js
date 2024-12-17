@@ -89,14 +89,10 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             
             document.getElementById('DivEnv').style.display = 'none';
             document.getElementById('legend-textEnv').style.display = 'none';
-
+            
+            document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-            document.getElementById('p0').style.display = 'none';
-            document.getElementById('nb0').style.display = 'none';
-            document.getElementById('color0').style.display = 'none';
-            document.getElementById('p1').style.display = 'none';
-            document.getElementById('nb1').style.display = 'none';
-            document.getElementById('color1').style.display = 'none';
+
         }
 
         if (data.TypeChoose === 'Par titre') {
@@ -104,13 +100,9 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('DivEnv').style.display = 'none';
             document.getElementById('legend-textEnv').style.display = 'none';
 
+            document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-            document.getElementById('p0').style.display = 'none';
-            document.getElementById('nb0').style.display = 'none';
-            document.getElementById('color0').style.display = 'none';
-            document.getElementById('p1').style.display = 'none';
-            document.getElementById('nb1').style.display = 'none';
-            document.getElementById('color1').style.display = 'none';
+            
         }
 
         if (data.TypeChoose === 'Par sujet') {
@@ -220,7 +212,7 @@ function writeElementNumber(elementName, newValue){
             console.log("Ça marche", elementName, element.NoeudsName);
 
             if (elementName === "nb1" && element.NoeudsName === "Nombre de nodes environnant ") {
-                if (newValue >=1 && newValue <= 10000 ) 
+                if (newValue >=0 && newValue <= 10000 ) 
                 {
                     element.value = newValue;
                     data.estRecharger = "false";
@@ -234,7 +226,7 @@ function writeElementNumber(elementName, newValue){
                 }
             }
             else if (elementName === "nb0" && element.NoeudsName === "Nombre de nodes à l'origine "){
-                if (newValue >=1 && newValue <= 10000 ) 
+                if (newValue >=0 && newValue <= 10000 ) 
                     {
                         element.value = newValue;
                         data.estRecharger = "false";
