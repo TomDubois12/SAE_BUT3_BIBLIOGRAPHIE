@@ -92,7 +92,10 @@ def find_min_max_values(dico):
 
 def transform_value_log(value, original_min, original_max, target_min=20, target_max=100):    
     # Normaliser la valeur par rapport à la plage originale
-    normalized_value = (value - original_min) / (original_max - original_min)
+    if original_max <= original_min:
+        normalized_value = 0.5
+    else:
+        normalized_value = (value - original_min) / (original_max - original_min)
     
     # Appliquer une transformation logarithmique pour donner plus de différenciation aux petites valeurs
     log_transformed = math.log1p((normalized_value ** 0.9) * (math.e - 1))  # log1p(x) = log(1 + x) pour éviter les problèmes autour de 0
@@ -173,7 +176,8 @@ def show_graphique_node(primaryKey):
                     primaryNode= False
                 )
         return G
-    
+    if(primaryKey not in cache_data.keys()):
+        raise BadDoiError()
 
     # Create the graph
     G = nx.DiGraph()
@@ -189,7 +193,6 @@ def show_graphique_node(primaryKey):
     dfFinal = df.reindex(allTheKeys)
 
     noms = dfFinal.index  # Use the index (the keys)
-
 
     G = setAllNode(G)
 
@@ -352,7 +355,8 @@ def show_graphique_author(liste_key):
     noms = dfFinal.index  # Use the index (the keys)
     
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
-
+    if len(originKeys) == 0:
+        raise EmptyListError()
     G = setAllNode(G)
 
     liaisons = dataUser["ColorPickerSettings"]
@@ -435,40 +439,77 @@ def getUserSetting(settingFilePath):
     return data
 
 
+class AppError(Exception):
+    """Classe de base pour les erreurs de l'application."""
+    def __init__(self, message, code):
+        super().__init__(message)
+        self.code = code
 
+
+class EmptyWordError(AppError):
+    def __init__(self):
+        super().__init__("Il semblerais qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
+
+class EmptyListError(AppError):
+    def __init__(self):
+        super().__init__("Il semblerais qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
+
+class BadDoiError(AppError):
+    def __init__(self):
+        super().__init__("Il semblerais que ce Doi n'existe pas dans vos données", 1003)
+        
 if __name__ == "__main__":
 
     #Get all the settings of the User in the file in paramater.
     dataUser = getUserSetting("renderer/json/userSettings.json")
 
     #Il faut 2 argument dans le lancement du script, le premier c'est le sujet et le deuxième "true" si recherche par autheur, "false" sinon.
-    if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
-        mot_cle = sys.argv[1]
+    try:
+        if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
+            mot_cle = sys.argv[1]
 
-        if len(sys.argv) >= 2:
-            match sys.argv[2]:
-                case "sujet":
-                    # Exécution de la recherche par mot clé
-                    nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
-                    NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
-                    similarities = search_by_keyword(mot_cle,nbNodeOrigin)
-                    liste_final = [t[0] for t in similarities]
-                    liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
-                    show_graphique(liste_final, dataUser)
-                case "auteur":
-                    liste_final = search_by_author(mot_cle)
-                    show_graphique_author(liste_final)
-                case "titre":
-                    liste_final = search_by_title(mot_cle)
-                    show_graphique_author(liste_final)
-                case "noeud":
-                    show_graphique_node(mot_cle)
-                    
-        readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
+            if len(sys.argv) >= 2:
+                match sys.argv[2]:
+                    case "sujet":
+                        # Exécution de la recherche par mot clé
+                        nbNodeOrigin = int(dataUser['ListeNoeudSettings'][0]['value'])
+                        NbNodeChild = int(dataUser['ListeNoeudSettings'][1]['value'])
+                        similarities = search_by_keyword(mot_cle,nbNodeOrigin)
+                        liste_final = [t[0] for t in similarities]
+                        liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
+                        show_graphique(liste_final, dataUser)
+                    case "auteur":
+                        try:
+                            liste_final = search_by_author(mot_cle)
+                            show_graphique_author(liste_final)
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
+                    case "titre":
+                        try:
+                            liste_final = search_by_title(mot_cle)
+                            show_graphique_author(liste_final)
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
+                            
+                    case "noeud":
+                        try:
+                            show_graphique_node(mot_cle.lower())
+                        except BadDoiError as e:
+                            print(f"Erreur : {e.code}")
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
+                            
+            readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
-    else:
-        raise ValueError("valeur nul, il doit y avoir une valeur")
+        else:
+            raise EmptyWordError()
+    except EmptyWordError as e:
+        print(f"Erreur : {e.code}")
 
+
+#code des erreurs possible:
+#Pas de mot entrer pour la recherche: 1001
+#Pas de node en résultat lors d'une recherche: 1002
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
 #python3 -m Bokeh.src.mainPyvis "carbon" "sujet"

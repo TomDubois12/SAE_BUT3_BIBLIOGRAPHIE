@@ -60,13 +60,46 @@ function runPythonFunction(params) {
       const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
       console.log(...params);
       let output = '';
+
+      //Cette fonction récupère les sortie du terminal, pour vérifier si une erreur est apparue je met toute la sortie en forme de 
+      //liste de ligne puis je regarde l'avant dernière ligne ou est sensé se trouver une erreur et si oui alors je la traite.
       pythonProcess.stdout.on('data', (data) => {
           data += data.toString();
+          data = data.split("\n");
+          if(data[data.length-2].split(" : ")[1] == 1001){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Mot clé vide',
+              message: "Il semblerait qu'il n'y ait pas de mot clé saisies ?",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
+          if(data[data.length-2].split(" : ")[1] == 1002){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Aucun résultat',
+              message: "La recherche effectuée ne renvoie aucun résultat.",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
+          if(data[data.length-2].split(" : ")[1] == 1003){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Mauvais DOI',
+              message: "Le DOI entrer ne figure pas dans vos données.",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
       });
+
+
 
       pythonProcess.stderr.on('data', (data) => {
           reject(data.toString());
-      });
+          console.error(`Python stderr: ${data}`);
+      }); 
+
+
 
       pythonProcess.on('close', (code) => {
         if (code === 0) {
@@ -75,7 +108,7 @@ function runPythonFunction(params) {
           dialog.showMessageBox({
             type: 'error',
             title: 'Erreur',
-            message: 'Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche',
+            message: "Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche ",
           });
           reject(`Processus terminé avec un code d'erreur : ${code}`);
         }
