@@ -70,15 +70,6 @@ async function changeBlurColor(nodeId, isOrigin){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
             });
         }
-
-
-    // network.body.data.nodes.update({
-    //     id: nodeId,
-    //     color: color,
-    //     borderWidth: 0,
-    //     shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-    // });
-    // Délai avant de remettre la couleur d'origine (si nécessaire)
 }
 
 async function changeColorOnClick(nodeId){
@@ -103,8 +94,6 @@ async function changeColorOnClick(nodeId){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
             });
         }else{
-            console.log("heyyyyy");
-
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -132,7 +121,6 @@ async function colorOnNodeSave(idNode){
             maxD = maxDateEnv;
         }
     if(network.body.data.nodes.get(idNode).primaryNode){
-        console.log("heyyyyy");
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year, maxD, minD, color),
@@ -140,7 +128,6 @@ async function colorOnNodeSave(idNode){
             shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
         });
     }else{
-        console.log("ça passe");
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year,maxD,minD,color),

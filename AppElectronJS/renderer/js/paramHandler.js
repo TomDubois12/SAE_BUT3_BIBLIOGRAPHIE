@@ -260,12 +260,12 @@ function miseAjourTextAjour(){
             let estAJour = data.estRecharger;
             // On regarde si il y a besoin de recharger le graphe
             if (estAJour === "false") {
-                texteAjour.className = "textEstPasAJour"
-                console.log(estAJour);
+                texteAjour.className = "textEstPasAJour";
+                texteAjour.textContent = "Les paramètres et le graphe ne sont pas à jours...";
             }
             else {
-                texteAjour.className = "textEstAJour"
-                console.log(estAJour);
+                texteAjour.className = "textEstAJour";
+                texteAjour.textContent = "Les paramètres et le graphes sont à jours !";
             }
         }
     });
