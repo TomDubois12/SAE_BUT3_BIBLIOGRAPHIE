@@ -184,5 +184,15 @@ button.active {
     margin-bottom: 2vh;
 }
 
+/*****************/
+/* Extract       */
+/*****************/
 
+.exportCSV{
+    text-align: center;
+    justify-content: center;
+}
 
+.exportCSV p{
+    font-size: 1.5vw;
+}
