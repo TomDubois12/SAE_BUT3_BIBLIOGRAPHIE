@@ -5,7 +5,7 @@ let idSelectedNode = "";
 async function changeColorOnHover(nodeId, isOrigin) {
 
     // Obtenir la couleur associée au nœud (origine ou non)
-    const color = await getColorParamUser(isOrigin);
+    let color;
 
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
@@ -18,6 +18,7 @@ async function changeColorOnHover(nodeId, isOrigin) {
             maxD = maxDateEnv;
         }
     if(network.body.data.nodes.get(nodeId).primaryNode){
+        color = await getColorOrigineArticle();
         network.body.data.nodes.update({
             id: nodeId,
             color: getColorForDate(year, maxD, minD, color),
@@ -25,6 +26,7 @@ async function changeColorOnHover(nodeId, isOrigin) {
             shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
         });
     }else{
+        color = await getColorParamUser(isOrigin);
         network.body.data.nodes.update({
             id: nodeId,
             color: getColorForDate(year, maxD, minD, color),
@@ -40,7 +42,7 @@ async function changeBlurColor(nodeId, isOrigin){
 
     if (nodeId == idSelectedNode) { return;} 
     // Obtenir la couleur associée au nœud (origine ou non)
-    const color = await getColorParamUser(isOrigin);
+    let color;
 
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
@@ -53,6 +55,7 @@ async function changeBlurColor(nodeId, isOrigin){
             maxD = maxDateEnv;
         }
         if(network.body.data.nodes.get(nodeId).primaryNode){
+            color = await getColorOrigineArticle();
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -60,6 +63,7 @@ async function changeBlurColor(nodeId, isOrigin){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
             });
         }else{
+            color = await getColorParamUser(isOrigin)
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -72,7 +76,7 @@ async function changeBlurColor(nodeId, isOrigin){
 async function changeColorOnClick(nodeId){
 
     const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
-    const color = await getColorParamUser(isOrigin);
+    let color;
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
@@ -84,6 +88,7 @@ async function changeColorOnClick(nodeId){
             maxD = maxDateEnv;
         }
         if(network.body.data.nodes.get(nodeId).primaryNode){
+            color = await getColorOrigineArticle();
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -91,6 +96,7 @@ async function changeColorOnClick(nodeId){
                 shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
             });
         }else{
+            color = await getColorParamUser(isOrigin);
             network.body.data.nodes.update({
                 id: nodeId,
                 color: getColorForDate(year, maxD, minD, color),
@@ -105,7 +111,7 @@ async function colorOnNodeSave(idNode){
     if (idNode === ""){return;}
 
     const isOrigin = network.body.data.nodes.get(idNode).isOrigin;    
-    const color = await getColorParamUser(isOrigin);
+    let color;
 
     let year = network.body.data.nodes.get(idNode).year;
     let minD;
@@ -118,6 +124,7 @@ async function colorOnNodeSave(idNode){
             maxD = maxDateEnv;
         }
     if(network.body.data.nodes.get(idNode).primaryNode){
+        color = await getColorOrigineArticle();
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year, maxD, minD, color),
@@ -125,6 +132,7 @@ async function colorOnNodeSave(idNode){
             shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
         });
     }else{
+        color = await getColorParamUser(isOrigin);
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year,maxD,minD,color),
@@ -219,7 +227,7 @@ function createAside(nodeId) {
                 if (data) {
                     data = JSON.parse(data);
                     data.WordChoose = nodeData.doi;
-                    data.TypeChoose = "Par noeud";
+                    data.TypeChoose = "Par doi";
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                         if (err) {
                         console.error('Erreur d’écriture :', err);
@@ -354,7 +362,25 @@ function getColorParamUser(isOrigin) {
         });
     });
 }
+function getColorOrigineArticle() {
+    return new Promise((resolve, reject) => {
+        window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+            if (err) {
+                console.error('Erreur lors de la lecture du fichier JSON:', err);
+                reject('Erreur lors de la lecture du fichier');
+                return;
+            }
 
+            try {
+                data = JSON.parse(data);  // Conversion du JSON en objet JavaScript
+                resolve(data.ColorOriginArticle);  // Résoudre avec la couleur appropriée
+            } catch (parseError) {
+                console.error('Erreur de parsing JSON:', parseError);
+                reject('Erreur lors du parsing du fichier JSON');
+            }
+        });
+    });
+}
 
 network.on("click", onClick);
 network.on("hoverNode", onHover);
@@ -454,10 +480,12 @@ async function setAllNodeDeg() {
     network.body.data.nodes.forEach(async (elem) => {
         try {
             const isOrigin = elem.isOrigin;
-            const color = await getColorParamUser(isOrigin);
+            let color;
             
             const { minD, maxD } = getDateRange(isOrigin);
             if(elem.primaryNode){
+
+                color = await getColorOrigineArticle()
                 network.body.data.nodes.update({
                     id: elem.id,
                     color: getColorForDate(elem.year, maxD, minD, color),
@@ -465,6 +493,7 @@ async function setAllNodeDeg() {
                     shadow: { enabled: true, color: 'rgba(0,0,0,0.7', size: 10, x: 7,y: 7},
                 });
             }else{
+                color = await getColorParamUser(isOrigin)
                 network.body.data.nodes.update({
                     id: elem.id,
                     color: getColorForDate(elem.year, maxD, minD, color),
@@ -557,9 +586,11 @@ function initializeColorChangeListener() {
     const colorOrigineChange = document.getElementById("color0");
     const colorEnvironChange = document.getElementById("color1");  
     const colorNodeChange = document.getElementById("colorEdit");  
+    const colorOriginNodeChange = document.getElementById("colorEditNodeDOI");  
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
+            console.log("COucou1");
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
@@ -574,6 +605,7 @@ function initializeColorChangeListener() {
 
     if (colorEnvironChange) {  // Si l'élément est trouvé
         colorEnvironChange.addEventListener('change', (event) => {
+            console.log("COucou2");
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
@@ -588,6 +620,7 @@ function initializeColorChangeListener() {
     if (colorNodeChange) {  // Si l'élément est trouvé
         colorNodeChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
+                console.log("COucou3");
                 setTimeout(() => {
                     window.api.reloadGraph();
                 }, 250);
@@ -599,7 +632,21 @@ function initializeColorChangeListener() {
         observer.disconnect();
     }
 
+    if (colorOriginNodeChange) {  // Si l'élément est trouvé
+        colorOriginNodeChange.addEventListener('change', (event) => {
+            console.log("COucou4");
 
+            if (window.api && typeof window.api.reloadGraph === 'function') {
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 250);
+            } else {
+                console.error("window.api.reloadGraph n'est pas disponible.");
+            }
+        });
+        // Une fois trouvé et l'écouteur ajouté, on arrête l'observation
+        observer.disconnect();
+    }
 
 
 }
@@ -617,7 +664,9 @@ const observer = new MutationObserver((mutationsList, observer) => {
 observer.observe(document.body, { childList: true, subtree: true });
 
 // Appel initial pour vérifier si l'élément existe déjà
-initializeColorChangeListener();
+setTimeout(() => {
+    initializeColorChangeListener();
+}, 500);
 
 
 
@@ -671,7 +720,7 @@ function setWordSearch(){
             else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
                 selectElement.value = "sujet";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par noeud")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par doi")){
                 selectElement.value = "noeud";
             }
         }

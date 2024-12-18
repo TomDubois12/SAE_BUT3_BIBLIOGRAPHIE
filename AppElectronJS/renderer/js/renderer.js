@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // }
     });
 
-
-
     // Gestion de l'événement pour la touche "Entrée"
     document.getElementById('site-search').addEventListener('keypress', function(event) {
         if (event.key === "Enter") {
