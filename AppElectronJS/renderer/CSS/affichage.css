@@ -211,7 +211,7 @@ select{
     border-radius: 0.25rem;
     flex-shrink: 0;
     margin: 2vh 0.5vw;
-    border: 1.5px solid;
+    border: 0.5px solid;
 }
 
 .contenerListeParam ul li p, label{
@@ -282,3 +282,51 @@ select{
     font-size: 2vh;
 }
 
+
+input[type="color"] {
+    width: 3em;
+    height: 2em;
+    border: none;
+    border-radius: 25%;
+    background-color: transparent;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: 1px solid #363636;
+    border-radius: 15%;
+}
+
+input[type="color"]:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(99, 99, 99, 0.2);
+}
+
+/* Style quand tout est à jour */
+.textEstAJour {
+    color: #28a745;
+    background-color: #e6f9eb;
+    border: 1px solid #28a745;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Style quand ce n'est pas à jour */
+.textEstPasAJour {
+    color: #dc3545;
+    background-color: #fdecea;
+    border: 1px solid #dc3545;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+}
