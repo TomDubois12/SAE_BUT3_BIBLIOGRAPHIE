@@ -114,7 +114,7 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
         
-        if (data.TypeChoose === 'Par noeud') {
+        if (data.TypeChoose === 'Par doi') {
             document.getElementById('titleEditColor').style.display = 'none';
             document.getElementById('colorEdit').style.display = 'none';
         }
@@ -337,7 +337,7 @@ buttonModifCouleurs.onclick = function(){
             {
                 typeC = "titre";
             }
-            else if (data.TypeChoose ==="noeud")
+            else if (data.TypeChoose ==="Par doi")
                 {
                     typeC = "noeud";
                 }

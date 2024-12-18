@@ -219,7 +219,7 @@ function createAside(nodeId) {
                 if (data) {
                     data = JSON.parse(data);
                     data.WordChoose = nodeData.doi;
-                    data.TypeChoose = "Par noeud";
+                    data.TypeChoose = "Par doi";
                     window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                         if (err) {
                         console.error('Erreur d’écriture :', err);
@@ -671,7 +671,7 @@ function setWordSearch(){
             else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
                 selectElement.value = "sujet";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par noeud")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par doi")){
                 selectElement.value = "noeud";
             }
         }
