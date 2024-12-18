@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>BiblioLectIA</title>
-<link href="CSS/affichage.css" rel="stylesheet"/>
-<!-- <link href="CSS/param.css" rel="stylesheet"/> -->
-<style type="text/css">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>BiblioLectIA</title>
+    <link href="CSS/affichage.css" rel="stylesheet" />
+    <!-- <link href="CSS/param.css" rel="stylesheet"/> -->
+    <style type="text/css">
         #mynetwork {
             height: 100vh;
             background-color: #ffffff;
@@ -23,13 +24,14 @@
         }
     </style>
 </head>
+
 <body>
-<div class="contenerNavbar">
-<div class="logoNavbar">
-<a href="search.html"><img alt="logo de l'application" class="logo" src="images/logo.png"/></a>
-</div>
-<nav class="navbar">
-<script>
+    <div class="contenerNavbar">
+        <div class="logoNavbar">
+            <a href="search.html"><img alt="logo de l'application" class="logo" src="images/logo.png" /></a>
+        </div>
+        <nav class="navbar">
+            <script>
                 function hideFirstDiv() {
                     const div1 = document.getElementById("criteres");
 
@@ -45,15 +47,16 @@
                 }
 
             </script>
-<input class="input" id="site-search" minlength="4" name="q" placeholder="Indiquez un mot clé" type="search"/>
-<select id="listBouton" onchange="changerChoix(this)">
-<option class="auteur" value="auteur">Par auteur</option>
-<option class="sujet" value="sujet">Par sujet</option>
-<option class="titre" value="titre">Par titre</option>
-<option class="noeud" value="noeud">Par noeud</option>
-</select>
-<button id="search-btn">Rechercher</button>
-<script>
+            <input class="input" id="site-search" minlength="4" name="q" placeholder="Indiquez un mot clé"
+                type="search" />
+            <select id="listBouton" onchange="changerChoix(this)">
+                <option class="auteur" value="auteur">Par auteur</option>
+                <option class="sujet" value="sujet">Par sujet</option>
+                <option class="titre" value="titre">Par titre</option>
+                <option class="noeud" value="noeud">Par doi</option>
+            </select>
+            <button id="search-btn">Rechercher</button>
+            <script>
                 document.getElementById('search-btn').addEventListener('click', function () {
                     document.body.classList.add('loading');
                     setTimeout(() => {
@@ -61,13 +64,15 @@
                     }, 20000);
                 });
             </script>
-</nav>
-</div>
-<!-- <div id="result"></div> -->
-<script src="js/renderer.js"></script>
-<!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
+            <a class="add-article" href="ajout_article.html">Ajouter un article</a>
+        </nav>
+    </div>
+    <!-- <div id="result"></div> -->
+    <script src="js/renderer.js"></script>
+    <!-- Il ne faut pas enlever cette div la !!!!!!!!!!!!!!!!
     Elle stocke mon graphe grâce à un script python
 -->
+
 <div class="contenerCanvaAside">
 <div class="asideParam" id="asideParam">
 <div class="criteres" id="criteres">
@@ -133,62 +138,61 @@
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
                   for (nodeId in allNodes) {
+
                     nodeColors[nodeId] = allNodes[nodeId].color;
-                  }
-                  allEdges = edges.get({ returnType: "Object" });
-                  // adding nodes and edges to the graph
-                  data = {nodes: nodes, edges: edges};
+                }
+                allEdges = edges.get({ returnType: "Object" });
+                // adding nodes and edges to the graph
+                data = { nodes: nodes, edges: edges };
 
-                  var options = {
-    "configure": {
-        "enabled": false
-    },
-    "edges": {
-        "color": {
-            "inherit": true
-        },
-        "smooth": {
-            "enabled": true,
-            "type": "dynamic"
-        }
-    },
-    "interaction": {
-        "dragNodes": true,
-        "hideEdgesOnDrag": false,
-        "hideNodesOnDrag": false
-    },
-    "physics": {
-        "enabled": true,
-        "stabilization": {
-            "enabled": true,
-            "fit": true,
-            "iterations": 1000,
-            "onlyDynamicEdges": false,
-            "updateInterval": 50
-        }
-    }
-};
-
-                  
+                var options = {
+                    "configure": {
+                        "enabled": false
+                    },
+                    "edges": {
+                        "color": {
+                            "inherit": true
+                        },
+                        "smooth": {
+                            "enabled": true,
+                            "type": "dynamic"
+                        }
+                    },
+                    "interaction": {
+                        "dragNodes": true,
+                        "hideEdgesOnDrag": false,
+                        "hideNodesOnDrag": false
+                    },
+                    "physics": {
+                        "enabled": true,
+                        "stabilization": {
+                            "enabled": true,
+                            "fit": true,
+                            "iterations": 1000,
+                            "onlyDynamicEdges": false,
+                            "updateInterval": 50
+                        }
+                    }
+                };
 
 
-                  
 
-                  network = new vis.Network(container, data, options);
-
-                  
-
-                  
-
-                  
+                network = new vis.Network(container, data, options);
 
 
-                  
 
-                  return network;
 
-              }
-              drawGraph();
-        </script><script src="js/EventNodeEdge.js"> </script></div>
+
+
+
+                return network;
+
+            }
+            drawGraph();
+        </script>
+        <script src="Bokeh/bin/lib/binding/utils.js" type="text/javascript"></script>
+        <script src="js/EventNodeEdge.js"> </script>
+    </div>
 </body>
+
 </html>

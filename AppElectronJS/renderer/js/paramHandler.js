@@ -92,7 +92,8 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             
             document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
 
         if (data.TypeChoose === 'Par titre') {
@@ -102,12 +103,15 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
 
             document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-            
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
 
         if (data.TypeChoose === 'Par sujet') {
             document.getElementById('titleEditColor').style.display = 'none';
             document.getElementById('colorEdit').style.display = 'none';
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
         
         if (data.TypeChoose === 'Par noeud') {

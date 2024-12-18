@@ -2,7 +2,6 @@ let AS_ASIDE = false;
 let AS_CLICK = false;
 let idSelectedNode = "";
 
-
 async function changeColorOnHover(nodeId, isOrigin) {
 
     // Obtenir la couleur associée au nœud (origine ou non)
@@ -215,7 +214,7 @@ function createAside(nodeId) {
         const buttonCreateGraph = document.createElement("button");
         buttonCreateGraph.textContent = "Générer le graphe de cet article"
         buttonCreateGraph.classList.add("buttonGenerateGraph");
-        buttonCreateGraph.addEventListener("click", async () => {
+        buttonCreateGraph.addEventListener("click", async (e) => {
             window.api.readFile('renderer/json/userSettings.json', (err, data) => {
                 if (data) {
                     data = JSON.parse(data);
@@ -229,7 +228,7 @@ function createAside(nodeId) {
                 }
             });
 
-            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud", true], true);
         });
         
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {
