@@ -108,7 +108,7 @@ body {
 /*   _   */
 
 /* Style de base pour les boutons */
-button {
+button, .add{
     padding: 1vw 2vw;
     background-color: white;
     border: solid #759BFF;
@@ -120,7 +120,7 @@ button {
 }
 
 /* Effet hover pour les boutons */
-button:hover {
+button:hover, .add:hover{
     background-color: #F9CE72;
     border: solid #F9CE72;
     box-shadow: 0 0.5vw 1.5vw rgba(0, 122, 139, 0.3);
@@ -142,7 +142,7 @@ button:disabled {
 }
 
 /* Active button styling */
-button.active {
+button.actived{
     background-color: #759BFF;
     color: white;
     box-shadow: 0 0.4vw 1vw rgba(0, 122, 139, 0.2);
@@ -197,14 +197,30 @@ button.active {
 }
 
 /*****************/
-/* Extract       */
+/* CSV           */
 /*****************/
+
+.CSV{
+    text-align: center;
+}
 
 .exportCSV{
     text-align: center;
     justify-content: center;
 }
 
-.exportCSV p{
+.CSV p{
     font-size: 1.5vw;
+}
+
+.CSV .title{
+    font-size: 1.2vw;
+}
+
+.biblio{
+    margin-bottom: 2vh;
+}
+
+.add-article{
+    padding-bottom: 2vh;
 }
