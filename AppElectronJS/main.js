@@ -131,7 +131,7 @@ function openOtherWindow(){
   graphWindo.loadFile('./renderer/test.html');
 }
 
-ipcMain.handle('callFunctionSearch', (event, query, specialEvent = false) => {
+ipcMain.handle('callFunctionSearch', (event, query) => {
 
   if(query.length == 3 && query[2]){
     

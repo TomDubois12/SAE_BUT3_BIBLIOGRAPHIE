@@ -228,7 +228,7 @@ function createAside(nodeId) {
                 }
             });
 
-            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud", true], true);
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]); // si on veut ajouter une nouvelle page, on rajoute true dans la liste
         });
         
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {
