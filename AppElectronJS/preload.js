@@ -13,7 +13,10 @@ contextBridge.exposeInMainWorld('api', {
     writeFile: (path, data, callback) => fs.writeFile(path, data, callback),
     reloadGraph: async () => {
         return await ipcRenderer.invoke('reloadPage');
-    }
+    },
+
+    accesLoadCSV: () => ipcRenderer.invoke('loadCSVpage')
+
 });
 
 
@@ -67,6 +70,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     on: (event, callback) => {
         ipcRenderer.on(event, (event, ...args) => callback(...args)); // Permet d'écouter des événements
     },
+
     sendCSVPath: (csvFilePath) => ipcRenderer.send('load-search-page', csvFilePath),
     addArticle: (newArticle) => ipcRenderer.send('add-article', newArticle),
 

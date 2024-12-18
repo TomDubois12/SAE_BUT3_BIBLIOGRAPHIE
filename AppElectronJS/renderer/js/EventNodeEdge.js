@@ -273,13 +273,11 @@ function onClick(params) {
     // Pour bloquer l'apparition de hover quand une est cliqué
 
     // Changer la couleur du nœud sur le clic
-    console.log(nodeId,idSelectedNode);
     if (nodeId !== idSelectedNode) {
         // Sauvegarde la couleur de l'ancien nœud
         colorOnNodeSave(idSelectedNode);
         idSelectedNode = nodeId; // met à jour le nœud sélectionné
     }
-    console.log(nodeId,idSelectedNode);
 
 
     AS_CLICK = true;
@@ -496,7 +494,6 @@ async function setAllNodeDeg() {
 
 
         DivOrigine.style.background = `linear-gradient(to left, ${colorOrMin}, ${colorOrMax})`;
-        console.log("Gradient applied");
 
         const legend = document.getElementById("legend-textOr");
         if (minDateOrigin === undefined || maxDateOrigin === undefined) {
@@ -524,7 +521,6 @@ async function setAllNodeDeg() {
             legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
 
-        console.log("Legend updated:", maxDateOrigin, minDateOrigin);
         addDynamicCSS()
     } catch (error) {
         console.error("Error applying gradient or legend:", error);
@@ -560,6 +556,7 @@ function initializeColorChangeListener() {
 
     const colorOrigineChange = document.getElementById("color0");
     const colorEnvironChange = document.getElementById("color1");  
+    const colorNodeChange = document.getElementById("colorEdit");  
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
@@ -577,6 +574,19 @@ function initializeColorChangeListener() {
 
     if (colorEnvironChange) {  // Si l'élément est trouvé
         colorEnvironChange.addEventListener('change', (event) => {
+            if (window.api && typeof window.api.reloadGraph === 'function') {
+                setTimeout(() => {
+                    window.api.reloadGraph();
+                }, 250);
+            } else {
+                console.error("window.api.reloadGraph n'est pas disponible.");
+            }
+        });
+        // Une fois trouvé et l'écouteur ajouté, on arrête l'observation
+        observer.disconnect();
+    }
+    if (colorNodeChange) {  // Si l'élément est trouvé
+        colorNodeChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
@@ -679,7 +689,6 @@ function setTextAJour(){
             // On récupère le fichier
             data = JSON.parse(data);
             estAJour = data.estRecharger;
-            console.log(estAJour);
             if (estAJour === "true"){
                 texteAjour.textContent = "Les paramètres et le graphes sont à jours !";
             }

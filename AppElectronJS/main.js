@@ -233,7 +233,9 @@ ipcMain.handle("reloadPage", (event) => {
   
 });
 
-
+ipcMain.handle("loadCSVpage", (event) => {
+  mainWindow.loadFile('./renderer/loadcsv.html'); 
+});
 
 // For mac user
 if (process.platform == 'darwin'){
