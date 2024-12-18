@@ -10,9 +10,15 @@
         </div> 
         <div class="text">
             <p class="title">Explorez les articles connectés sous forme de graphe</p>
+            <div id="CSVInfo">
+                <p class="textsearch">Vous utilisez actuellement le CSV :</p>
+                <p id="textCSVChoose" class="title"></p>
+                <button id="buttonChangeCSV" class="input" onclick="changeCSV()" >Charger un autre CSV</button>
+            </div>
             <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
         </div>
 
+        
         <nav class="navbar">
             <input class="input" type="search" id="site-search" name="q" minlength="1"
                 placeholder="Indiquez un mot clé, un nom d’auteur, un titre ou encore un doi..."  

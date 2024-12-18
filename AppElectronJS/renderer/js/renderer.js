@@ -1,7 +1,7 @@
 // Assurez-vous que le DOM est complètement chargé avant d'attacher des événements
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener("keydown", function (event) {
-        console.log("Touche pressée : ", event.key); // Vérifie si l'événement est détecté
+        // console.log("Touche pressée : ", event.key); Vérifie si l'événement est détecté
         if (event.key === "Enter") {
             research();
         }
@@ -12,14 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let paramRecherche = "";
         paramRecherche = document.getElementById("listBouton");
-        
-        console.log(paramRecherche.value)
-
+        keepResearchParam(query);
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
 
-        if(!output.includes("Error")){
-            keepResearchParam(query);
-        }
+        // if(!output.includes("Error")){
+        //     keepResearchParam(query);
+        // }
     });
 
 
@@ -54,7 +52,7 @@ function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
     }
 }
 
-function keepResearchParam(newWord, newType){
+function keepResearchParam(newWord){
 
     let typeSearch = getSelectedOption()
 
@@ -75,7 +73,7 @@ function keepResearchParam(newWord, newType){
             data.estRecharger = "true";
             // On sauvegarde les modification
             window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {  
-            console.error('Erreur d’écriture :', err);
+                console.error('Erreur d’écriture :', err);
             });
         }
     });
@@ -101,12 +99,27 @@ async function research(){
 
     let paramRecherche = "";
     paramRecherche = document.getElementById("listBouton");
-    
-    console.log(paramRecherche.value)
-    
+    keepResearchParam(query);
     const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
-    if(!output.includes("Error")){
-        keepResearchParam(query);
-    }
+    // if(!output.includes("Error")){
+    //     keepResearchParam(query);
+    // }
 }
 
+function changeCSV() {
+    //Mettre un bouton qui redirige a la page de chargement d'un nouveau CSV
+    window.api.accesLoadCSV();
+    
+}
+
+function infoCSV(){
+    let textCSV = document.getElementById("textCSVChoose");
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data && textCSV) {
+            data = JSON.parse(data);
+            textCSV.textContent = data.CSVChoose;
+        }
+    });
+
+}
+infoCSV();

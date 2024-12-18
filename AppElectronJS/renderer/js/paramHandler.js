@@ -62,7 +62,7 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             input.type = 'number';
             input.id = `nb${index}`;
             input.step = 1;
-            input.min = 1;
+            input.min = 0;
             input.max = 50;
             input.value = element.value;
         
@@ -249,15 +249,10 @@ function writeElementCheck(elementName, newValue){
 }
 
 function writeElementNumber(elementName, newValue){
-    console.log(elementName,newValue);
-
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
     if (data) {
         data = JSON.parse(data);
         data.ListeNoeudSettings.forEach(element => {
-
-            console.log("Ça marche", elementName, element.NoeudsName);
-
             if (elementName === "nb1" && element.NoeudsName === "Nombre de nodes environnant ") {
                 if (newValue >=0 && newValue <= 10000 ) 
                 {
