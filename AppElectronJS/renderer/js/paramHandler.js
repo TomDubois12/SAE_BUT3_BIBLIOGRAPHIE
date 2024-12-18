@@ -346,11 +346,11 @@ function miseAjourTextAjour(){
 miseAjourTextAjour();
 
 const buttonModifCouleurs = document.getElementById('buttonModifCouleurs');
-buttonModifCouleurs.onclick = function(){
+buttonModifCouleurs.onclick =async function(){
     // Il ne modifie plus les couleurs mais s'occupe mtn de refresh le graphe si des nouveau paramètre sont activées ou désactivé.
 
     let estAJour = "false";
-    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+    await window.api.readFile('renderer/json/userSettings.json', async (err, data) => {
         if (data) {
             data = JSON.parse(data);
             estAJour = data.estRecharger;
@@ -376,8 +376,12 @@ buttonModifCouleurs.onclick = function(){
                 {
                     typeC = "noeud";
                 }
-
-            window.api.callFunctionSearch([data.WordChoose, typeC]);
+            let divInvisible = document.getElementsByClassName("divInvisible")[0];
+            divInvisible.classList.add("invisibleBackground");
+            divInvisible.style.visibility = "visible";
+            await window.api.callFunctionSearch([data.WordChoose, typeC]);
+            divInvisible.classList.remove("invisibleBackground");
+            divInvisible.style.visibility = "hidden";
 
         }
         miseAjourTextAjour();
