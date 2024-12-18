@@ -23,13 +23,22 @@
     </div>
 
     <script>
+        window.electronAPI.on('article-response', (message) => {
+            alert(message);
+        });
+
         function ajouterArticle() {
             var contenu = document.getElementById('textarea-id').value;
-            
             console.log('Contenu du textarea:', contenu);
             
-            alert('Contenu de l\'article ajouté: ' + contenu);
-            window.electronAPI.addArticle(contenu);
+            // Vérification si le contenu n'est pas vide
+            if (!contenu.trim()) {
+                alert('Veuillez entrer un titre ou DOI valide.');
+                return;
+            }
+            
+            // Appel de l'API Electron pour ajouter l'article
+            window.electronAPI.addArticle(contenu);  
         }
     </script>
 </body>
