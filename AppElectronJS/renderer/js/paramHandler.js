@@ -62,7 +62,7 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             input.type = 'number';
             input.id = `nb${index}`;
             input.step = 1;
-            input.min = 1;
+            input.min = 0;
             input.max = 50;
             input.value = element.value;
         
@@ -92,7 +92,8 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             
             document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
 
         if (data.TypeChoose === 'Par titre') {
@@ -102,12 +103,15 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
 
             document.getElementById('listeNbNoeuds').style.display = 'none';
             document.getElementById('subtitleParam').style.display = 'none';
-            
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
 
         if (data.TypeChoose === 'Par sujet') {
             document.getElementById('titleEditColor').style.display = 'none';
             document.getElementById('colorEdit').style.display = 'none';
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
         }
         
         if (data.TypeChoose === 'Par noeud') {
@@ -249,15 +253,10 @@ function writeElementCheck(elementName, newValue){
 }
 
 function writeElementNumber(elementName, newValue){
-    console.log(elementName,newValue);
-
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
     if (data) {
         data = JSON.parse(data);
         data.ListeNoeudSettings.forEach(element => {
-
-            console.log("Ça marche", elementName, element.NoeudsName);
-
             if (elementName === "nb1" && element.NoeudsName === "Nombre de nodes environnant ") {
                 if (newValue >=0 && newValue <= 10000 ) 
                 {

@@ -1,10 +1,33 @@
 <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+        <link rel="stylesheet" href="CSS/accueil.css">
+    </head>
+    <body>
+        <div class="logo">
+            <img src="images/logo.png" alt="logo de l'application" class="logo">
+        </div> 
+        <div class="text">
+            <p class="title">Explorez les articles connectés sous forme de graphe</p>
+            <div id="CSVInfo">
+                <p class="textsearch">Vous utilisez actuellement le CSV :</p>
+                <p id="textCSVChoose" class="title"></p>
+                <button id="buttonChangeCSV" class="input" onclick="changeCSV()" >Charger un autre CSV</button>
+            </div>
+            <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
+        </div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <link rel="stylesheet" href="CSS/accueil.css">
-</head>
+        
+        <nav class="navbar">
+            <input class="input" type="search" id="site-search" name="q" minlength="1"
+                placeholder="Indiquez un mot clé, un nom d’auteur, un titre ou encore un doi..."  
+            />
+            <select id="listBouton" onchange="changerChoix(this)">
+                <option class="auteur" value="auteur">Par auteur</option>
+                <option class="sujet" value="sujet">Par sujet</option>
+                <option class="titre" value="titre">Par titre</option>
+                <option class="noeud" value="noeud">Par doi</option>
 
 <body>
     <div class="logo">
