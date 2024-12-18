@@ -12,11 +12,6 @@
     </div>
     <div class="text">
         <p class="title">Explorez les articles connectés sous forme de graphe</p>
-        <div id="CSVInfo">
-            <p class="textsearch">Vous utilisez actuellement le CSV :</p>
-            <p id="textCSVChoose" class="title"></p>
-            <button id="buttonChangeCSV" class="input" onclick="changeCSV()">Charger un autre CSV</button>
-        </div>
         <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
     </div>
 
@@ -80,11 +75,21 @@
         </li>
     </ul>
 
-    <div class="exportCSV">
-        <p>Vous pouvez extraire ici tous les DOI des articles présents dans l'application.</p>
-        <button onclick=extract()>Extraire</button>
+    <div class="CSV">
+        <div id="CSVInfo">
+            <p class="textsearch">Vous utilisez actuellement le CSV :</p>
+            <p id="textCSVChoose" class="title"></p>
+            <button id="buttonChangeCSV" class="input" onclick="changeCSV()">Charger un autre CSV</button>
+        </div>
+        <div class="exportCSV">
+            <p>Vous pouvez extraire ici tous les DOI des articles présents dans l'application.</p>
+            <button onclick=extract()>Extraire</button>
+        </div>
+        <div class="add-article">
+            <p class="biblio">Vous pouvez ajouter un article à votre biblioagrphie ici.</p>
+            <button class="add" onclick="window.location.href='ajout_article.html';">Ajouter un article</button>
+        </div>
     </div>
-
     <script>
         function extract() {
             const filePath = '../cache_doi.json';

@@ -13,6 +13,7 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 def is_valid_doi(doi):
     """
     Vérifie si une chaîne de caractères correspond à un DOI valide.
+    Exemple : 10.3895/recit.v5.n12.4301
 
     Args:
     - doi (str): La chaîne de caractères représentant un DOI.
@@ -25,7 +26,7 @@ def is_valid_doi(doi):
 def is_valid_url(url):
     """
     Vérifie si une chaîne de caractères correspond à une URL valide de type Semantic Scholar.
-
+    Exemple : https://www.semanticscholar.org/paper/Requirements-Engineering-for-Embedded-Systems%3A-A-Pereira-Ribeiro/d1f2f40c850d2c793ea6cbf13261824d53cfecee
     Args:
     - url (str): La chaîne de caractères représentant une URL.
 
@@ -33,6 +34,19 @@ def is_valid_url(url):
     - bool: True si l'URL est valide, sinon False.
     """
     return bool(re.match(r'^https://www.semanticscholar.org/paper/', url))
+
+def is_valid_url_doi(url_doi):
+    """
+    Vérifie si une chaîne de caractères correspond à un DOI valide.
+    Exemple : https://doi.org/10.3895/recit.v5.n12.4301
+
+    Args:
+    - doi (str): La chaîne de caractères représentant un DOI.
+
+    Returns:
+    - bool: True si le DOI est valide, sinon False.
+    """
+    return bool(re.match(r"^https://doi\.org/10\.\d{4,9}/[-._;()/:A-Z0-9]+$", url_doi, re.IGNORECASE))
 
 def get_response(doi_url):
     """
@@ -52,6 +66,10 @@ def get_response(doi_url):
     if is_valid_url(doi_url):
         paper_id = doi_url.split('/')[-1]
         return requests.get(f"{base_url}{paper_id}")
+
+    if is_valid_url_doi(doi_url):
+        doi_part = doi_url.split('https://doi.org/')[-1]  # Récupère tout après "https://doi.org/"
+        return requests.get(f"{base_url}{doi_part}")
     
     return None
 
@@ -68,19 +86,27 @@ def extract_data_from_response(response):
     """
     if response.ok:
         data = response.json()
-        title = data.get('title', "Titre inconnu")
-        abstract = data.get('abstract', "Aperçu indisponible")
+        title = data.get('title')
+        abstract = data.get('abstract')
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
-        doi = data.get('doi', "DOI indisponible")
-        year = data.get('year', "Année inconnue")
+        doi = data.get('doi')
+        year = data.get('year')
         citations = data.get('citations', [])
         references = data.get('references', [])
 
         num_citations = len(citations)
-        citation_dois = [citation.get('doi', "DOI indisponible") for citation in citations]
-        references_doi = [reference.get('doi', "DOI indisponible") for reference in references]
 
-        return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url', "URL indisponible")
+        citation_dois = []
+        for citation in citations:
+            if citation:
+                citation_dois.append(citation.get('doi'))
+
+        references_doi = []
+        for reference in references:
+            if references:
+                references_doi.append(reference.get('doi'))
+
+        return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
     
     return None, None, None, None, None, None, None, None, None
 
@@ -137,7 +163,7 @@ def semantic_scholar_research(doi=None, title=None):
     
     return extract_data_from_response(response)
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=None, references_doi=None, cache_file='cache_doi.json'):
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[], cache_file='cache_doi.json'):
     """
     Enregistre les informations sur un article dans un fichier de cache.
 
@@ -153,6 +179,18 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
     - references_doi (list, optional): Les DOI des références de l'article. Par défaut None.
     - cache_file (str, optional): Le nom du fichier où les données sont stockées. Par défaut 'cache_doi.json'.
     """
+
+    # S'assurer que les paramètres ne sont pas None et utiliser les valeurs par défaut si nécessaire
+    title = title if title is not None else "Titre inconnu"
+    abstract = abstract if abstract is not None else "Aperçu indisponible"
+    authors = authors if authors is not None else "Auteurs inconnus"
+    year = year if year is not None else "Année inconnue"
+    url = url if url is not None else "URL indisponible"
+    num_citations = num_citations if num_citations is not None else 0
+    doi_citations = doi_citations if doi_citations is not None else []
+    references_doi = references_doi if references_doi is not None else []
+
+
     if not os.path.exists(cache_file):
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({}, f)
@@ -160,7 +198,7 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
     with open(cache_file, 'r', encoding='utf-8') as f:
         cache_data = json.load(f)
 
-    if doi != "DOI indisponible":
+    if doi and is_valid_doi(doi):
         cache_data[doi] = {
             'title': title,
             'abstract': abstract,
