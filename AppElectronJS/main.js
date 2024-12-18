@@ -303,18 +303,28 @@ ipcMain.on('send-csv-path', (event, csvPath) => {
 });
 
 ipcMain.on('add-article', (event, newArticle) => {
-  console.log(`Ǹouvel article: ${newArticle}`);
+  console.log(`Nouveau article: ${newArticle}`);
 
   const command = `python -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
   exec(command, (error, stdout, stderr) => {
     if (error) {
         console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
         return;
     }
     if (stderr) {
         console.error(`Erreur standard : ${stderr}`);
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
         return;
     }
+
+    // Si stdout est 'None' ou vide
+    if (!stdout || stdout.trim() === "None") {
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
+    } else {
+        event.reply('article-response', 'Article ajouté avec succès');
+    }
+
     console.log(`Sortie du script Python : ${stdout}`);
   });
-})
+});
