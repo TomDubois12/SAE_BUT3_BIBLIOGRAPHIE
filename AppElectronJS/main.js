@@ -194,18 +194,24 @@ const mainMenuTemplates = [
   {
     label:'Settings',
     submenu:[
+      // {
+      //   label: 'Gerer les couleurs',
+      //   // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
+      //   click(){
+      //     // Une fenêtre pour gerer les couleurs des noeuds 
+      //     graphWindo = new BrowserWindow({
+      //       width: 800,
+      //       height: 600,
+      //       icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+      //       webPreferences: webPref
+      //   });
+      //   graphWindo.loadFile('./renderer/test.html');
+      //   }
+      // },
       {
-        label: 'Gerer les couleurs',
-        // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
+        label:'Ajouter un article',
         click(){
-          // Une fenêtre pour gerer les couleurs des noeuds 
-          graphWindo = new BrowserWindow({
-            width: 800,
-            height: 600,
-            icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-            webPreferences: webPref
-        });
-        graphWindo.loadFile('./renderer/test.html');
+          mainWindow.loadFile('./renderer/ajout_article.html'); 
         }
       }
     ]
@@ -243,23 +249,23 @@ if (process.platform == 'darwin'){
 }
 
 // For product environement, add devTool menu and accelerator
-if (isDev){
-  mainMenuTemplates.push({
-    label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
-    submenu:[
-      {
-        label:'Toggle devTools',
-        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
-        click(item, focusedWindow){
-          focusedWindow.toggleDevTools();
-        }
-      },
-      {
-        role:'reload'  // permet de refresh l'app
-      }
-    ]
-  });
-}
+// if (isDev){
+//   mainMenuTemplates.push({
+//     label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
+//     submenu:[
+//       {
+//         label:'Toggle devTools',
+//         accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
+//         click(item, focusedWindow){
+//           focusedWindow.toggleDevTools();
+//         }
+//       },
+//       {
+//         role:'reload'  // permet de refresh l'app
+//       }
+//     ]
+//   });
+// }
 
 ipcMain.on('load-search-page', (event) => {
   // Charge immédiatement la page de chargement
