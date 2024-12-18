@@ -590,7 +590,6 @@ function initializeColorChangeListener() {
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
-            console.log("COucou1");
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
@@ -605,7 +604,6 @@ function initializeColorChangeListener() {
 
     if (colorEnvironChange) {  // Si l'élément est trouvé
         colorEnvironChange.addEventListener('change', (event) => {
-            console.log("COucou2");
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
                     window.api.reloadGraph();
@@ -620,7 +618,6 @@ function initializeColorChangeListener() {
     if (colorNodeChange) {  // Si l'élément est trouvé
         colorNodeChange.addEventListener('change', (event) => {
             if (window.api && typeof window.api.reloadGraph === 'function') {
-                console.log("COucou3");
                 setTimeout(() => {
                     window.api.reloadGraph();
                 }, 250);
@@ -634,7 +631,6 @@ function initializeColorChangeListener() {
 
     if (colorOriginNodeChange) {  // Si l'élément est trouvé
         colorOriginNodeChange.addEventListener('change', (event) => {
-            console.log("COucou4");
 
             if (window.api && typeof window.api.reloadGraph === 'function') {
                 setTimeout(() => {
