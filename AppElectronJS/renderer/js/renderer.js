@@ -8,16 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // Écoute l'événement pour la recherche
     document.getElementById('search-btn').addEventListener('click', async () => {
+        let divInvisible = document.getElementsByClassName("divInvisible")[0];
+        divInvisible.classList.add("invisibleBackground");
+        divInvisible.style.visibility = "visible";
+
         const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
 
         let paramRecherche = "";
         paramRecherche = document.getElementById("listBouton");
         keepResearchParam(query);
         const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
-
         // if(!output.includes("Error")){
         //     keepResearchParam(query);
         // }
+        divInvisible.classList.remove("invisibleBackground");
+        divInvisible.style.visibility = "hidden";
+
     });
 
     // Gestion de l'événement pour la touche "Entrée"
@@ -28,27 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Active le bouton "Par auteur" par défaut
-    desactiverBouton('sujet', 'auteur'); // Appelle la fonction pour désactiver le bouton "sujet"
 });
 
-// Fonction pour désactiver un bouton et activer l'autre
-function desactiverBouton(idBoutonADesactiver, idBoutonAActiver) {
-    const boutonADesactiver = document.getElementById(idBoutonADesactiver);
-    const boutonAActiver = document.getElementById(idBoutonAActiver);
 
-    if (boutonADesactiver) {
-        boutonADesactiver.disabled = true;
-        boutonADesactiver.style.backgroundColor = "white"; // Indique visuellement qu'il est désactivé
-        boutonADesactiver.style.color = "black"; // Indique visuellement qu'il est désactivé
-    }
-
-    if (boutonAActiver) {
-        boutonAActiver.disabled = false;
-        boutonAActiver.style.backgroundColor = "#759BFF"; // Indique visuellement qu'il est actif
-        boutonAActiver.style.color = "white"; // Indique visuellement qu'il est actif
-    }
-}
 
 function keepResearchParam(newWord){
 
@@ -93,12 +81,20 @@ function getSelectedOption() {
 }
 
 async function research(){
+    let divInvisible = document.getElementsByClassName("divInvisible")[0];
+    divInvisible.classList.add("invisibleBackground");
+    divInvisible.style.visibility = "visible";
+
     const query = document.getElementById('site-search').value; // Récupère la valeur de recherche
 
     let paramRecherche = "";
     paramRecherche = document.getElementById("listBouton");
     keepResearchParam(query);
     const output = await window.api.callFunctionSearch([query, paramRecherche.value]);
+
+    divInvisible.classList.remove("invisibleBackground");
+    divInvisible.style.visibility = "hidden";
+
     // if(!output.includes("Error")){
     //     keepResearchParam(query);
     // }
@@ -121,3 +117,7 @@ function infoCSV(){
 
 }
 infoCSV();
+
+    
+
+
