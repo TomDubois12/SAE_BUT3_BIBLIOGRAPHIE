@@ -44,7 +44,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(500 - ((key2[1] - 0.7) / (1 - 0.7)) * (500 - 20)), color=liaison['color'])    
+                    G.add_edge(key, key2[0], length=(700 - ((key2[1] - 0.7) / (1 - 0.7)) * (700 - 50)), color=liaison['color'])    
 
         case 'Référence':
             for node in allTheKeys:
@@ -119,7 +119,8 @@ def show_graphique_node(primaryKey):
         similarities = search_by_keyword(mot_cle,nbNodeOrigin)
         liste_final = [t[0] for t in similarities]
         liste_final = get_list_xSimilaritie(liste_final, NbNodeChild)
-        
+        if primaryKey in liste_final:
+            liste_final.remove(primaryKey)
         all_key1 = [t[0] for t in liste_final] #List of originNode, the node with the more similarities with the subject.
         all_key2 = [t[1] for t in liste_final] #List of the childs of all the originNode.
         all_key2 = [t[0] for _t in all_key2 for t in _t]
