@@ -145,6 +145,27 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             });
 
         }
+
+        if (data.TypeChoose === 'Par doi' ) {
+            // On s'occupe du cas où c'est par titre ou part auteur, pour avoir la couleur des nodes 
+
+            //La div de couleur a changer 
+            let divColor = document.getElementById('colorEditNodeDOI');
+
+            //La couleur stocker dans le json
+            let colorNode = data.ColorOriginArticle;
+            
+            divColor.className = 'color-box';
+            divColor.value = colorNode;
+
+
+
+            //On ajoute un event pour le changement de valeur de la couleur
+            divColor.addEventListener('change', (event) => {
+                writeColorOrigineArticleNodes(event.target.value);
+            });
+
+        }
     } else {
         console.error("Impossible de lire les paramètres utilisateur.");
     }
@@ -156,12 +177,27 @@ function isHexColor(value) {
 }
 
 function writeColorNodes(newColor){
-    console.log(newColor,isHexColor(newColor));
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data && isHexColor(newColor)) {
             
             data = JSON.parse(data);
             data.ColorNodesSpecialType = newColor;
+
+            window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                if (err) {
+                console.error('Erreur d’écriture :', err);
+                }
+            });
+        }
+    });
+}
+
+function writeColorOrigineArticleNodes(newColor){
+    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+        if (data && isHexColor(newColor)) {
+            
+            data = JSON.parse(data);
+            data.ColorOriginArticle = newColor;
 
             window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
                 if (err) {
@@ -202,7 +238,6 @@ function writePickerColor(elemntId, newColor){
 }
 
 function writeColor(elemntId, newColor){
-    console.log("lgozejgoinbiengpizsr");
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             data = JSON.parse(data);
