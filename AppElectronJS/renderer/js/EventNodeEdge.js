@@ -236,7 +236,12 @@ function createAside(nodeId) {
                 }
             });
 
-            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]); // si on veut ajouter une nouvelle page, on rajoute true dans la liste
+            let divInvisible = document.getElementsByClassName("divInvisible")[0];
+            divInvisible.classList.add("invisibleBackground");
+            divInvisible.style.visibility = "visible";
+            const output = await window.api.callFunctionSearch([nodeData.doi, "noeud"]);  // si on veut ajouter une nouvelle page, on rajoute true dans la liste
+            divInvisible.classList.remove("invisibleBackground");
+            divInvisible.style.visibility = "hidden";
         });
         
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {

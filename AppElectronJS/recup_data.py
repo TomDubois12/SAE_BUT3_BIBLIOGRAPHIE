@@ -197,7 +197,7 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
 
     with open(cache_file, 'r', encoding='utf-8') as f:
         cache_data = json.load(f)
-
+        
     if doi and is_valid_doi(doi):
         cache_data[doi] = {
             'title': title,
