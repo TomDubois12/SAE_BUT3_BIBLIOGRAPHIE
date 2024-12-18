@@ -12,8 +12,14 @@
     </div>
     <div class="text">
         <p class="title">Explorez les articles connectés sous forme de graphe</p>
+        <div id="CSVInfo">
+            <p class="textsearch">Vous utilisez actuellement le CSV :</p>
+            <p id="textCSVChoose" class="title"></p>
+            <button id="buttonChangeCSV" class="input" onclick="changeCSV()">Charger un autre CSV</button>
+        </div>
         <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
     </div>
+
 
     <nav class="navbar">
         <input class="input" type="search" id="site-search" name="q" minlength="1"
@@ -22,7 +28,7 @@
             <option class="auteur" value="auteur">Par auteur</option>
             <option class="sujet" value="sujet">Par sujet</option>
             <option class="titre" value="titre">Par titre</option>
-            <option class="noeud" value="noeud">Par noeud</option>
+            <option class="noeud" value="noeud">Par doi</option>
 
         </select>
         <button id="search-btn">Rechercher</button>
