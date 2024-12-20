@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Ce fichier contient le code pour gérer l'extraction des données d'une API.
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 import os
 import json
 import re

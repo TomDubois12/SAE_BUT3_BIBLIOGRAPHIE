@@ -1,0 +1,16 @@
+{
+    "credits": {
+      "auteur": "IUT Orléans Département Informatique",
+      "collaborateurs": [
+        "BOISSAY Robin",
+        "BOISSAY Nathan",
+        "BRION Adèle",
+        "DUBOIS Tom"
+      ],
+      "date_creation": "11 septembre 2024",
+      "version": "1.0",
+      "description": "Ce fichier contient les informations de crédit pour le projet.",
+      "remerciements": "CLEUZIOU Guillaume"
+    }
+  }
+  
