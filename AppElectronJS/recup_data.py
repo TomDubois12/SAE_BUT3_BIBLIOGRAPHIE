@@ -103,8 +103,14 @@ def extract_data_from_response(response):
 
         references_doi = []
         for reference in references:
-            if references:
-                references_doi.append(reference.get('doi'))
+            if reference:
+                print(reference.get('doi'))
+                doi_ref = reference.get('doi')
+                if doi_ref:
+                    response_ref = get_response(doi_ref)
+                if response.ok:
+                    num_citations = len(response_ref.json().get('citations',[]))-1
+                    references_doi.append((reference.get('doi'), num_citations))
 
         return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
     
@@ -126,7 +132,7 @@ def ajout_article(doi_url):
     title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, url = extract_data_from_response(response)
 
     # Ajouter au cache
-    cache(doi, title, abstract, authors, year, url, num_citations, citation_dois, references_doi)
+    cache(doi, title, abstract, authors, year, url, num_citations, citation_dois, references_doi, False)
     load_or_compute_embeddings()
 
 def semantic_scholar_research(doi=None, title=None):
@@ -163,7 +169,7 @@ def semantic_scholar_research(doi=None, title=None):
     
     return extract_data_from_response(response)
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[], cache_file='cache_doi.json'):
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[],in_csv=True, cache_file='cache_doi.json'):
     """
     Enregistre les informations sur un article dans un fichier de cache.
 
@@ -206,7 +212,8 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'year': year,
             'num_citations': num_citations,
             'doi_references': references_doi,
-            'url': url
+            'url': url,
+            'in_csv': in_csv
         }
 
         with open(cache_file, 'w', encoding='utf-8') as f:
@@ -245,7 +252,7 @@ def recuperate_data(cache_file='cache_doi.json'):
             # Si le DOI est dans le cache
             continue
         elif isinstance(doi, str) and pd.notna(doi):
-            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi=doi)
+            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi)
 
             title = title or "Titre inconnu"
             abstract = abstract or "Aperçu indisponible"
