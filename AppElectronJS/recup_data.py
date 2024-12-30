@@ -102,15 +102,26 @@ def extract_data_from_response(response):
                 citation_dois.append(citation.get('doi'))
 
         references_doi = []
+        
         for reference in references:
             if reference:
                 print(reference.get('doi'))
                 doi_ref = reference.get('doi')
+                num_citations = None  # Valeur par défaut pour num_citations
+
                 if doi_ref:
                     response_ref = get_response(doi_ref)
-                if response.ok:
-                    num_citations = len(response_ref.json().get('citations',[]))-1
-                    references_doi.append((reference.get('doi'), num_citations))
+
+                    if response_ref and response_ref.ok:
+                        try:
+                            num_citations = len(response_ref.json().get('citations', [])) - 1
+                        except (ValueError, KeyError, AttributeError) as e:
+                            print(f"Error processing response for DOI {doi_ref}: {e}")
+                    else:
+                        print(f"No valid response for DOI {doi_ref}. Adding null.")
+
+                references_doi.append((doi_ref, num_citations))
+
 
         return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
     
