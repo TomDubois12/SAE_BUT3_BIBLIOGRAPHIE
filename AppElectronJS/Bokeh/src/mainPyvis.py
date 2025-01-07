@@ -44,7 +44,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(700 - ((key2[1] - 0.7) / (1 - 0.7)) * (700 - 50)), color=liaison['color'])    
+                    G.add_edge(key, key2[0], length=(700 - ((key2[1]) * 700)), color=liaison['color'], smooth=False)    
 
         case 'Référence':
             for node in allTheKeys:
@@ -295,6 +295,7 @@ def show_graphique(liste_key, dataUser):
             G = setLiaison(G, liaison, allTheKeys, liste_key)
 
     nt = Network('100vh', '100vw', notebook=True)
+    nt.force_atlas_2based(gravity=-50, central_gravity=0.01, spring_length=100, spring_strength=0.08)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
