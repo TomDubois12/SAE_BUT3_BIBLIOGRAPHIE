@@ -1,6 +1,38 @@
 const fs = require("fs");
 const { contextBridge, ipcRenderer, dialog } = require('electron');
 
+let queue = Promise.resolve();
+
+// Fonction pour ajouter une tâche dans la file d'attente
+function addToQueue(task, callback) {
+    queue = queue
+      .then(task)
+      .then((result) => callback(null, result)) // Envoie le résultat au callback en cas de succès
+      .catch((err) => callback(err)); // Envoie l'erreur au callback en cas d'échec
+  }
+
+// Lire un fichier (ajouté à la file d'attente)
+function readFile(path, callback) {
+    addToQueue(() => {
+      return new Promise((resolve, reject) => {
+        fs.readFile(path, 'utf-8', (err, data) => {
+          if (err) return reject(err);
+          resolve(data);
+        });
+      });
+    }, callback);
+  }
+// Écrire dans un fichier (ajouté à la file d'attente)
+function writeFile(path, data, callback) {
+    addToQueue(() => {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(path, data, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }, callback);
+  }
 
 contextBridge.exposeInMainWorld('api', { 
     callFunctionSearch: async (query) => {
@@ -9,8 +41,8 @@ contextBridge.exposeInMainWorld('api', {
     openWindoColor: async () => {
         return await ipcRenderer.invoke('openWindoColor');
     },
-    readFile: (path, callback) => fs.readFile(path, 'utf-8', callback),
-    writeFile: (path, data, callback) => fs.writeFile(path, data, callback),
+    readFile: (path, callback) => fs.readFile(path, 'utf-8', callback), // readFile(path, callback), fs.readFile(path, 'utf-8', callback),
+    writeFile: (path, data, callback) => writeFile(path, data, callback), //fs.writeFile(path, data, callback),
     reloadGraph: async () => {
         return await ipcRenderer.invoke('reloadPage');
     },
