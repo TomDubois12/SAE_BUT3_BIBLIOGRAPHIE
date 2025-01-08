@@ -273,19 +273,20 @@ def recuperate_data(cache_file='cache_doi.json'):
 
     return data
 
+#model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned-model', token="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"),
                                embedding_file='cache_doi.json', title_weight=0.5, abstract_weight=0.5):
     """
-    Charge les embeddings des titres et résumés et génère de nouveaux embeddings si nécessaire.
+    Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
 
     Args:
-    - model (SentenceTransformer, optional): Le modèle utilisé pour générer les embeddings. Par défaut un modèle pré-entraîné.
-    - embedding_file (str, optional): Le fichier de cache contenant les embeddings. Par défaut 'cache_doi.json'.
-    - title_weight (float, optional): Le poids attribué aux embeddings des titres. Par défaut 0.5.
-    - abstract_weight (float, optional): Le poids attribué aux embeddings des résumés. Par défaut 0.5.
+        model: SentenceTransformer utilisé pour calculer les embeddings.
+        embedding_file: Nom du fichier JSON contenant les informations et dans lequel les embeddings seront ajoutés.
+        title_weight: Pondération appliquée aux embeddings des titres.
+        abstract_weight: Pondération appliquée aux embeddings des résumés.
 
     Returns:
-    - dict: Le dictionnaire contenant les embeddings des articles mis à jour.
+        data: Dictionnaire des données enrichies avec les embeddings.
     """
     if not os.path.exists(embedding_file):
         raise FileNotFoundError(f"Le fichier '{embedding_file}' n'existe pas.")
@@ -298,10 +299,15 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
     abstracts = []
 
     for doi, info in data.items():
-        if "embeddings" not in info:
-            dois_to_process.append(doi)
-            titles.append(info.get("title", ""))
-            abstracts.append(info.get("abstract", ""))
+        if "embeddings" not in info or "title" not in info["embeddings"] or "abstract" not in info["embeddings"]:
+            title = info.get("title", "")
+            abstract = info.get("abstract", "")
+
+            # Filtrage pour éviter "Aperçu indisponible"
+            if title != "Titre inconnu" or abstract != "Aperçu indisponible":
+                dois_to_process.append(doi)
+                titles.append(title if title != "Aperçu indisponible" else "")
+                abstracts.append(abstract if abstract != "Aperçu indisponible" else "")
 
     print("Calcul des embeddings pour les articles sans embeddings...")
     title_embeddings = model.encode(titles).tolist()
@@ -311,6 +317,7 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         if "embeddings" not in data[doi]:
             data[doi]["embeddings"] = {}
 
+        # Gestion des embeddings nuls pour les champs vides
         if titles[dois_to_process.index(doi)] == "":
             title_emb = [0] * model.get_sentence_embedding_dimension()
         if abstracts[dois_to_process.index(doi)] == "":
@@ -319,7 +326,34 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         data[doi]["embeddings"]["title"] = title_emb
         data[doi]["embeddings"]["abstract"] = abstract_emb
 
-        combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
+        # Dynamisation des pondérations en fonction de la longueur
+        title_length = len(titles[dois_to_process.index(doi)].split())
+        abstract_length = len(abstracts[dois_to_process.index(doi)].split())
+
+        # Ajustement dynamique des poids
+        if len(title.split()) < 10 and not abstract: # Titre court mais pas d'abstract 
+            title_weight, abstract_weight = 0.4, 0.0
+            
+        if len(title.split()) < 10 and abstract: # Titre court et abstract présent
+            title_weight, abstract_weight = 0.3, 0.7
+            
+        if len(title.split()) >= 10 and not abstract: # Titre assez long mais pas d'abstract
+            title_weight, abstract_weight = 0.6, 0.0
+            
+        if len(title.split()) >= 10 and abstract: # Titre assez long et abstract présent
+            title_weight, abstract_weight = 0.5, 0.5
+        
+        if not title and abstract:  # Pas de titre et abstract présent
+            title_weight, abstract_weight = 0.0, 0.9
+
+        # Combinaison des embeddings avec pondérations
+        if title_emb == [0] * model.get_sentence_embedding_dimension():
+            combined_embedding = np.array(abstract_emb)
+        elif abstract_emb == [0] * model.get_sentence_embedding_dimension():
+            combined_embedding = np.array(title_emb)
+        else:
+            combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
+
         data[doi]["embeddings"]["combined"] = combined_embedding.tolist()
 
     with open(embedding_file, 'w', encoding='utf-8') as f:
