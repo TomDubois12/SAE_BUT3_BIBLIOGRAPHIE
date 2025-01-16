@@ -1,3 +1,4 @@
+git switch develop
 cd ../
 virtualenv venv
 source venv/Scripts/activate
