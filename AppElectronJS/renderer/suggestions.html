@@ -34,7 +34,7 @@
             let div_suggest = document.getElementById('suggestions-container');
             var contenu = parseInt(document.getElementById('number-id').value);
             if (isNaN(contenu)) {
-                p.textContent = 'Veuillez entrer un nombre de citations.';
+                div_suggest.textContent = 'Veuillez entrer un nombre de citations.';
                 return;
             }
 
@@ -65,13 +65,28 @@
                             suggestionParagraph.textContent = `${key}`;
                             suggestionContainer.appendChild(suggestionParagraph);
 
+                            // Afficher le nombre total de citations
+                            let nbCitationsParagraph = document.createElement('p');
+                            nbCitationsParagraph.textContent = `Cet article a été cité ${suggestions[key].nb_citations} fois.`;
+                            suggestionContainer.appendChild(nbCitationsParagraph);
+
+                            // Afficher le nombre d'occurrences dans la bibliographie
+                            let occurenceParagraph = document.createElement('p');
+                            occurenceParagraph.textContent = `Cet article est cité ${suggestions[key].cite} fois dans votre bibliographie.`;
+                            suggestionContainer.appendChild(occurenceParagraph);
+
                             // Ajouter le bouton "Ajouter à la bibliographie"
                             let addButton = document.createElement('button');
                             addButton.textContent = 'Ajouter à la bibliographie';
                             addButton.classList.add('suggestion-add-button');
-                            addButton.onclick = function(event) { ajouterArticle(event); };  // Pass event to the function
-                            suggestionContainer.appendChild(addButton);
+                            addButton.id = `${key}`;
 
+                            // Affecter une fonction au bouton pour ajouter l'article
+                            addButton.onclick = function () {
+                                ajouterArticle(key);
+                            };
+
+                            suggestionContainer.appendChild(addButton);
                             div_suggest.appendChild(suggestionContainer);
                         }
                     }
@@ -90,16 +105,13 @@
         }
 
         // Fonction pour ajouter l'article
-        async function ajouterArticle(event) {
-            const suggestionContent = event.target.parentElement.querySelector('.a_ajouter').textContent;
-            console.log('Contenu de la suggestion:', suggestionContent);
-
+        async function ajouterArticle(doi) {
             // Afficher un message de chargement
             afficherFeedback('Ajout en cours...', 'loading');
 
             // Call API to add the article
             try {
-                const output = await window.electronAPI.addArticle(suggestionContent);
+                const output = await window.electronAPI.addArticle(doi);
                 afficherFeedback('Article ajouté avec succès!', 'success');  // Success message
             } catch (error) {
                 afficherFeedback('Erreur lors de l\'ajout de l\'article.', 'error');  // Error message
@@ -120,12 +132,6 @@
                 feedbackContainer.style.color = 'blue';
             }
         }
-
-        // Listen to the article-response event from the API
-        window.electronAPI.on('article-response', (message) => {
-            afficherFeedback(message, message.includes("avec succès") ? 'success' : 'error');
-        });
-
     </script>
 </body>
 

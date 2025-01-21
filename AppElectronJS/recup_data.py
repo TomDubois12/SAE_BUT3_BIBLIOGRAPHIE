@@ -83,35 +83,33 @@ def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
     with open(cache_file, 'r', encoding='utf-8') as f:
         cache_data = json.load(f)
 
-    dict_ref_importantes = dict()
+    dict_ref_importantes = {}
 
     # Itérer sur les articles dans cache_data avec les clés (DOI) et les valeurs (données de l'article)
     for doi, article in cache_data.items():
         # Vérifier si l'article a des références DOI et que celles-ci respectent le seuil de citations
-        if 'doi_references' in article and len(article['doi_references']) > 0:
+        if 'doi_references' in article and isinstance(article['doi_references'], list):
             for reference in article['doi_references']:
-                if reference[0] != "Pas de références" and reference[0] is not None and reference[1] is not None and type(reference[1]) is int and reference[1] >= int(nb_citations_mini):
-                    for doi, article in cache_data.items():
-                        if reference[0].lower() not in doi:
-                            if reference[0].lower() not in dict_ref_importantes:
-                                #dict_ref_importantes[reference[0]] = set()
-                                dict_ref_importantes[reference[0]] = 0
-                            dict_ref_importantes[reference[0]] += 1  # Ajouter le DOI de l'article
+                # Vérifier la validité de la référence
+                if reference[0] != "Pas de références" and reference[0] is not None and reference[1] is not None and reference[0].lower() not in cache_data.keys():
+                    # Vérifier que le nombre de citations est un entier et respecte le seuil
+                    if isinstance(reference[1], int) and reference[1] >= int(nb_citations_mini):
+                        ref_doi_lower = reference[0].lower()
+                        if ref_doi_lower != doi.lower():  # Eviter les références au même article
+                            if ref_doi_lower not in dict_ref_importantes:
+                                dict_ref_importantes[ref_doi_lower] = {'cite': 0, 'nb_citations': reference[1]}
+                            dict_ref_importantes[ref_doi_lower]['cite'] += 1  # Compter le nombre de fois où cette référence est citée
 
-    # Convertir les sets en listes avant la sérialisation JSON
+    # Convertir les résultats pour s'assurer qu'ils sont au format correct
     dict_ref_importantes = {
-        key: list(value) if isinstance(value, set) else value
-        for key, value in dict_ref_importantes.items()
+        key: value for key, value in dict_ref_importantes.items()
     }
 
     # Retourner les résultats en JSON avec des guillemets doubles (format JSON valide)
     json_output = json.dumps(dict_ref_importantes, ensure_ascii=False, indent=2)
 
-    # Affichage de la sortie avant de la retourner
-    # print(json_output)  # Vérification
-
-    # Nettoyer la sortie et la renvoyer
-    return json_output.strip()  # Supprimer les espaces et nouvelles lignes avant retour
+    # Retourner la sortie nettoyée, sans espaces ou nouvelles lignes superflues
+    return json_output.strip()
 
 def extract_data_from_response(response):
     """
@@ -184,6 +182,8 @@ def ajout_article(doi_url):
         return None
     title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, url = extract_data_from_response(response)
 
+    if doi is None:
+        return None
     # Ajouter au cache
     cache(doi.lower(), title, abstract, authors, year, url, num_citations, citation_dois, references_doi, False)
     load_or_compute_embeddings()
