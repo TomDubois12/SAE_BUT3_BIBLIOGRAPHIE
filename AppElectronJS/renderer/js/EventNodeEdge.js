@@ -390,6 +390,11 @@ function getColorOrigineArticle() {
 network.on("click", onClick);
 network.on("hoverNode", onHover);
 network.on("blurNode", onBLur);
+network.on("hoverEdge", function (params) {
+    const edgeId = params.edge; // ID de l'edge survolé
+    const edge = network.body.data.edges.get(edgeId); // Récupère les données de l'edge
+    console.log(`Edge survolé: ${edge.label || edge.title}`);
+  });
 
 
 
