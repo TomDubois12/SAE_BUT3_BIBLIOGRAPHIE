@@ -177,7 +177,17 @@ def show_graphique_node(primaryKey):
                     primaryNode= False
                 )
         return G
+    
+    #Check if the key is in the cache by checking all the key in lower. Its to fix the bug after the import of an article and then a search by doi.
     if(primaryKey not in cache_data.keys()):
+        for key in cache_data.keys():
+            if key.lower() == primaryKey:
+                primaryKey = key
+                break
+
+
+    if(not primaryKey in cache_data.keys()):
+        print(primaryKey, cache_data.keys())
         raise BadDoiError()
 
     # Create the graph
@@ -517,4 +527,4 @@ if __name__ == "__main__":
 #python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "richard l." "auteur"
+#python3 -m Bokeh.src.mainPyvis "10.1016/S0022-3093(99)00388-9" "noeud"
