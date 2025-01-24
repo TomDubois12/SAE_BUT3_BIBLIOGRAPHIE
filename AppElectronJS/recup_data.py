@@ -323,13 +323,6 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         if abstracts[dois_to_process.index(doi)] == "":
             abstract_emb = [0] * model.get_sentence_embedding_dimension()
 
-        data[doi]["embeddings"]["title"] = title_emb
-        data[doi]["embeddings"]["abstract"] = abstract_emb
-
-        # Dynamisation des pondérations en fonction de la longueur
-        title_length = len(titles[dois_to_process.index(doi)].split())
-        abstract_length = len(abstracts[dois_to_process.index(doi)].split())
-
         # Ajustement dynamique des poids
         if len(title.split()) < 10 and not abstract: # Titre court mais pas d'abstract 
             title_weight, abstract_weight = 0.4, 0.0
@@ -354,12 +347,15 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         else:
             combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
 
+        # Écriture uniquement du combined embedding
         data[doi]["embeddings"]["combined"] = combined_embedding.tolist()
 
+    # Sauvegarde dans le fichier en n'écrivant que les combined embeddings
     with open(embedding_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     return data
+
 
 if __name__ == "__main__":
     start_time = time.time()
