@@ -57,44 +57,16 @@ a img {
 
 #suggestions-container {
     width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 100%;
 }
 
 #suggestions-container p {
     font-size: 16px;
     line-height: 1.5;
-    color: #555;
     margin-bottom: 10px;
-}
-
-.suggestion-button {
-    padding: 8px 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
-
-.suggestion-button:hover {
-    background-color: #45a049;
-}
-
-.divInvisible {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    visibility: hidden;
-    z-index: 999;
 }
 
 .invisibleBackground {
@@ -110,9 +82,17 @@ a img {
     font-size: 24px;
     color: white;
     font-weight: bold;
+    text-align: center;
 }
 
 .suggestion-container{
     border: black solid;
     padding: 2vh;
+    margin: 2vh;
+    flex-basis: 25%;
+}
+
+a{
+    color: blue;
+    text-decoration: underline;
 }

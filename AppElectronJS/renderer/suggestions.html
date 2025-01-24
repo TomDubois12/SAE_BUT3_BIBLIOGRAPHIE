@@ -49,24 +49,25 @@
 
                 console.log("Réponse brute :", output);
 
-                let cleanedOutput = output.trim().replace(/\s+/g, '');
+                let cleanedOutput = output.trim().replace(/\s+/g, ' ');
                 console.log("Sortie nettoyée :", cleanedOutput);
 
                 try {
                     const suggestions = JSON.parse(cleanedOutput);
                     div_suggest.innerHTML = ''; // Clear previous results
 
+
                     for (const key in suggestions) {
                         if (suggestions.hasOwnProperty(key)) {
                             let suggestionContainer = document.createElement('div');
                             suggestionContainer.classList.add('suggestion-container');
 
-                            let suggestionParagraph = document.createElement('p');
+                            let suggestionParagraph = document.createElement('h2');
                             suggestionParagraph.classList.add("a_ajouter");
                             suggestionParagraph.textContent = `${suggestions[key].titre}`;
                             suggestionContainer.appendChild(suggestionParagraph);
 
-                            let accesSemantic = document.createElement('button');
+                            let accesSemantic = document.createElement('a');
                             accesSemantic.classList.add("lienSemantic");
                             accesSemantic.textContent = `${key}`;
 
@@ -122,37 +123,36 @@
 
         // Fonction pour ajouter l'article
         async function ajouterArticle(doi) {
-            // Afficher un message de chargement
-            afficherFeedback('Ajout en cours...', 'loading');
 
             // Call API to add the article
             try {
                 const output = await window.electronAPI.addArticle(doi);
-                afficherFeedback('Article ajouté avec succès!', 'success');  // Success message
 
-                // Désactiver le bouton après l'ajout
+                // Success: Disable the button after the article is added
                 const button = document.getElementById(doi); // Utilisation du DOI comme ID du bouton
                 button.disabled = true;
-                button.textContent = 'Article ajouté';  // Changer le texte du bouton
+                button.textContent = 'Article ajouté';  // Change the button text
                 button.style.border = 'solid green';
 
-                setTimeout(() => {
-                    const buttonDOI = document.createElement('button');
-                    buttonDOI.textContent = "Voir un graphe de l'article";
+                // Create the "Voir un graphe de l'article" button immediately after success
+                //const buttonDOI = document.createElement('button');
+                //buttonDOI.textContent = "Voir un graphe de l'article";
 
-                    // Assuming you want to append it to the first suggestion container
-                    const suggestionContainers = document.getElementsByClassName('suggestion-container');
+                // Find the corresponding suggestion container and append the button
+                ///const suggestionContainers = document.getElementsByClassName('suggestion-container');
 
-                    if (suggestionContainers.length > 0) {
-                        suggestionContainers[0].appendChild(buttonDOI);  // Append to the first container
-                    }
-                }, 10000);
+                //if (suggestionContainers.length > 0) {
+                    //suggestionContainers[0].appendChild(buttonDOI);  // Append it to the first suggestion container
+                //}
 
+                // Show success feedback
 
             } catch (error) {
-                afficherFeedback('Erreur lors de l\'ajout de l\'article.', 'error');  // Error message
+                // In case of error, show an error message
+                afficherFeedback('Erreur lors de l\'ajout de l\'article.', 'error');
             }
         }
+
 
 
         // Function to display feedback messages
