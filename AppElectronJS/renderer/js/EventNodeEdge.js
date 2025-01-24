@@ -399,6 +399,9 @@ network.on("hoverEdge", function (params) {
     suiviSouris.style.display = "block";
     const edgeId = params.edge; // ID de l'edge survolé
     let texte = network.body.data.edges.get(edgeId).title;
+    if (isNaN(texte)) {
+        suiviSouris.style.display = "none";
+    }
     if(texte < 0){texte = 0;}
     texte = Math.round(texte * 100) + "%";
     suiviSouris.textContent = texte;
