@@ -510,6 +510,15 @@ if __name__ == "__main__":
                             print(f"Erreur : {e.code}")
                         except EmptyListError as e:
                             print(f"Erreur : {e.code}")
+                    case "reference":
+                        try:
+                            liste_final = cache_data[mot_cle].get("doi_citations", [])
+                            print(liste_final,mot_cle)
+                            show_graphique_author(liste_final)
+                        except BadDoiError as e:
+                            print(f"Erreur : {e.code}")
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
                             
             readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
