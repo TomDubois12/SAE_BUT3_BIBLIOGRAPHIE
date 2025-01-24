@@ -63,8 +63,23 @@
 
                             let suggestionParagraph = document.createElement('p');
                             suggestionParagraph.classList.add("a_ajouter");
-                            suggestionParagraph.textContent = `${key}`;
+                            suggestionParagraph.textContent = `${suggestions[key].titre}`;
                             suggestionContainer.appendChild(suggestionParagraph);
+
+                            let accesSemantic = document.createElement('button');
+                            accesSemantic.classList.add("lienSemantic");
+                            accesSemantic.textContent = `${key}`;
+
+                            // Check if DOI or citation link is available
+                            if (`${suggestions[key].url}`) {
+                                accesSemantic.addEventListener('click', () => {
+                                    window.open(`${suggestions[key].url}`, "_blank", "noopener noreferrer");
+                                });
+                            } else {
+                                doi.setAttribute('disabled', true);  // Disable button if no citation
+                            }
+                            suggestionContainer.appendChild(accesSemantic);
+
 
                             // Afficher le nombre total de citations
                             let nbCitationsParagraph = document.createElement('p');

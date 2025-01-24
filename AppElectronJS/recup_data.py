@@ -74,6 +74,8 @@ def get_response(doi_url):
     return None
 
 def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
+    """
+    """
     # Vérifier si le fichier cache existe; sinon, créer un fichier cache vide
     if not os.path.exists(cache_file):
         with open(cache_file, 'w', encoding='utf-8') as f:
@@ -98,6 +100,8 @@ def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
                         if ref_doi_lower != doi.lower():  # Eviter les références au même article
                             if ref_doi_lower not in dict_ref_importantes:
                                 dict_ref_importantes[ref_doi_lower] = {'cite': 0, 'nb_citations': reference[1]}
+                                dict_ref_importantes[ref_doi_lower]['titre'] = reference[2]
+                                dict_ref_importantes[ref_doi_lower]['url'] = reference[3]
                             dict_ref_importantes[ref_doi_lower]['cite'] += 1  # Compter le nombre de fois où cette référence est citée
 
     # Convertir les résultats pour s'assurer qu'ils sont au format correct
@@ -155,12 +159,14 @@ def extract_data_from_response(response):
                         try:
                             # Nombre de citations pour la référence
                             num_ref_citations = len(response_ref.json().get('citations', []))
+                            titre_citation = response_ref.json().get('title')
+                            url_citation = response_ref.json().get('url')
                         except (ValueError, KeyError, AttributeError) as e:
                             print(f"Error processing response for DOI {doi_ref}: {e}")
                     else:
                         print(f"No valid response for DOI {doi_ref}. Adding null.")
 
-                    references_doi.append((doi_ref, num_ref_citations))
+                    references_doi.append((doi_ref, num_ref_citations, titre_citation, url_citation))
 
         # Retour des données extraites
         return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
