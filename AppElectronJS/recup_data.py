@@ -85,6 +85,48 @@ def get_response(doi_url):
     
     return None
 
+def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
+    """
+    """
+    # Vérifier si le fichier cache existe; sinon, créer un fichier cache vide
+    if not os.path.exists(cache_file):
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+    # Lire les données du cache
+    with open(cache_file, 'r', encoding='utf-8') as f:
+        cache_data = json.load(f)
+
+    dict_ref_importantes = {}
+
+    # Itérer sur les articles dans cache_data avec les clés (DOI) et les valeurs (données de l'article)
+    for doi, article in cache_data.items():
+        # Vérifier si l'article a des références DOI et que celles-ci respectent le seuil de citations
+        if 'doi_references' in article and isinstance(article['doi_references'], list):
+            for reference in article['doi_references']:
+                # Vérifier la validité de la référence
+                if reference[0] != "Pas de références" and reference[0] is not None and reference[1] is not None and reference[0].lower() not in cache_data.keys():
+                    # Vérifier que le nombre de citations est un entier et respecte le seuil
+                    if isinstance(reference[1], int) and reference[1] >= int(nb_citations_mini):
+                        ref_doi_lower = reference[0].lower()
+                        if ref_doi_lower != doi.lower():  # Eviter les références au même article
+                            if ref_doi_lower not in dict_ref_importantes:
+                                dict_ref_importantes[ref_doi_lower] = {'cite': 0, 'nb_citations': reference[1]}
+                                dict_ref_importantes[ref_doi_lower]['titre'] = reference[2]
+                                dict_ref_importantes[ref_doi_lower]['url'] = reference[3]
+                            dict_ref_importantes[ref_doi_lower]['cite'] += 1  # Compter le nombre de fois où cette référence est citée
+
+    # Convertir les résultats pour s'assurer qu'ils sont au format correct
+    dict_ref_importantes = {
+        key: value for key, value in dict_ref_importantes.items()
+    }
+
+    # Retourner les résultats en JSON avec des guillemets doubles (format JSON valide)
+    json_output = json.dumps(dict_ref_importantes, ensure_ascii=False, indent=2)
+
+    # Retourner la sortie nettoyée, sans espaces ou nouvelles lignes superflues
+    return json_output.strip()
+
 def extract_data_from_response(response):
     """
     Extrait les données pertinentes de la réponse JSON de l'API Semantic Scholar.
@@ -98,6 +140,8 @@ def extract_data_from_response(response):
     """
     if response.ok:
         data = response.json()
+        
+        # Récupération des informations de base
         title = data.get('title')
         abstract = data.get('abstract')
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
@@ -106,20 +150,39 @@ def extract_data_from_response(response):
         citations = data.get('citations', [])
         references = data.get('references', [])
 
+        # Nombre de citations directes
         num_citations = len(citations)
 
-        citation_dois = []
-        for citation in citations:
-            if citation:
-                citation_dois.append(citation.get('doi'))
+        # Collecte des DOI des citations
+        citation_dois = [citation.get('doi') for citation in citations if citation]
 
+        # Collecte des DOI des références avec calcul du nombre de citations
         references_doi = []
         for reference in references:
-            if references:
-                references_doi.append(reference.get('doi'))
+            if reference:
+                doi_ref = reference.get('doi')
+                num_ref_citations = None  # Valeur par défaut pour les citations des références
 
+                if doi_ref:
+                    # Requête pour obtenir les données de la référence
+                    response_ref = get_response(doi_ref)
+
+                    if response_ref and response_ref.ok:
+                        try:
+                            # Nombre de citations pour la référence
+                            num_ref_citations = len(response_ref.json().get('citations', []))
+                            titre_citation = response_ref.json().get('title')
+                            url_citation = response_ref.json().get('url')
+                        except (ValueError, KeyError, AttributeError) as e:
+                            print(f"Error processing response for DOI {doi_ref}: {e}")
+                    else:
+                        print(f"No valid response for DOI {doi_ref}. Adding null.")
+
+                    references_doi.append((doi_ref, num_ref_citations, titre_citation, url_citation))
+
+        # Retour des données extraites
         return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
-    
+
     return None, None, None, None, None, None, None, None, None
 
 def ajout_article(doi_url):
@@ -137,8 +200,10 @@ def ajout_article(doi_url):
         return None
     title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, url = extract_data_from_response(response)
 
+    if doi is None:
+        return None
     # Ajouter au cache
-    cache(doi, title, abstract, authors, year, url, num_citations, citation_dois, references_doi)
+    cache(doi.lower(), title, abstract, authors, year, url, num_citations, citation_dois, references_doi, False)
     load_or_compute_embeddings()
 
 def semantic_scholar_research(doi=None, title=None):
@@ -175,7 +240,7 @@ def semantic_scholar_research(doi=None, title=None):
     
     return extract_data_from_response(response)
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[], cache_file='cache_doi.json'):
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[],in_csv=True, cache_file='cache_doi.json'):
     """
     Enregistre les informations sur un article dans un fichier de cache.
 
@@ -218,7 +283,8 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'year': year,
             'num_citations': num_citations,
             'doi_references': references_doi,
-            'url': url
+            'url': url,
+            'in_csv': in_csv
         }
 
         with open(cache_file, 'w', encoding='utf-8') as f:
@@ -257,7 +323,7 @@ def recuperate_data(cache_file='cache_doi.json'):
             # Si le DOI est dans le cache
             continue
         elif isinstance(doi, str) and pd.notna(doi):
-            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi=doi)
+            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi)
 
             title = title or "Titre inconnu"
             abstract = abstract or "Aperçu indisponible"

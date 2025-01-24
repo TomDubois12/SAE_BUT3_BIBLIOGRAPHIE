@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, nativeTheme, dialog } = require('electron')
 const path = require('node:path');
 const { spawn, exec } = require('child_process');
 const fs = require("fs");
@@ -38,16 +38,16 @@ const createWindow = async () => {
 
     // Vérifie si le chemin CSV existe dans le JSON
     const pathCSV = parsedData.CSVChoose;
-    
+
     if (pathCSV && fs.existsSync(`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`)) {
-        mainWindow.loadFile('renderer/search.html');
+      mainWindow.loadFile('renderer/search.html');
     } else {
-        mainWindow.loadFile('renderer/loadcsv.html');
+      mainWindow.loadFile('renderer/loadcsv.html');
     }
-} catch (error) {
+  } catch (error) {
     console.error("Erreur de lecture ou d'analyse du fichier JSON :", error);
     mainWindow.loadFile('renderer/loadcsv.html'); // En cas d'erreur, charge une page de secours
-}
+  }
 
 
 
@@ -57,73 +57,73 @@ const createWindow = async () => {
 
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
-    err = new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
-      console.log(...params);
-      let output = '';
+  err = new Promise((resolve, reject) => {
+    const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
+    console.log(...params);
+    let output = '';
 
-      //Cette fonction récupère les sortie du terminal, pour vérifier si une erreur est apparue je met toute la sortie en forme de 
-      //liste de ligne puis je regarde l'avant dernière ligne ou est sensé se trouver une erreur et si oui alors je la traite.
-      pythonProcess.stdout.on('data', (data) => {
-          data += data.toString();
-          data = data.split("\n");
-          if(data[data.length-2].split(" : ")[1] == 1001){
-            dialog.showMessageBox({
-              type: 'warning',
-              title: 'Mot clé vide',
-              message: "Il semblerait qu'il n'y ait pas de mot clé saisies ?",
-            });
-            reject("Processus terminé avec un code d'erreur");
-          }
-          if(data[data.length-2].split(" : ")[1] == 1002){
-            dialog.showMessageBox({
-              type: 'warning',
-              title: 'Aucun résultat',
-              message: "La recherche effectuée ne renvoie aucun résultat.",
-            });
-            reject("Processus terminé avec un code d'erreur");
-          }
-          if(data[data.length-2].split(" : ")[1] == 1003){
-            dialog.showMessageBox({
-              type: 'warning',
-              title: 'Mauvais DOI',
-              message: "Le DOI entrer ne figure pas dans vos données.",
-            });
-            reject("Processus terminé avec un code d'erreur");
-          }
-      });
-
-
-
-      pythonProcess.stderr.on('data', (data) => {
-          reject(data.toString());
-          console.error(`Python stderr: ${data}`);
-      }); 
+    //Cette fonction récupère les sortie du terminal, pour vérifier si une erreur est apparue je met toute la sortie en forme de 
+    //liste de ligne puis je regarde l'avant dernière ligne ou est sensé se trouver une erreur et si oui alors je la traite.
+    pythonProcess.stdout.on('data', (data) => {
+      data += data.toString();
+      data = data.split("\n");
+      if (data[data.length - 2].split(" : ")[1] == 1001) {
+        dialog.showMessageBox({
+          type: 'warning',
+          title: 'Mot clé vide',
+          message: "Il semblerait qu'il n'y ait pas de mot clé saisies ?",
+        });
+        reject("Processus terminé avec un code d'erreur");
+      }
+      if (data[data.length - 2].split(" : ")[1] == 1002) {
+        dialog.showMessageBox({
+          type: 'warning',
+          title: 'Aucun résultat',
+          message: "La recherche effectuée ne renvoie aucun résultat.",
+        });
+        reject("Processus terminé avec un code d'erreur");
+      }
+      if (data[data.length - 2].split(" : ")[1] == 1003) {
+        dialog.showMessageBox({
+          type: 'warning',
+          title: 'Mauvais DOI',
+          message: "Le DOI entrer ne figure pas dans vos données.",
+        });
+        reject("Processus terminé avec un code d'erreur");
+      }
+    });
 
 
 
-      pythonProcess.on('close', (code) => {
-        if (code === 0) {
-          resolve(output); // Processus terminé avec succès
-        } else {
-          dialog.showMessageBox({
-            type: 'error',
-            title: 'Erreur',
-            message: "Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche ",
-          });
-          reject(`Processus terminé avec un code d'erreur : ${code}`);
-        }
-      });
+    pythonProcess.stderr.on('data', (data) => {
+      reject(data.toString());
+      console.error(`Python stderr: ${data}`);
+    });
+
+
+
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve(output); // Processus terminé avec succès
+      } else {
+        dialog.showMessageBox({
+          type: 'error',
+          title: 'Erreur',
+          message: "Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche ",
+        });
+        reject(`Processus terminé avec un code d'erreur : ${code}`);
+      }
+    });
   });
 
-    
+
 
   return err;
 }
 
-function openOtherWindow(){
+function openOtherWindow() {
   graphWindo = new BrowserWindow({
-    width: isDev ? 1000: 500,
+    width: isDev ? 1000 : 500,
     height: 600,
     icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
     webPreferences: webPref
@@ -133,30 +133,30 @@ function openOtherWindow(){
 
 ipcMain.handle('callFunctionSearch', (event, query) => {
 
-  if(query.length == 3 && query[2]){
-    
-    runPythonFunction(query).then( () => {openOtherWindow();});
-    
-  }else{
+  if (query.length == 3 && query[2]) {
+
+    runPythonFunction(query).then(() => { openOtherWindow(); });
+
+  } else {
 
     // Appel de la fonction Python avec les paramètres fournis
     return runPythonFunction(query)
-    .then((output) => {
+      .then((output) => {
         // Une fois le processus Python terminé, charger la nouvelle page HTML
-        mainWindow.loadFile('renderer/test.html'); 
+        mainWindow.loadFile('renderer/test.html');
         return output;  // Renvoyer la sortie du script Python
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         // En cas d'erreur, renvoyer l'erreur
         // !!! ne pas changer le texte Error en dessous, important pour la gestion d'erreur dans renderer.js
         return `Error: ${error}`;
-    });
+      });
   }
 });
 
 app.whenReady().then(() => {
   createWindow();
-  
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -167,7 +167,7 @@ app.whenReady().then(() => {
 //For mac users, close app 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit(); 
+    app.quit();
   }
 });
 
@@ -175,25 +175,25 @@ app.on('window-all-closed', () => {
 const mainMenuTemplates = [
   {
     label: 'File',
-    submenu:[
+    submenu: [
       {
-        label:'Quit',
+        label: 'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-        click(){
+        click() {
           app.quit();
         }
       },
       {
-        label:'Open other CSV',
-        click(){
-          mainWindow.loadFile('./renderer/loadcsv.html'); 
+        label: 'Open other CSV',
+        click() {
+          mainWindow.loadFile('./renderer/loadcsv.html');
         }
       }
     ]
   },
   {
-    label:'Settings',
-    submenu:[
+    label: 'Settings',
+    submenu: [
       // {
       //   label: 'Gerer les couleurs',
       //   // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
@@ -209,9 +209,9 @@ const mainMenuTemplates = [
       //   }
       // },
       {
-        label:'Ajouter un article',
-        click(){
-          mainWindow.loadFile('./renderer/ajout_article.html'); 
+        label: 'Ajouter un article',
+        click() {
+          mainWindow.loadFile('./renderer/ajout_article.html');
         }
       }
     ]
@@ -220,11 +220,11 @@ const mainMenuTemplates = [
 
 
 ipcMain.handle('openWindoColor', (event) => {
-    const fenetre = new BrowserWindow({
-      width: 800,
-      height: 600,
-      icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-      webPreferences: webPref
+  const fenetre = new BrowserWindow({
+    width: 800,
+    height: 600,
+    icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+    webPreferences: webPref
   });
   fenetre.loadFile('./renderer/colorSettings.html');
 });
@@ -236,32 +236,32 @@ ipcMain.handle("reloadPage", (event) => {
   } else {
     console.error("La fenêtre mainWindow n'est pas définie ou n'a pas de webContents");
   }
-  
+
 });
 
 ipcMain.handle("loadCSVpage", (event) => {
-  mainWindow.loadFile('./renderer/loadcsv.html'); 
+  mainWindow.loadFile('./renderer/loadcsv.html');
 });
 
 // For mac user
-if (process.platform == 'darwin'){
-  mainMenuTemplates.unshift({}); 
+if (process.platform == 'darwin') {
+  mainMenuTemplates.unshift({});
 }
 
 // For product environement, add devTool menu and accelerator
-if (isDev){
+if (isDev) {
   mainMenuTemplates.push({
-    label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
-    submenu:[
+    label: 'Developer Tools', // Ajout d'un menu si le dev ce connecte
+    submenu: [
       {
-        label:'Toggle devTools',
+        label: 'Toggle devTools',
         accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
-        click(item, focusedWindow){
+        click(item, focusedWindow) {
           focusedWindow.toggleDevTools();
         }
       },
       {
-        role:'reload'  // permet de refresh l'app
+        role: 'reload'  // permet de refresh l'app
       }
     ]
   });
@@ -273,20 +273,20 @@ ipcMain.on('load-search-page', (event) => {
 
   // Exécute le script Python
   exec('python recup_data.py', (error, stdout, stderr) => {
-      if (error) {
-          console.error(`Erreur d'exécution: ${error.message}`);
-          event.sender.send('python-error', error.message);
-          return;
-      }
-      if (stderr) {
-          console.error(`stderr: ${stderr}`);
-          event.sender.send('python-error', stderr);
-          return;
-      }
-      console.log(`stdout: ${stdout}`);
+    if (error) {
+      console.error(`Erreur d'exécution: ${error.message}`);
+      event.sender.send('python-error', error.message);
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      event.sender.send('python-error', stderr);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
 
-      // Redirige vers la page finale après l'exécution
-      mainWindow.loadFile('renderer/search.html');
+    // Redirige vers la page finale après l'exécution
+    mainWindow.loadFile('renderer/search.html');
   });
 });
 
@@ -296,15 +296,15 @@ ipcMain.on('send-csv-path', (event, csvPath) => {
   // Appeler le script Python avec le chemin en paramètre
   const command = `python recup_data.py ${csvPath}`;
   exec(command, (error, stdout, stderr) => {
-      if (error) {
-          console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
-          return;
-      }
-      if (stderr) {
-          console.error(`Erreur standard : ${stderr}`);
-          return;
-      }
-      console.log(`Sortie du script Python : ${stdout}`);
+    if (error) {
+      console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Erreur standard : ${stderr}`);
+      return;
+    }
+    console.log(`Sortie du script Python : ${stdout}`);
   });
 });
 
@@ -314,23 +314,66 @@ ipcMain.on('add-article', (event, newArticle) => {
   const command = `python -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
   exec(command, (error, stdout, stderr) => {
     if (error) {
-        console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
-        event.reply('article-response', 'Impossible d\'ajouter l\'article');
-        return;
+      console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+      event.reply('article-response', 'Impossible d\'ajouter l\'article');
+      return;
     }
     if (stderr) {
-        console.error(`Erreur standard : ${stderr}`);
-        event.reply('article-response', 'Impossible d\'ajouter l\'article');
-        return;
+      console.error(`Erreur standard : ${stderr}`);
+      event.reply('article-response', 'Impossible d\'ajouter l\'article');
+      return;
     }
 
     // Si stdout est 'None' ou vide
     if (!stdout || stdout.trim() === "None") {
-        event.reply('article-response', 'Impossible d\'ajouter l\'article');
+      event.reply('article-response', 'Impossible d\'ajouter l\'article');
     } else {
-        event.reply('article-response', 'Article ajouté avec succès');
+      event.reply('article-response', 'Article ajouté avec succès');
     }
 
     console.log(`Sortie du script Python : ${stdout}`);
   });
 });
+
+ipcMain.handle('suggestions', async (event, nb_citations) => {
+  console.log(`Recherche avec: ${nb_citations}`);
+
+  const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
+
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+        reject('Impossible d\'ajouter l\'article');
+        return;
+      }
+      if (stderr) {
+        console.error(`Erreur standard : ${stderr}`);
+        reject('Impossible d\'ajouter l\'article');
+        return;
+      }
+    
+      // Vérification de la sortie brute
+      console.log('Sortie brute:', stdout);
+    
+      // Nettoyer les espaces, les nouvelles lignes et les caractères invisibles
+      const cleanedStdout = stdout.replace(/[\u200B-\u200D\uFEFF]/g, '')  // Supprimer les caractères invisibles
+                                   .replace(/[\r\n]+/g, '');  // Supprimer les retours à la ligne supplémentaires
+    
+      console.log('Sortie nettoyée:', cleanedStdout);
+    
+      // Vérification de la validité du JSON
+      try {
+        const suggestions = JSON.parse(cleanedStdout);
+        resolve(JSON.stringify(suggestions, null, 2));
+      } catch (parseError) {
+        console.error('Erreur lors de l\'analyse JSON:', parseError);
+        console.error('Contenu nettoyé de stdout:', cleanedStdout);  // Afficher stdout nettoyé pour le débogage
+        reject('Impossible de traiter les suggestions.');
+      }
+    });
+    
+
+  });
+});
+

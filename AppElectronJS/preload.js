@@ -105,6 +105,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     sendCSVPath: (csvFilePath) => ipcRenderer.send('load-search-page', csvFilePath),
     addArticle: (newArticle) => ipcRenderer.send('add-article', newArticle),
+    suggestions: (nb_citations) => ipcRenderer.invoke('suggestions', nb_citations),
 
 
 });
