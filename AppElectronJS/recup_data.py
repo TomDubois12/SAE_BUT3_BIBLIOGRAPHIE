@@ -234,7 +234,7 @@ def recuperate_data(cache_file='cache_doi.json'):
     Returns:
     - pd.DataFrame: Les données du fichier CSV sous forme de DataFrame pandas, ou None si des erreurs sont rencontrées.
     """
-    with open("./renderer/json/userSettings.json", "r") as file:
+    with open("./renderer/json/userSettings.json", "r", encoding="utf-8") as file:
         settings = json.load(file)
             
     csv_name = settings.get("CSVChoose", None)
