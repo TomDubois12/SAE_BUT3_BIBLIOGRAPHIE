@@ -16,9 +16,10 @@
     <div class="text">
         <p class="texttitle">Voici les articles liés à ceux de votre bibliographie mais qui n'y apparaissent pas.</p>
         <p class="textsubtitle">Il pourrait être intéressant de les lire.</p>
+        <p class="textsubtitle">Veuillez entrer le nombre de citations minimum </p>
         <input id="number-id" type="number">
         <div class="contenerButton">
-            <button id="ajout-btn" onclick="afficher_suggestions()">Ajouter l'article</button>
+            <button id="ajout-btn" onclick="afficher_suggestions()">Rechercher</button>
         </div>
         <p class="result"></p> <!-- Result feedback container -->
     </div>
@@ -113,10 +114,31 @@
             try {
                 const output = await window.electronAPI.addArticle(doi);
                 afficherFeedback('Article ajouté avec succès!', 'success');  // Success message
+
+                // Désactiver le bouton après l'ajout
+                const button = document.getElementById(doi); // Utilisation du DOI comme ID du bouton
+                button.disabled = true;
+                button.textContent = 'Article ajouté';  // Changer le texte du bouton
+                button.style.border = 'solid green';
+
+                setTimeout(() => {
+                    const buttonDOI = document.createElement('button');
+                    buttonDOI.textContent = "Voir un graphe de l'article";
+
+                    // Assuming you want to append it to the first suggestion container
+                    const suggestionContainers = document.getElementsByClassName('suggestion-container');
+
+                    if (suggestionContainers.length > 0) {
+                        suggestionContainers[0].appendChild(buttonDOI);  // Append to the first container
+                    }
+                }, 10000);
+
+
             } catch (error) {
                 afficherFeedback('Erreur lors de l\'ajout de l\'article.', 'error');  // Error message
             }
         }
+
 
         // Function to display feedback messages
         function afficherFeedback(message, type) {

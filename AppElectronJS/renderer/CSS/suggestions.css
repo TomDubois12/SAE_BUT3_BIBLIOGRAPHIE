@@ -1,7 +1,3 @@
-body {
-    background-color: white;
-}
-
 .logo {
     display: flex;
     justify-content: center;
@@ -60,18 +56,11 @@ a img {
 }
 
 #suggestions-container {
-    margin-top: 30px;
-    text-align: left;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
 }
 
@@ -121,4 +110,9 @@ a img {
     font-size: 24px;
     color: white;
     font-weight: bold;
+}
+
+.suggestion-container{
+    border: black solid;
+    padding: 2vh;
 }
