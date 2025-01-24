@@ -376,6 +376,10 @@ buttonModifCouleurs.onclick =async function(){
                 {
                     typeC = "noeud";
                 }
+            else if (data.TypeChoose ==="Par reference")
+                {
+                    typeC = "reference";
+                }
             let divInvisible = document.getElementsByClassName("divInvisible")[0];
             divInvisible.classList.add("invisibleBackground");
             divInvisible.style.visibility = "visible";
