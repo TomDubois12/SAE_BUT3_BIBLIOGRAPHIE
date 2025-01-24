@@ -44,7 +44,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(700 - ((key2[1]) * 700)), color=liaison['color'], smooth=False)    
+                    G.add_edge(key, key2[0],title=key2[1], length=(700 - ((key2[1]) * 700)), color=liaison['color'], smooth=False)    
 
         case 'Référence':
             for node in allTheKeys:
