@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="CSS/loading.css">
+    <title>Chargement de données</title>
+</head>
+<body>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div> 
+    <div class="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <p id="estimated-time">Chargement...</p>
+    <script type="module">
+        import { main } from './js/progress.js';
+        main();
+    </script>
+</body>
+</html>

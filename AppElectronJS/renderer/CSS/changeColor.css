@@ -1,0 +1,47 @@
+body {
+    font-family: 'Arial', sans-serif; /* Police générale de la page */
+    background-color: #f5f5f5; /* Couleur de fond douce */
+    margin: 0;
+    padding: 20px;
+}
+
+.color-list {
+    list-style-type: none; /* Supprime les puces */
+    padding: 0; /* Supprime le padding par défaut */
+    max-width: 400px; /* Limite la largeur de la liste */
+    margin: auto; /* Centre la liste horizontalement */
+}
+
+.color-item {
+    display: flex; /* Utilise flexbox pour l'alignement */
+    align-items: center; /* Aligne les éléments verticalement au centre */
+    background-color: #fff; /* Couleur de fond des éléments */
+    border: 1px solid #ddd; /* Bordure légère */
+    border-radius: 5px; /* Coins arrondis */
+    margin: 10px 0; /* Marge entre les éléments */
+    padding: 10px; /* Espacement interne */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
+    transition: transform 0.2s; /* Animation de transformation */
+}
+
+.color-item:hover {
+    transform: scale(1.02); /* Légère augmentation au survol */
+}
+
+.color-title {
+    flex: 1; /* Prend l'espace disponible */
+    font-size: 18px; /* Taille de police */
+    margin: 0; /* Supprime la marge par défaut */
+}
+
+.color-box {
+    width: 30px; /* Largeur du carré coloré */
+    height: 30px; /* Hauteur du carré coloré */
+    border-radius: 5px; /* Coins arrondis du carré */
+    margin-right: 10px; /* Espace entre le carré et le bouton radio */
+}
+
+input[type="radio"] {
+    transform: scale(1.2); /* Agrandir le bouton radio */
+    cursor: pointer; /* Curseur pointer au survol */
+}

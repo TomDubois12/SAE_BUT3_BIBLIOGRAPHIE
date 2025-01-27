@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="CSS/ajoutarticle.css">
+</head>
+
+<body>
+    <a href="search.html"><img src="images/retour.png" alt="flèche retour"></a>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div>
+    
+    <div class="text">
+        <p class="texttitle">Ajouter un article par son titre ou DOI</p>
+        <p class="textsubtitle">(ou faites le glisser depuis semanticscholar)</p>
+        <input id="textfield-id" type="text">
+        <div class="contenerButton">
+            <button id="ajout-btn" onclick="ajouterArticle()">Ajouter l'article</button>
+        </div>
+        <p class="result"></p>
+    </div>
+
+    <script>
+        // Lorsque la réponse de l'API arrive
+        window.electronAPI.on('article-response', (message) => {
+            let p = document.getElementsByClassName('result')[0]; // Accéder au premier élément avec la classe 'result'
+            
+            // Mettre à jour le texte du message
+            p.textContent = message;
+    
+            // Si le message indique que l'article a été ajouté avec succès, rechargez la page
+            if (message === "Article ajouté avec succès") {
+                location.reload(); // Recharger la page
+            }
+        });
+    
+        // Fonction pour ajouter l'article
+        function ajouterArticle() {
+            let p = document.getElementsByClassName('result')[0]; // Accéder au premier élément avec la classe 'result'
+            var contenu = document.getElementById('textfield-id').value;
+            console.log('Contenu du textarea:', contenu);
+            
+            // Vérification si le contenu n'est pas vide
+            if (!contenu.trim()) {
+                p.textContent = 'Veuillez entrer un titre ou DOI valide.';
+                return;
+            }
+            
+            // Appel de l'API Electron pour ajouter l'article
+            window.electronAPI.addArticle(contenu);
+        }
+    </script>
+    
+</body>
+
+</html>

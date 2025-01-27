@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="CSS/loadcsv.css">
+    <script>
+        let fileName = ''; // Variable pour stocker le nom du fichier
+
+        function importCSV() {
+            const input = document.getElementById('csv-input');
+            const file = input.files[0];  // Obtenir le fichier sélectionné
+            console.log('Fichier sélectionné:', file); // Débogage
+            if (file) {
+                fileName = file.name;  // Récupérer le nom du fichier
+                window.electronAPI.saveCSVPath(file);
+                console.log('Nom du fichier enregistré:', fileName); // Débogage
+                displayFileName(); // Afficher le contenu de la seconde page
+            } else {
+                alert("Veuillez sélectionner un fichier CSV."); // Alerte si aucun fichier n'est sélectionné
+            }
+        }
+
+        function displayFileName() {
+            // Cacher la section d'importation et afficher le reste
+            document.getElementById('file-upload-section').style.display = 'none'; // Cacher la section d'importation
+            document.getElementById('file-name-section').style.display = 'block'; // Afficher la section avec le nom du fichier
+            document.getElementById('file-name-button-section').style.display = 'block'; // Afficher les boutons d'accès
+            document.getElementById('csv-file-name').textContent = fileName; // Afficher le nom du fichier
+        }
+
+        function changeCSV() {
+            // Remettre à zéro l'état pour importer un nouveau fichier
+            document.getElementById('file-upload-section').style.display = 'block'; // Afficher la section d'importation
+            document.getElementById('file-name-section').style.display = 'none'; // Cacher la section avec le nom du fichier
+            document.getElementById('file-name-button-section').style.display = 'none'; // Cacher les boutons
+            document.getElementById('csv-input').value = ''; // Réinitialiser l'entrée de fichier
+        }
+    </script>
+</head>
+
+<body>
+    <a href="search.html"><img src="images/retour.png" alt="flèche retour"></a>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div>
+    
+    <!-- Section d'importation -->
+    <div class="text" id="file-upload-section">
+        <p class="texttitle">Charger un fichier CSV</p>
+        <p class="texttitle">pour commencer</p>
+        <input type="file" id="csv-input" accept=".csv" style="display: none;" onchange="importCSV();" />
+        <div class="contenerButton">
+            <button id="import-btn" onclick="document.getElementById('csv-input').click();">Ouvrir un fichier CSV</button>
+        </div>
+    </div>
+
+    <!-- Section qui s'affiche après avoir chargé le CSV -->    
+    <div class="contenerButton" id="file-name-button-section" style="display: none;">
+        <button id="change-btn" onclick="changeCSV();">Changer de CSV</button>
+        <div class="text" id="file-name-section" style="display: none;">
+            <p class="texttitle">Vous allez continuer avec le CSV :</p>
+            <p class="texttitle2" id="csv-file-name">"Nom du CSV"</p>
+        </div>
+        <button id="access-btn" onclick="window.electronAPI.accessBiblioLectio();">Charger les données</button>
+        <script>
+            window.electronAPI.on('python-error', (errorMessage) => {
+                alert("Une erreur est survenue : " + errorMessage);
+            });
+
+            window.electronAPI.on('python-finished', () => {
+                console.log("La fonction Python est terminée.");
+                window.location.href = 'renderer/search.html';
+            });
+        </script>
+    </div>
+</body>
+</html>

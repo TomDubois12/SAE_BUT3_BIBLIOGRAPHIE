@@ -1,0 +1,48 @@
+body {
+    background-color: white;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.texttitle {
+    font-size: 4vh;
+    margin: 0;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: white;
+    color: black;
+    border: solid;
+    border-color: #F9CE72;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+
+.contenerButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 5vh;
+}
+
+a img{
+    margin-top: 2vh;
+    margin-left: 2vh;
+    max-width: 5vw;
+}
