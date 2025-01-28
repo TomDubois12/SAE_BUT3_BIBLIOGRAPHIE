@@ -307,6 +307,7 @@ function onHover(params){
 }
 
 function onBLur(params){
+
     const nodeId = params.node;
     if (!AS_CLICK){
         changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
@@ -390,10 +391,30 @@ function getColorOrigineArticle() {
 network.on("click", onClick);
 network.on("hoverNode", onHover);
 network.on("blurNode", onBLur);
+network.on("hoverEdge", function (params) {
+    const suiviSouris = document.getElementById('suivi-souris');
 
+    suiviSouris.style.left = event.pageX - suiviSouris.offsetWidth / 2 + 'px';
+    suiviSouris.style.top = event.pageY - suiviSouris.offsetHeight / 2 + 'px';
+    suiviSouris.style.display = "block";
+    const edgeId = params.edge; // ID de l'edge survolé
+    let texte = network.body.data.edges.get(edgeId).title;
+    if (isNaN(texte)) {
+        suiviSouris.style.display = "none";
+    }
+    if(texte < 0){texte = 0;}
+    texte = Math.round(texte * 100) + "%";
+    suiviSouris.textContent = texte;
+    
+   
+  });
 
-
-
+network.on("blurEdge", function (params) {
+    const suiviSouris = document.getElementById('suivi-souris');
+    
+    // Cacher l'élément de suivi de la souris
+    suiviSouris.style.display = "none";
+});
 
 function adjustColorBrightness(hex, factor) {
     // Enlever le "#" du début si nécessaire

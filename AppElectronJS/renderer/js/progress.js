@@ -20,16 +20,23 @@ export async function updateProgressBar(jsonPath, totalLines) {
         if (!response.ok) throw new Error(`Erreur de chargement du fichier JSON : ${response.statusText}`);
         
         const jsonData = await response.json();
-        const currentInserts = Object.keys(jsonData).length;
+        let currentInserts = Object.keys(jsonData).length;
+
+        // Vérification de cohérence
+        if (currentInserts > totalLines) {
+            console.warn("Le nombre d'inserts dépasse le total des lignes. Ajustement à 0.");
+            currentInserts = 0;
+        }
 
         // Mise à jour de la barre
         const progressPercent = Math.min((currentInserts / totalLines) * 100, 100);
         document.getElementById("progress-bar").style.width = `${progressPercent}%`;
         document.getElementById("progress-bar").textContent = `${Math.round(progressPercent)}%`;
 
-        // Mise à jour de l'estimation
-        const timePerInsert = 15 / 10; // Exemple de temps par insert
-        const estimatedTimeLeft = ((totalLines - currentInserts) * timePerInsert) / 60;
+        // Calcul du temps restant
+        const timePerInsert = 45; // Temps par insertion en secondes
+        const remainingInserts = Math.max(totalLines - currentInserts, 0);
+        const estimatedTimeLeft = (remainingInserts * timePerInsert) / 60;
         const minutes = Math.floor(estimatedTimeLeft);
         const seconds = Math.round((estimatedTimeLeft - minutes) * 60);
 

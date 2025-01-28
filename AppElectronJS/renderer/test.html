@@ -21,6 +21,18 @@
             width: 400px;
             height: 600px;
         }
+
+        #suivi-souris {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* Caché par défaut */
+            z-index:1001;
+          }
     </style>
 </head>
 <body>
@@ -92,6 +104,7 @@
 </div>
 </div>
 </div>
+<div id="suivi-souris"></div>
 <div class="divInvisible"></div>
 <div class="TargetDiv"><div class="card" style="width: 100%">
 
@@ -123,9 +136,9 @@
 
                   
 
-                  // parsing and collecting nodes and edges from the python
                   nodes = new vis.DataSet([{"abstract": "Highly reduced few-layer graphene oxide films with conductivities of up to 500 S cm\u22121 are obtained. The thin films with an optimized compromise between sheet resistance (3.1 k\u03a9 sq\u22121) and transparency (around 80% to 90%) are suitable for touch screens and transparent electrodes in OLEDs. We discuss the effects of low temperature annealing and chemical reduction on the properties of the films and present an optimized reduction process that allows the original 2D/G Raman intensity ratio of few-layer graphene to be recovered. The Raman spectrum of graphene oxide is found to be only related to oxygen-free graphene-like regions with Raman bands at 1130 and 3155 cm\u22121 that probably involve C\u2013H vibrations of rings and edges, while a band at 1700 cm\u22121 is assigned to irregular rings such as Stone Wales defects. All the bands involve resonant Raman processes and disappear in highly reduced samples. Clear correlations of the D band width with the sp2 content in thin films and resistivity have been observed, indicating that this is a good Raman parameter for evaluating the quality of the samples. The structural defects produced by the release of embedded water and some of the oxygen functional groups during annealing are detrimental for intra-grain conductivity but greatly enhance inter-grain connectivity.", "author": "X. D\u00edez-Betriu, S. \u00c1lvarez-Garc\u00eda, C. Botas, P. \u00c1lvarez, J. S\u00e1nchez-Marcos, C. Prieto, R. Men\u00e9ndez, A. Andr\u00e9s", "color": "red", "doi": "10.1039/c3tc31124d", "id": "10.1039/c3tc31124d", "isOrigin": "true", "label": "X. D\u00edez-Betriu 2013", "nb_citations": 277, "shape": "dot", "size": 26, "title": "Raman spectroscopy for the study of reduction mechanisms and optimization of conductivity in graphene oxide thin films", "url": "https://www.semanticscholar.org/paper/01dc6af47b874bd91632b18917f3d447fd8595aa", "year": 2013}, {"abstract": "Aper\u00e7u indisponible", "author": "F. Bonaccorso, Z. Sun, T. Hasan, A. Ferrari", "color": "red", "doi": "10.1038/nphoton.2010.186", "id": "10.1038/nphoton.2010.186", "isOrigin": "true", "label": "F. Bonaccorso 2010", "nb_citations": 6849, "shape": "dot", "size": 100, "title": "Graphene Photonics and Optoelectroncs", "url": "https://www.semanticscholar.org/paper/de0effde5b834e352a61c6d8eee248e4f9cb9866", "year": 2010}, {"abstract": "We demonstrate a polymer-free method that can routinely transfer relatively large-area graphene to any substrate with advanced electrical properties and superior atomic and chemical structures as compared to the graphene sheets transferred with conventional polymer-assisted methods. The graphene films that are transferred with polymer-free method show high electrical conductance and excellent optical transmittance. Raman spectroscopy and X-ray/ultraviolet photoelectron spectroscopy also confirm the presence of high quality graphene sheets with little contamination after transfer. Atom-resolved images can be obtained using scanning tunneling microscope on as-transferred graphene sheets without additional cleaning process. The mobility of the polymer-free graphene monolayer is as high as 63,000 cm(2) V(-1) s(-1), which is 50% higher than the similar sample transferred with the conventional method. More importantly, this method allows us to place graphene directly on top of devices made of soft materials, such as organic and polymeric thin films, which widens the applications of graphene in soft electronics.", "author": "Wei-Hsiang Lin, Ting Chen, Jan-Kai Chang, Jieh-I Taur, Y. Lo, Wei-Li Lee, Chia\u2010Seng Chang, W. Su, Chih\u2010I Wu", "color": "red", "doi": "10.1021/nn406170d", "id": "10.1021/nn406170d", "isOrigin": "true", "label": "Wei-Hsiang Lin 2014", "nb_citations": 171, "shape": "dot", "size": 24, "title": "A direct and polymer-free method for transferring graphene grown by chemical vapor deposition to any substrate.", "url": "https://www.semanticscholar.org/paper/28ab554d2742984aee9f5f92ee79c8af0874d9a1", "year": 2014}]);
                   edges = new vis.DataSet([{"arrows": "to", "color": "#f85a16", "from": "10.1039/c3tc31124d", "to": "10.1038/nphoton.2010.186", "width": 1}, {"arrows": "to", "color": "#f85a16", "from": "10.1021/nn406170d", "to": "10.1038/nphoton.2010.186", "width": 1}]);
+
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -156,6 +169,15 @@
     },
     "physics": {
         "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.01,
+            "damping": 0.4,
+            "gravitationalConstant": -50,
+            "springConstant": 0.08,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
         "stabilization": {
             "enabled": true,
             "fit": true,
