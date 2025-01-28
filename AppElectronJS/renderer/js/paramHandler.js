@@ -118,6 +118,13 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('titleEditColor').style.display = 'none';
             document.getElementById('colorEdit').style.display = 'none';
         }
+
+        if (data.TypeChoose === 'Par reference') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
+        }
                    
 
         const ulNode = document.getElementById('ulNode');
