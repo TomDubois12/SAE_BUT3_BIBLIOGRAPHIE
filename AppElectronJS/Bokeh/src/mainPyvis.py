@@ -460,15 +460,15 @@ class AppError(Exception):
 
 class EmptyWordError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
+        super().__init__("Il semblerait qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
 
 class EmptyListError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
+        super().__init__("Il semblerait qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
 
 class BadDoiError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais que ce Doi n'existe pas dans vos données", 1003)
+        super().__init__("Il semblerait que ce Doi n'existe pas dans vos données", 1003)
         
 if __name__ == "__main__":
 

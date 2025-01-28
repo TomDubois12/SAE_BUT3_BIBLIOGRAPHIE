@@ -39,13 +39,8 @@
                 return;
             }
 
-            let divInvisible = document.getElementsByClassName("divInvisible")[0];
-            divInvisible.classList.add("invisibleBackground");
-            divInvisible.style.visibility = "visible";
-
             try {
                 const output = await window.electronAPI.suggestions(contenu);
-                divInvisible.style.visibility = "hidden";
 
                 console.log("Réponse brute :", output);
 
@@ -56,59 +51,78 @@
                     const suggestions = JSON.parse(cleanedOutput);
                     div_suggest.innerHTML = ''; // Clear previous results
 
+                    // Créer un tableau des suggestions
+                    let suggestionsArray = [];
 
                     for (const key in suggestions) {
                         if (suggestions.hasOwnProperty(key)) {
-                            let suggestionContainer = document.createElement('div');
-                            suggestionContainer.classList.add('suggestion-container');
-
-                            let suggestionParagraph = document.createElement('h2');
-                            suggestionParagraph.classList.add("a_ajouter");
-                            suggestionParagraph.textContent = `${suggestions[key].titre}`;
-                            suggestionContainer.appendChild(suggestionParagraph);
-
-                            let accesSemantic = document.createElement('a');
-                            accesSemantic.classList.add("lienSemantic");
-                            accesSemantic.textContent = `${key}`;
-
-                            // Check if DOI or citation link is available
-                            if (`${suggestions[key].url}`) {
-                                accesSemantic.addEventListener('click', () => {
-                                    window.open(`${suggestions[key].url}`, "_blank", "noopener noreferrer");
-                                });
-                            } else {
-                                doi.setAttribute('disabled', true);  // Disable button if no citation
-                            }
-                            suggestionContainer.appendChild(accesSemantic);
-
-
-                            // Afficher le nombre total de citations
-                            let nbCitationsParagraph = document.createElement('p');
-                            nbCitationsParagraph.textContent = `Cet article a été cité ${suggestions[key].nb_citations} fois.`;
-                            suggestionContainer.appendChild(nbCitationsParagraph);
-
-                            // Afficher le nombre d'occurrences dans la bibliographie
-                            let occurenceParagraph = document.createElement('p');
-                            occurenceParagraph.textContent = `Cet article est cité ${suggestions[key].cite} fois dans votre bibliographie.`;
-                            suggestionContainer.appendChild(occurenceParagraph);
-
-                            // Ajouter le bouton "Ajouter à la bibliographie"
-                            let addButton = document.createElement('button');
-                            addButton.textContent = 'Ajouter à la bibliographie';
-                            addButton.classList.add('suggestion-add-button');
-                            addButton.id = `${key}`;
-
-                            // Affecter une fonction au bouton pour ajouter l'article
-                            addButton.onclick = function () {
-                                ajouterArticle(key);
-                            };
-
-                            suggestionContainer.appendChild(addButton);
-                            div_suggest.appendChild(suggestionContainer);
+                            suggestionsArray.push({ key, ...suggestions[key] });
                         }
                     }
 
-                    if (Object.keys(suggestions).length === 0) {
+                    // Tri des suggestions par "cite" (nombre de fois dans la bibliographie) de manière décroissante en utilisant une boucle
+                    for (let i = 0; i < suggestionsArray.length - 1; i++) {
+                        for (let j = i + 1; j < suggestionsArray.length; j++) {
+                            if (suggestionsArray[i].cite < suggestionsArray[j].cite) {
+                                // Échange des éléments
+                                let temp = suggestionsArray[i];
+                                suggestionsArray[i] = suggestionsArray[j];
+                                suggestionsArray[j] = temp;
+                            }
+                        }
+                    }
+
+                    // Afficher les suggestions triées
+                    suggestionsArray.forEach(suggestion => {
+                        let suggestionContainer = document.createElement('div');
+                        suggestionContainer.classList.add('suggestion-container');
+                        suggestionContainer.id = suggestion.key;
+
+                        let suggestionParagraph = document.createElement('h2');
+                        suggestionParagraph.classList.add("a_ajouter");
+                        suggestionParagraph.textContent = `${suggestion.titre}`;
+                        suggestionContainer.appendChild(suggestionParagraph);
+
+                        let accesSemantic = document.createElement('a');
+                        accesSemantic.classList.add("lienSemantic");
+                        accesSemantic.textContent = `${suggestion.key}`;
+
+                        // Check if DOI or citation link is available
+                        if (suggestion.url) {
+                            accesSemantic.addEventListener('click', () => {
+                                window.open(suggestion.url, "_blank", "noopener noreferrer");
+                            });
+                        } else {
+                            accesSemantic.setAttribute('disabled', true);  // Disable link if no citation
+                        }
+                        suggestionContainer.appendChild(accesSemantic);
+
+                        // Afficher le nombre total de citations
+                        let nbCitationsParagraph = document.createElement('p');
+                        nbCitationsParagraph.textContent = `Cet article a été cité ${suggestion.nb_citations} fois.`;
+                        suggestionContainer.appendChild(nbCitationsParagraph);
+
+                        // Afficher le nombre d'occurrences dans la bibliographie
+                        let occurenceParagraph = document.createElement('p');
+                        occurenceParagraph.textContent = `Cet article est cité ${suggestion.cite} fois dans votre bibliographie.`;
+                        suggestionContainer.appendChild(occurenceParagraph);
+
+                        // Ajouter le bouton "Ajouter à la bibliographie"
+                        let addButton = document.createElement('button');
+                        addButton.textContent = 'Ajouter à la bibliographie';
+                        addButton.classList.add('suggestion-add-button');
+                        addButton.id = `${suggestion.key}+1`;
+
+                        // Affecter une fonction au bouton pour ajouter l'article
+                        addButton.onclick = function () {
+                            ajouterArticle(suggestion.key);
+                        };
+
+                        suggestionContainer.appendChild(addButton);
+                        div_suggest.appendChild(suggestionContainer);
+                    });
+
+                    if (suggestionsArray.length === 0) {
                         div_suggest.textContent = 'Aucune suggestion d\'article.';
                     }
                 } catch (parseError) {
@@ -121,53 +135,67 @@
             }
         }
 
-        // Fonction pour ajouter l'article
-        async function ajouterArticle(doi) {
 
-            // Call API to add the article
-            try {
-                const output = await window.electronAPI.addArticle(doi);
+        let lookedDoi = "";
 
-                // Success: Disable the button after the article is added
-                const button = document.getElementById(doi); // Utilisation du DOI comme ID du bouton
+        // Lorsque la réponse de l'API arrive
+        window.electronAPI.on('article-response', (message) => {
+            // Si le message indique que l'article a été ajouté avec succès, rechargez la page
+            if (message === "Article ajouté avec succès") {
+                const buttonDOI = document.createElement('button');
+                buttonDOI.textContent = "Voir un graphe de l'article";
+                buttonDOI.addEventListener("click", async (e) => {
+                    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+
+                        document.body.style.cursor = 'progress';  // Afficher un curseur de progression
+                        if (data) {
+                            data = JSON.parse(data);
+                            data.WordChoose = lookedDoi;
+                            data.TypeChoose = "Par doi";
+                            window.api.writeFile('renderer/json/userSettings.json', JSON.stringify(data), (err) => {
+                                if (err) {
+                                    console.error('Erreur d’écriture :', err);
+                                }
+                            });
+                        }
+                    });
+                    const output = await window.api.callFunctionSearch([lookedDoi, "reference"]);  // si on veut ajouter une nouvelle page, on rajoute true dans la liste
+                });
+
+                const doicontainer = document.getElementById(lookedDoi);
+                doicontainer.appendChild(buttonDOI);
+
+                const button = document.getElementById(lookedDoi + "+1");
+                button.textContent = 'Article ajouté';
                 button.disabled = true;
-                button.textContent = 'Article ajouté';  // Change the button text
                 button.style.border = 'solid green';
 
-                // Create the "Voir un graphe de l'article" button immediately after success
-                //const buttonDOI = document.createElement('button');
-                //buttonDOI.textContent = "Voir un graphe de l'article";
 
-                // Find the corresponding suggestion container and append the button
-                ///const suggestionContainers = document.getElementsByClassName('suggestion-container');
-
-                //if (suggestionContainers.length > 0) {
-                    //suggestionContainers[0].appendChild(buttonDOI);  // Append it to the first suggestion container
-                //}
-
-                // Show success feedback
-
-            } catch (error) {
-                // In case of error, show an error message
-                afficherFeedback('Erreur lors de l\'ajout de l\'article.', 'error');
+                let divInvisible = document.getElementsByClassName("divInvisible")[0];
+                divInvisible.classList.add("invisibleBackground");
+                divInvisible.style.visibility = "hidden";
+                document.body.style.cursor = 'default';
             }
-        }
+        });
 
 
+        // Fonction pour ajouter l'article avec gestion du chargement
+        async function ajouterArticle(doi) {
+            // Appel de l'API Electron pour ajouter l'article
+            let divInvisible = document.getElementsByClassName("divInvisible")[0];
+            divInvisible.classList.add("invisibleBackground");
+            divInvisible.style.visibility = "visible";
 
-        // Function to display feedback messages
-        function afficherFeedback(message, type) {
-            const feedbackContainer = document.getElementById('feedback-container');
-            feedbackContainer.textContent = message;
+            // Désactiver le bouton pour éviter plusieurs clics
+            const button = document.getElementById(doi + "+1");
+            button.disabled = true;
+            button.textContent = 'Ajout en cours...'; // Modifier le texte du bouton
+            button.style.border = 'solid orange';
 
-            // Change the feedback style based on success or error
-            if (type === 'success') {
-                feedbackContainer.style.color = 'green';
-            } else if (type === 'error') {
-                feedbackContainer.style.color = 'red';
-            } else if (type === 'loading') {
-                feedbackContainer.style.color = 'blue';
-            }
+            // Changer le curseur pour indiquer que l'action est en cours
+            document.body.style.cursor = 'progress';  // Afficher un curseur de progression
+            const output = await window.electronAPI.addArticle(doi);
+            lookedDoi = doi;
         }
     </script>
 </body>
