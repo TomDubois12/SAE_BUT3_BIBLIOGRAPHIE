@@ -51,8 +51,8 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                 premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
                 for ref in liste_references_du_node:
-                    if ref in allTheKeys:
-                        deuxieme_node = ref
+                    if ref[0] in allTheKeys:
+                        deuxieme_node = ref[0]
                         G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
 
                         
@@ -365,7 +365,7 @@ def show_graphique_author(liste_key):
     dfFinal = df.reindex(liste_key)
 
     noms = dfFinal.index  # Use the index (the keys)
-    
+
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
     if len(originKeys) == 0:
         raise EmptyListError()
@@ -510,6 +510,20 @@ if __name__ == "__main__":
                             print(f"Erreur : {e.code}")
                         except EmptyListError as e:
                             print(f"Erreur : {e.code}")
+                    case "reference":
+                        try:
+                
+                            liste = [mot_cle]
+      
+                            for article in cache_data.keys():
+                                for reference in cache_data[article].get("doi_references", []):
+                                    if mot_cle == reference[0]:
+                                        liste.append(article)
+                            show_graphique_author(liste)
+                        except BadDoiError as e:
+                            print(f"Erreur : {e.code}")
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
                             
             readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
 
@@ -524,7 +538,7 @@ if __name__ == "__main__":
 #Pas de node en résultat lors d'une recherche: 1002
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
+#python -m Bokeh.src.mainPyvis "a" "auteur"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "10.1016/S0022-3093(99)00388-9" "noeud"
+#python -m Bokeh.src.mainPyvis "10.1103/physrevb.54.8064" "reference"
