@@ -29,14 +29,6 @@ console.log = (...args) => {
 };
 
 
-// Chemin vers le virtualenv
-const venvPath = isDev
-  ? path.join(__dirname, 'venv') // En mode dev
-  : path.join(process.resourcesPath, 'venv'); // En production
-
-
-
-
 function installPythonDependencies() {
   // Vérifie que l'exécutable Python existe dans le virtualenv
   if (!fs.existsSync(pythonExecutable)) {
@@ -364,8 +356,11 @@ ipcMain.on('add-article', (event, newArticle) => {
   console.log(`Nouveau article: ${newArticle}`);
   
   // Ligne a changé pour adapter au __dirname
-  const command = pythonExecutable + ` -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
-  exec(command, (error, stdout, stderr) => {
+
+  const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py ajout_article ${newArticle}`);
+  //const command = pythonExecutable + ` -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
+
+  exec(command, { maxBuffer: 4096 * 4096  },(error, stdout, stderr) => {
     if (error) {
         console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
         event.reply('article-response', 'Impossible d\'ajouter l\'article');
@@ -391,10 +386,11 @@ ipcMain.on('add-article', (event, newArticle) => {
 ipcMain.handle('suggestions', async (event, nb_citations) => {
   console.log(`Recherche avec: ${nb_citations}`);
 
-  const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
+  const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py get_suggestions ${nb_citations}`);
+  //const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
 
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command,{ maxBuffer: 4096 * 4096  }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
         reject('Impossible d\'ajouter l\'article');

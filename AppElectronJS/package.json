@@ -40,7 +40,7 @@
     "appId": "com.example.yourapp",
     "productName": "BiblioLectIA",
     "directories": {
-      "output": "dist"
+      "output": "BiblioLectIA"
     },
     "files": [
       "node_modules/**/*",
