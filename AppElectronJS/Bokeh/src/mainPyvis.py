@@ -513,11 +513,11 @@ if __name__ == "__main__":
                     case "reference":
                         try:
                 
-                            liste = [mot_cle]
+                            liste = [mot_cle.lower()]
       
                             for article in cache_data.keys():
                                 for reference in cache_data[article].get("doi_references", []):
-                                    if mot_cle == reference[0]:
+                                    if mot_cle.lower() == reference[0]:
                                         liste.append(article)
                             show_graphique_author(liste)
                         except BadDoiError as e:
