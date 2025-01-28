@@ -170,7 +170,8 @@ select{
 /* Aside param */
 
 .criteres{
-    overflow: auto;
+    overflow-y: scroll;
+    height: 90vh;
 }
 
 .titleParam {

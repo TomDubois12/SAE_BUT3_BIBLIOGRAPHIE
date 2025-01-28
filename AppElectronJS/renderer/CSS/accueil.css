@@ -200,7 +200,7 @@ button.actived{
 /* CSV           */
 /*****************/
 
-.CSV{
+.CSV, .suggest{
     text-align: center;
 }
 
@@ -209,7 +209,7 @@ button.actived{
     justify-content: center;
 }
 
-.CSV p{
+.CSV p, .suggest p{
     font-size: 1.5vw;
 }
 

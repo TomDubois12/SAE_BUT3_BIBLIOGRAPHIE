@@ -24,6 +24,8 @@
             <option class="sujet" value="sujet">Par sujet</option>
             <option class="titre" value="titre">Par titre</option>
             <option class="noeud" value="noeud">Par doi</option>
+            <option class="reference" value="reference">Par reference</option>
+
 
         </select>
         <button id="search-btn">Rechercher</button>
@@ -75,6 +77,11 @@
         </li>
     </ul>
 
+    <div class="suggest">
+        <p class="biblio">Certains de vos articles font références à des articles qui n'apparaissent pas dans votre bibliographie.</p>
+        <button class="add" onclick="window.location.href='suggestions.html';">Voir ces articles</button>
+    </div>
+
     <div class="CSV">
         <div id="CSVInfo">
             <p class="textsearch">Vous utilisez actuellement le CSV :</p>
@@ -86,7 +93,7 @@
             <button onclick=extract()>Extraire</button>
         </div>
         <div class="add-article">
-            <p class="biblio">Vous pouvez ajouter un article à votre biblioagrphie ici.</p>
+            <p class="biblio">Vous pouvez ajouter un article à votre bibliographie ici.</p>
             <button class="add" onclick="window.location.href='ajout_article.html';">Ajouter un article</button>
         </div>
     </div>

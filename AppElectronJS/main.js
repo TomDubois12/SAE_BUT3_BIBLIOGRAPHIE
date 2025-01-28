@@ -387,3 +387,46 @@ ipcMain.on('add-article', (event, newArticle) => {
     console.log(`Sortie du script Python : ${stdout}`);
   });
 });
+
+ipcMain.handle('suggestions', async (event, nb_citations) => {
+  console.log(`Recherche avec: ${nb_citations}`);
+
+  const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
+
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+        reject('Impossible d\'ajouter l\'article');
+        return;
+      }
+      if (stderr) {
+        console.error(`Erreur standard : ${stderr}`);
+        reject('Impossible d\'ajouter l\'article');
+        return;
+      }
+    
+      // Vérification de la sortie brute
+      console.log('Sortie brute:', stdout);
+    
+      // Nettoyer les espaces, les nouvelles lignes et les caractères invisibles
+      const cleanedStdout = stdout.replace(/[\u200B-\u200D\uFEFF]/g, '')  // Supprimer les caractères invisibles
+                                   .replace(/[\r\n]+/g, '');  // Supprimer les retours à la ligne supplémentaires
+    
+      console.log('Sortie nettoyée:', cleanedStdout);
+    
+      // Vérification de la validité du JSON
+      try {
+        const suggestions = JSON.parse(cleanedStdout);
+        resolve(JSON.stringify(suggestions, null, 2));
+      } catch (parseError) {
+        console.error('Erreur lors de l\'analyse JSON:', parseError);
+        console.error('Contenu nettoyé de stdout:', cleanedStdout);  // Afficher stdout nettoyé pour le débogage
+        reject('Impossible de traiter les suggestions.');
+      }
+    });
+    
+
+  });
+});
+

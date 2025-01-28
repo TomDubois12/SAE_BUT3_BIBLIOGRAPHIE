@@ -77,15 +77,15 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0], length=(700 - ((key2[1] - 0.7) / (1 - 0.7)) * (700 - 50)), color=liaison['color'])    
+                    G.add_edge(key, key2[0],title=key2[1], length=(700 - ((key2[1]) * 700)), color=liaison['color'], smooth=False)    
 
         case 'Référence':
             for node in allTheKeys:
                 premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
                 for ref in liste_references_du_node:
-                    if ref in allTheKeys:
-                        deuxieme_node = ref
+                    if ref[0] in allTheKeys:
+                        deuxieme_node = ref[0]
                         G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
 
                         
@@ -210,7 +210,17 @@ def show_graphique_node(primaryKey):
                     primaryNode= False
                 )
         return G
+    
+    #Check if the key is in the cache by checking all the key in lower. Its to fix the bug after the import of an article and then a search by doi.
     if(primaryKey not in cache_data.keys()):
+        for key in cache_data.keys():
+            if key.lower() == primaryKey:
+                primaryKey = key
+                break
+
+
+    if(not primaryKey in cache_data.keys()):
+        print(primaryKey, cache_data.keys())
         raise BadDoiError()
 
     # Create the graph
@@ -328,6 +338,7 @@ def show_graphique(liste_key, dataUser):
             G = setLiaison(G, liaison, allTheKeys, liste_key)
 
     nt = Network('100vh', '100vw', notebook=True)
+    nt.force_atlas_2based(gravity=-50, central_gravity=0.01, spring_length=100, spring_strength=0.08)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
@@ -387,7 +398,6 @@ def show_graphique_author(liste_key):
     dfFinal = df.reindex(liste_key)
 
     noms = dfFinal.index  # Use the index (the keys)
-    
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
     if len(originKeys) == 0:
         raise EmptyListError()
@@ -482,15 +492,15 @@ class AppError(Exception):
 
 class EmptyWordError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
+        super().__init__("Il semblerait qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
 
 class EmptyListError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
+        super().__init__("Il semblerait qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
 
 class BadDoiError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais que ce Doi n'existe pas dans vos données", 1003)
+        super().__init__("Il semblerait que ce Doi n'existe pas dans vos données", 1003)
         
 if __name__ == "__main__":
 
@@ -534,6 +544,20 @@ if __name__ == "__main__":
                             print(f"Erreur : {e.code}")
                         except EmptyListError as e:
                             print(f"Erreur : {e.code}")
+                    case "reference":
+                        try:
+                
+                            liste = [mot_cle.lower()]
+      
+                            for article in cache_data.keys():
+                                for reference in cache_data[article].get("doi_references", []):
+                                    if mot_cle.lower() == reference[0]:
+                                        liste.append(article)
+                            show_graphique_author(liste)
+                        except BadDoiError as e:
+                            print(f"Erreur : {e.code}")
+                        except EmptyListError as e:
+                            print(f"Erreur : {e.code}")
                             
             readGraph_and_write(bokeh_path + "/bin/nx.html", renderer_path + "/test.html")
 
@@ -548,7 +572,7 @@ if __name__ == "__main__":
 #Pas de node en résultat lors d'une recherche: 1002
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python3 -m Bokeh.src.mainPyvis "carbon" "sujet"
+#python -m Bokeh.src.mainPyvis "a" "auteur"
 
 #Recherche par auteur.
-#python3 -m Bokeh.src.mainPyvis "richard l." "auteur"
+#python -m Bokeh.src.mainPyvis "10.1103/physrevb.54.8064" "reference"

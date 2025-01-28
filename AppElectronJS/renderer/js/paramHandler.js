@@ -118,6 +118,13 @@ window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             document.getElementById('titleEditColor').style.display = 'none';
             document.getElementById('colorEdit').style.display = 'none';
         }
+
+        if (data.TypeChoose === 'Par reference') {
+            document.getElementById('titleEditColor').style.display = 'none';
+            document.getElementById('colorEdit').style.display = 'none';
+            document.getElementById('subtitleColorNodeDOI').style.display = 'none';
+            document.getElementById('colorEditNodeDOI').style.display = 'none';
+        }
                    
 
         const ulNode = document.getElementById('ulNode');
@@ -375,6 +382,10 @@ buttonModifCouleurs.onclick =async function(){
             else if (data.TypeChoose ==="Par doi")
                 {
                     typeC = "noeud";
+                }
+            else if (data.TypeChoose ==="Par reference")
+                {
+                    typeC = "reference";
                 }
             let divInvisible = document.getElementsByClassName("divInvisible")[0];
             divInvisible.classList.add("invisibleBackground");

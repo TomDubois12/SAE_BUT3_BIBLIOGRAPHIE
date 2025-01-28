@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Ce fichier contient le code pour gérer l'extraction des données d'une API.
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 import os
 import json
 import re
@@ -26,7 +38,7 @@ def is_valid_doi(doi):
     Returns:
     - bool: True si le DOI est valide, sinon False.
     """
-    return bool(re.match(r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$", doi, re.IGNORECASE))
+    return bool(re.match(r"^10\.\d{4,9}/[-._;()/:A-Z0-9%]+$", doi, re.IGNORECASE))
 
 def is_valid_url(url):
     """
@@ -78,6 +90,48 @@ def get_response(doi_url):
     
     return None
 
+def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
+    """
+    """
+    # Vérifier si le fichier cache existe; sinon, créer un fichier cache vide
+    if not os.path.exists(cache_file):
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+    # Lire les données du cache
+    with open(cache_file, 'r', encoding='utf-8') as f:
+        cache_data = json.load(f)
+
+    dict_ref_importantes = {}
+
+    # Itérer sur les articles dans cache_data avec les clés (DOI) et les valeurs (données de l'article)
+    for doi, article in cache_data.items():
+        # Vérifier si l'article a des références DOI et que celles-ci respectent le seuil de citations
+        if 'doi_references' in article and isinstance(article['doi_references'], list):
+            for reference in article['doi_references']:
+                # Vérifier la validité de la référence
+                if reference[0] != "Pas de références" and reference[0] is not None and reference[1] is not None and reference[0].lower() not in cache_data.keys():
+                    # Vérifier que le nombre de citations est un entier et respecte le seuil
+                    if isinstance(reference[1], int) and reference[1] >= int(nb_citations_mini):
+                        ref_doi_lower = reference[0].lower()
+                        if ref_doi_lower != doi.lower():  # Eviter les références au même article
+                            if ref_doi_lower not in dict_ref_importantes:
+                                dict_ref_importantes[ref_doi_lower] = {'cite': 0, 'nb_citations': reference[1]}
+                                dict_ref_importantes[ref_doi_lower]['titre'] = reference[2]
+                                dict_ref_importantes[ref_doi_lower]['url'] = reference[3]
+                            dict_ref_importantes[ref_doi_lower]['cite'] += 1  # Compter le nombre de fois où cette référence est citée
+
+    # Convertir les résultats pour s'assurer qu'ils sont au format correct
+    dict_ref_importantes = {
+        key: value for key, value in dict_ref_importantes.items()
+    }
+
+    # Retourner les résultats en JSON avec des guillemets doubles (format JSON valide)
+    json_output = json.dumps(dict_ref_importantes, ensure_ascii=False, indent=2)
+
+    # Retourner la sortie nettoyée, sans espaces ou nouvelles lignes superflues
+    return json_output.strip()
+
 def extract_data_from_response(response):
     """
     Extrait les données pertinentes de la réponse JSON de l'API Semantic Scholar.
@@ -91,6 +145,8 @@ def extract_data_from_response(response):
     """
     if response.ok:
         data = response.json()
+        
+        # Récupération des informations de base
         title = data.get('title')
         abstract = data.get('abstract')
         authors = ', '.join([author['name'] for author in data.get('authors', [])])
@@ -99,20 +155,39 @@ def extract_data_from_response(response):
         citations = data.get('citations', [])
         references = data.get('references', [])
 
+        # Nombre de citations directes
         num_citations = len(citations)
 
-        citation_dois = []
-        for citation in citations:
-            if citation:
-                citation_dois.append(citation.get('doi'))
+        # Collecte des DOI des citations
+        citation_dois = [citation.get('doi') for citation in citations if citation]
 
+        # Collecte des DOI des références avec calcul du nombre de citations
         references_doi = []
         for reference in references:
-            if references:
-                references_doi.append(reference.get('doi'))
+            if reference:
+                doi_ref = reference.get('doi')
+                num_ref_citations = None  # Valeur par défaut pour les citations des références
 
+                if doi_ref:
+                    # Requête pour obtenir les données de la référence
+                    response_ref = get_response(doi_ref)
+
+                    if response_ref and response_ref.ok:
+                        try:
+                            # Nombre de citations pour la référence
+                            num_ref_citations = len(response_ref.json().get('citations', []))
+                            titre_citation = response_ref.json().get('title')
+                            url_citation = response_ref.json().get('url')
+                        except (ValueError, KeyError, AttributeError) as e:
+                            print(f"Error processing response for DOI {doi_ref}: {e}")
+                    else:
+                        print(f"No valid response for DOI {doi_ref}. Adding null.")
+
+                    references_doi.append((doi_ref, num_ref_citations, titre_citation, url_citation))
+
+        # Retour des données extraites
         return title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, data.get('url')
-    
+
     return None, None, None, None, None, None, None, None, None
 
 def ajout_article(doi_url):
@@ -130,8 +205,10 @@ def ajout_article(doi_url):
         return None
     title, abstract, authors, doi, year, num_citations, citation_dois, references_doi, url = extract_data_from_response(response)
 
+    if doi is None:
+        return None
     # Ajouter au cache
-    cache(doi, title, abstract, authors, year, url, num_citations, citation_dois, references_doi)
+    cache(doi.lower(), title, abstract, authors, year, url, num_citations, citation_dois, references_doi, False)
     load_or_compute_embeddings()
 
 def semantic_scholar_research(doi=None, title=None):
@@ -168,10 +245,9 @@ def semantic_scholar_research(doi=None, title=None):
     
     return extract_data_from_response(response)
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[]):
-    
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[],in_csv=True, cache='cache_doi.json'):
     """
-    Enregistre les informations sur un article dans un fichier de cache
+    Enregistre les informations sur un article dans un fichier de cache.
 
     Args:
     - doi (str): Le DOI de l'article.
@@ -212,13 +288,14 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'year': year,
             'num_citations': num_citations,
             'doi_references': references_doi,
-            'url': url
+            'url': url,
+            'in_csv': in_csv
         }
 
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
-def recuperate_data():
+def recuperate_data(cache='cache_doi.json'):
     """
     Récupère les informations des articles à partir d'un fichier CSV et met à jour le cache.
 
@@ -251,7 +328,7 @@ def recuperate_data():
             # Si le DOI est dans le cache
             continue
         elif isinstance(doi, str) and pd.notna(doi):
-            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi=doi)
+            title, abstract, author, doi, year, num_citations, doi_citations, doi_references, url = semantic_scholar_research(doi)
 
             title = title or "Titre inconnu"
             abstract = abstract or "Aperçu indisponible"
@@ -267,19 +344,20 @@ def recuperate_data():
 
     return data
 
+#model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned-model', token="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"),
-                               embedding_file=cache_file, title_weight=0.5, abstract_weight=0.5):
+                               embedding_file='cache_doi.json', title_weight=0.5, abstract_weight=0.5):
     """
-    Charge les embeddings des titres et résumés et génère de nouveaux embeddings si nécessaire.
+    Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
 
     Args:
-    - model (SentenceTransformer, optional): Le modèle utilisé pour générer les embeddings. Par défaut un modèle pré-entraîné.
-    - embedding_file (str, optional): Le fichier de cache contenant les embeddings. Par défaut 'cache_doi.json'.
-    - title_weight (float, optional): Le poids attribué aux embeddings des titres. Par défaut 0.5.
-    - abstract_weight (float, optional): Le poids attribué aux embeddings des résumés. Par défaut 0.5.
+        model: SentenceTransformer utilisé pour calculer les embeddings.
+        embedding_file: Nom du fichier JSON contenant les informations et dans lequel les embeddings seront ajoutés.
+        title_weight: Pondération appliquée aux embeddings des titres.
+        abstract_weight: Pondération appliquée aux embeddings des résumés.
 
     Returns:
-    - dict: Le dictionnaire contenant les embeddings des articles mis à jour.
+        data: Dictionnaire des données enrichies avec les embeddings.
     """
     if not os.path.exists(embedding_file):
         raise FileNotFoundError(f"Le fichier '{embedding_file}' n'existe pas.")
@@ -292,10 +370,15 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
     abstracts = []
 
     for doi, info in data.items():
-        if "embeddings" not in info:
-            dois_to_process.append(doi)
-            titles.append(info.get("title", ""))
-            abstracts.append(info.get("abstract", ""))
+        if "embeddings" not in info or "title" not in info["embeddings"] or "abstract" not in info["embeddings"]:
+            title = info.get("title", "")
+            abstract = info.get("abstract", "")
+
+            # Filtrage pour éviter "Aperçu indisponible"
+            if title != "Titre inconnu" or abstract != "Aperçu indisponible":
+                dois_to_process.append(doi)
+                titles.append(title if title != "Aperçu indisponible" else "")
+                abstracts.append(abstract if abstract != "Aperçu indisponible" else "")
 
     print("Calcul des embeddings pour les articles sans embeddings...")
     title_embeddings = model.encode(titles).tolist()
@@ -305,17 +388,40 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
         if "embeddings" not in data[doi]:
             data[doi]["embeddings"] = {}
 
+        # Gestion des embeddings nuls pour les champs vides
         if titles[dois_to_process.index(doi)] == "":
             title_emb = [0] * model.get_sentence_embedding_dimension()
         if abstracts[dois_to_process.index(doi)] == "":
             abstract_emb = [0] * model.get_sentence_embedding_dimension()
 
-        data[doi]["embeddings"]["title"] = title_emb
-        data[doi]["embeddings"]["abstract"] = abstract_emb
+        # Ajustement dynamique des poids
+        if len(title.split()) < 10 and not abstract: # Titre court mais pas d'abstract 
+            title_weight, abstract_weight = 0.4, 0.0
+            
+        if len(title.split()) < 10 and abstract: # Titre court et abstract présent
+            title_weight, abstract_weight = 0.3, 0.7
+            
+        if len(title.split()) >= 10 and not abstract: # Titre assez long mais pas d'abstract
+            title_weight, abstract_weight = 0.6, 0.0
+            
+        if len(title.split()) >= 10 and abstract: # Titre assez long et abstract présent
+            title_weight, abstract_weight = 0.5, 0.5
+        
+        if not title and abstract:  # Pas de titre et abstract présent
+            title_weight, abstract_weight = 0.0, 0.9
 
-        combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
+        # Combinaison des embeddings avec pondérations
+        if title_emb == [0] * model.get_sentence_embedding_dimension():
+            combined_embedding = np.array(abstract_emb)
+        elif abstract_emb == [0] * model.get_sentence_embedding_dimension():
+            combined_embedding = np.array(title_emb)
+        else:
+            combined_embedding = title_weight * np.array(title_emb) + abstract_weight * np.array(abstract_emb)
+
+        # Écriture uniquement du combined embedding
         data[doi]["embeddings"]["combined"] = combined_embedding.tolist()
 
+    # Sauvegarde dans le fichier en n'écrivant que les combined embeddings
     with open(embedding_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -331,3 +437,4 @@ if __name__ == "__main__":
     load_or_compute_embeddings()
     end_time = time.time()
     print(f"Temps d'exécution de load_or_compute_embeddings: {end_time - start_time:.2f} secondes")
+

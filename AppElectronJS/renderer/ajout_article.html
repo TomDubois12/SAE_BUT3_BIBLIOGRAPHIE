@@ -22,6 +22,8 @@
         </div>
         <p class="result"></p>
     </div>
+    <div class="divInvisible"></div>
+
 
     <script>
         // Lorsque la réponse de l'API arrive
@@ -33,12 +35,14 @@
     
             // Si le message indique que l'article a été ajouté avec succès, rechargez la page
             if (message === "Article ajouté avec succès") {
-                location.reload(); // Recharger la page
+                setTimeout(() => {
+                    location.reload(); // Recharger la page
+                }, 1000);
             }
         });
     
         // Fonction pour ajouter l'article
-        function ajouterArticle() {
+        async function ajouterArticle() {
             let p = document.getElementsByClassName('result')[0]; // Accéder au premier élément avec la classe 'result'
             var contenu = document.getElementById('textfield-id').value;
             console.log('Contenu du textarea:', contenu);
@@ -50,7 +54,12 @@
             }
             
             // Appel de l'API Electron pour ajouter l'article
-            window.electronAPI.addArticle(contenu);
+            let divInvisible = document.getElementsByClassName("divInvisible")[0];
+            divInvisible.classList.add("invisibleBackground");
+            divInvisible.style.visibility = "visible";            
+            const output = await window.electronAPI.addArticle(contenu);
+            
+
         }
     </script>
     
