@@ -51,58 +51,78 @@
                     const suggestions = JSON.parse(cleanedOutput);
                     div_suggest.innerHTML = ''; // Clear previous results
 
+                    // Créer un tableau des suggestions
+                    let suggestionsArray = [];
+
                     for (const key in suggestions) {
                         if (suggestions.hasOwnProperty(key)) {
-                            let suggestionContainer = document.createElement('div');
-                            suggestionContainer.classList.add('suggestion-container');
-                            suggestionContainer.id = key;
-
-                            let suggestionParagraph = document.createElement('h2');
-                            suggestionParagraph.classList.add("a_ajouter");
-                            suggestionParagraph.textContent = `${suggestions[key].titre}`;
-                            suggestionContainer.appendChild(suggestionParagraph);
-
-                            let accesSemantic = document.createElement('a');
-                            accesSemantic.classList.add("lienSemantic");
-                            accesSemantic.textContent = `${key}`;
-
-                            // Check if DOI or citation link is available
-                            if (`${suggestions[key].url}`) {
-                                accesSemantic.addEventListener('click', () => {
-                                    window.open(`${suggestions[key].url}`, "_blank", "noopener noreferrer");
-                                });
-                            } else {
-                                doi.setAttribute('disabled', true);  // Disable button if no citation
-                            }
-                            suggestionContainer.appendChild(accesSemantic);
-
-                            // Afficher le nombre total de citations
-                            let nbCitationsParagraph = document.createElement('p');
-                            nbCitationsParagraph.textContent = `Cet article a été cité ${suggestions[key].nb_citations} fois.`;
-                            suggestionContainer.appendChild(nbCitationsParagraph);
-
-                            // Afficher le nombre d'occurrences dans la bibliographie
-                            let occurenceParagraph = document.createElement('p');
-                            occurenceParagraph.textContent = `Cet article est cité ${suggestions[key].cite} fois dans votre bibliographie.`;
-                            suggestionContainer.appendChild(occurenceParagraph);
-
-                            // Ajouter le bouton "Ajouter à la bibliographie"
-                            let addButton = document.createElement('button');
-                            addButton.textContent = 'Ajouter à la bibliographie';
-                            addButton.classList.add('suggestion-add-button');
-                            addButton.id = `${key}+1`;
-
-                            // Affecter une fonction au bouton pour ajouter l'article
-                            addButton.onclick = function () {
-                                ajouterArticle(key);
-                            };
-
-                            suggestionContainer.appendChild(addButton);
-                            div_suggest.appendChild(suggestionContainer);
+                            suggestionsArray.push({ key, ...suggestions[key] });
                         }
                     }
 
-                    if (Object.keys(suggestions).length === 0) {
+                    // Tri des suggestions par "cite" (nombre de fois dans la bibliographie) de manière décroissante en utilisant une boucle
+                    for (let i = 0; i < suggestionsArray.length - 1; i++) {
+                        for (let j = i + 1; j < suggestionsArray.length; j++) {
+                            if (suggestionsArray[i].cite < suggestionsArray[j].cite) {
+                                // Échange des éléments
+                                let temp = suggestionsArray[i];
+                                suggestionsArray[i] = suggestionsArray[j];
+                                suggestionsArray[j] = temp;
+                            }
+                        }
+                    }
+
+                    // Afficher les suggestions triées
+                    suggestionsArray.forEach(suggestion => {
+                        let suggestionContainer = document.createElement('div');
+                        suggestionContainer.classList.add('suggestion-container');
+                        suggestionContainer.id = suggestion.key;
+
+                        let suggestionParagraph = document.createElement('h2');
+                        suggestionParagraph.classList.add("a_ajouter");
+                        suggestionParagraph.textContent = `${suggestion.titre}`;
+                        suggestionContainer.appendChild(suggestionParagraph);
+
+                        let accesSemantic = document.createElement('a');
+                        accesSemantic.classList.add("lienSemantic");
+                        accesSemantic.textContent = `${suggestion.key}`;
+
+                        // Check if DOI or citation link is available
+                        if (suggestion.url) {
+                            accesSemantic.addEventListener('click', () => {
+                                window.open(suggestion.url, "_blank", "noopener noreferrer");
+                            });
+                        } else {
+                            accesSemantic.setAttribute('disabled', true);  // Disable link if no citation
+                        }
+                        suggestionContainer.appendChild(accesSemantic);
+
+                        // Afficher le nombre total de citations
+                        let nbCitationsParagraph = document.createElement('p');
+                        nbCitationsParagraph.textContent = `Cet article a été cité ${suggestion.nb_citations} fois.`;
+                        suggestionContainer.appendChild(nbCitationsParagraph);
+
+                        // Afficher le nombre d'occurrences dans la bibliographie
+                        let occurenceParagraph = document.createElement('p');
+                        occurenceParagraph.textContent = `Cet article est cité ${suggestion.cite} fois dans votre bibliographie.`;
+                        suggestionContainer.appendChild(occurenceParagraph);
+
+                        // Ajouter le bouton "Ajouter à la bibliographie"
+                        let addButton = document.createElement('button');
+                        addButton.textContent = 'Ajouter à la bibliographie';
+                        addButton.classList.add('suggestion-add-button');
+                        addButton.id = `${suggestion.key}+1`;
+
+                        // Affecter une fonction au bouton pour ajouter l'article
+                        addButton.onclick = function () {
+                            ajouterArticle(suggestion.key);
+                        };
+
+                        suggestionContainer.appendChild(addButton);
+                        div_suggest.appendChild(suggestionContainer);
+                    });
+
+                    if (suggestionsArray.length === 0) {
                         div_suggest.textContent = 'Aucune suggestion d\'article.';
                     }
                 } catch (parseError) {
@@ -115,15 +135,32 @@
             }
         }
 
+
         let lookedDoi = "";
 
         // Lorsque la réponse de l'API arrive
         window.electronAPI.on('article-response', (message) => {
-            console.log('salope');
             // Si le message indique que l'article a été ajouté avec succès, rechargez la page
             if (message === "Article ajouté avec succès") {
                 const buttonDOI = document.createElement('button');
                 buttonDOI.textContent = "Voir un graphe de l'article";
+                buttonDOI.addEventListener("click", async (e) => {
+                    window.api.readFile('renderer/json/userSettings.json', (err, data) => {
+
+                        document.body.style.cursor = 'progress';  // Afficher un curseur de progression
+                        if (data) {
+                            data = JSON.parse(data);
+                            data.WordChoose = lookedDoi;
+                            data.TypeChoose = "Par doi";
+                            window.api.writeFile('renderer/json/userSettings.json', JSON.stringify(data), (err) => {
+                                if (err) {
+                                    console.error('Erreur d’écriture :', err);
+                                }
+                            });
+                        }
+                    });
+                    const output = await window.api.callFunctionSearch([lookedDoi, "reference"]);  // si on veut ajouter une nouvelle page, on rajoute true dans la liste
+                });
 
                 const doicontainer = document.getElementById(lookedDoi);
                 doicontainer.appendChild(buttonDOI);
@@ -133,8 +170,10 @@
                 button.disabled = true;
                 button.style.border = 'solid green';
 
+
                 let divInvisible = document.getElementsByClassName("divInvisible")[0];
-                divInvisible.style.visibility = "hidden";  // Cacher l'overlay
+                divInvisible.classList.add("invisibleBackground");
+                divInvisible.style.visibility = "hidden";
                 document.body.style.cursor = 'default';
             }
         });
@@ -151,6 +190,7 @@
             const button = document.getElementById(doi + "+1");
             button.disabled = true;
             button.textContent = 'Ajout en cours...'; // Modifier le texte du bouton
+            button.style.border = 'solid orange';
 
             // Changer le curseur pour indiquer que l'action est en cours
             document.body.style.cursor = 'progress';  // Afficher un curseur de progression

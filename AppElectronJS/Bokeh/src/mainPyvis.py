@@ -460,15 +460,15 @@ class AppError(Exception):
 
 class EmptyWordError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
+        super().__init__("Il semblerait qu'aucun mot n'est était rentrer dans la barre de recherche", 1001)
 
 class EmptyListError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
+        super().__init__("Il semblerait qu'aucun article n'ait était trouvé avec cette recherche.", 1002)
 
 class BadDoiError(AppError):
     def __init__(self):
-        super().__init__("Il semblerais que ce Doi n'existe pas dans vos données", 1003)
+        super().__init__("Il semblerait que ce Doi n'existe pas dans vos données", 1003)
         
 if __name__ == "__main__":
 
@@ -513,11 +513,11 @@ if __name__ == "__main__":
                     case "reference":
                         try:
                 
-                            liste = [mot_cle]
+                            liste = [mot_cle.lower()]
       
                             for article in cache_data.keys():
                                 for reference in cache_data[article].get("doi_references", []):
-                                    if mot_cle == reference[0]:
+                                    if mot_cle.lower() == reference[0]:
                                         liste.append(article)
                             show_graphique_author(liste)
                         except BadDoiError as e:
