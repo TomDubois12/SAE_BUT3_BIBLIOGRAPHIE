@@ -6,7 +6,15 @@ const { stdout, stderr } = require('node:process');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const logFilePath = path.join(__dirname, 'app.log');
-const pythonExecutable = path.join(__dirname, 'python', 'python-portable', 'python.exe');
+const os = require('os');
+
+let pythonExecutable;
+
+if (os.platform() === 'win32') {
+    pythonExecutable = path.join(__dirname, 'python', 'python-portable', 'python.exe');
+} else {
+    pythonExecutable = path.join(__dirname, '../../venv', 'bin', 'python');
+}
 
 // Fonction utilitaire pour écrire dans le fichier de log
 function writeToLogFile(message) {
@@ -92,7 +100,7 @@ const createWindow = async () => {
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
     err = new Promise((resolve, reject) => {
-      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Bokeh\\src\\mainPyvis.py') , ...params]);
+      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Bokeh/src/mainPyvis.py') , ...params]);
       console.log(...params);
       let output = '';
 

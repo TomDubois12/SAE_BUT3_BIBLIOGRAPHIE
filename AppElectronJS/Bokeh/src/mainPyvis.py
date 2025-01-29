@@ -36,7 +36,6 @@ with open(cache_file, 'r', encoding='utf-8') as f:
     cache_data = json.load(f)
 
 # Afficher les données chargées
-print("Données du cache :", cache_data)
 
 
 import pandas as pd
