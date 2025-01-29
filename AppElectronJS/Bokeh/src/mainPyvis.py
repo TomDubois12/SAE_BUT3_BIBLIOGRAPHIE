@@ -44,16 +44,17 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0],title=key2[1], length=(700 - ((key2[1]) * 700)), color=liaison['color'], smooth=False)    
+                    G.add_edge(key, key2[0],title=key2[1], length=(G.nodes[key]['size'] + (700 - ((key2[1]) * 700))), color=liaison['color'], smooth=False)    
 
         case 'Référence':
             for node in allTheKeys:
+                print(G.nodes[node]['size'] + 100)
                 premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
                 for ref in liste_references_du_node:
                     if ref[0] in allTheKeys:
                         deuxieme_node = ref[0]
-                        G.add_edge(premiere_node, deuxieme_node, color=liaison['color'], arrows="to")
+                        G.add_edge(premiere_node, deuxieme_node,length =(G.nodes[node]['size'] + 500), color=liaison['color'], arrows="to",smooth=False)
 
                         
         case 'Date de publication':
@@ -71,7 +72,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                   for i in range(len(articles)):
                       for j in range(i + 1, len(articles)):
                           if articles[i] != articles[j]:
-                              G.add_edge(articles[i], articles[j], color=liaison['color'])
+                              G.add_edge(articles[i], articles[j], color=liaison['color'],smooth=False)
 
 
     return G
@@ -191,7 +192,7 @@ def show_graphique_node(primaryKey):
         raise BadDoiError()
 
     # Create the graph
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
 
     df = json_normalize(cache_data)
 
@@ -214,7 +215,9 @@ def show_graphique_node(primaryKey):
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_final)
 
-    nt = Network('100vh', '100vw', notebook=True)
+    nt = Network('100vh', '100vw')
+    nt.force_atlas_2based(central_gravity=0.001, spring_length=150, damping=0.99)
+    
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
@@ -281,7 +284,7 @@ def show_graphique(liste_key, dataUser):
 
 
     # Create the graph
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     
 
     df = json_normalize(cache_data)
@@ -304,8 +307,8 @@ def show_graphique(liste_key, dataUser):
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_key)
 
-    nt = Network('100vh', '100vw', notebook=True)
-    nt.force_atlas_2based(gravity=-50, central_gravity=0.01, spring_length=100, spring_strength=0.08)
+    nt = Network('100vh', '100vw')
+    nt.force_atlas_2based(central_gravity=0.001, spring_length=200,spring_strength=0.05)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
@@ -357,7 +360,7 @@ def show_graphique_author(liste_key):
         return G
 
     # Create the graph
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     
     df = json_normalize(cache_data)
 
@@ -388,7 +391,9 @@ def show_graphique_author(liste_key):
             G = setLiaison(G, liaison, liste_key, liste_cle1_cle2)
 
 
-    nt = Network('100vh', '100vw', notebook=True)
+    nt = Network('100vh', '100vw')
+    nt.force_atlas_2based(central_gravity=0.001, spring_length=150, damping=0.99)
+    
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
@@ -538,7 +543,7 @@ if __name__ == "__main__":
 #Pas de node en résultat lors d'une recherche: 1002
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python -m Bokeh.src.mainPyvis "a" "auteur"
+#python -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
 #python -m Bokeh.src.mainPyvis "10.1103/physrevb.54.8064" "reference"
