@@ -1,20 +1,53 @@
+import os
+import sys
 import json
+
+# Répertoire actuel du script (mainPyvis.py)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Chemin vers le fichier cache_doi.json dans l'arborescence finale
+cache_file = os.path.join(current_dir, '..','..', 'cache_doi.json')
+
+# Ajouter le dossier BERT au chemin d'import
+bert_path = os.path.join(current_dir, '..', '..', 'BERT')
+if os.path.isdir(bert_path) and bert_path not in sys.path:
+    sys.path.append(bert_path)
+
+# Ajouter le dossier Bokeh au chemin d'import
+bokeh_path = os.path.join(current_dir, '..', '..', 'Bokeh')
+if os.path.isdir(bokeh_path) and bokeh_path not in sys.path:
+    sys.path.append(bokeh_path)
+
+# Ajouter le dossier Renderer au chemin d'import
+renderer_path = os.path.join(current_dir, '..', '..', 'renderer')
+if os.path.isdir(renderer_path) and renderer_path not in sys.path:
+    sys.path.append(renderer_path)
+
+# Importer les fonctions depuis search_utils
+from search_utils import search_by_author, search_by_keyword, find_similar_articles, search_by_title
+
+# Vérifier si le fichier cache_doi.json existe
+if not os.path.exists(cache_file):
+    print(f"Erreur : Le fichier {cache_file} est introuvable.")
+    sys.exit(1)
+
+# Charger les données depuis cache_doi.json
+with open(cache_file, 'r', encoding='utf-8') as f:
+    cache_data = json.load(f)
+
+# Afficher les données chargées
+print("Données du cache :", cache_data)
+
+
 import pandas as pd
 import networkx as nx
 from pyvis.network import Network
-from BERT.search_utils import search_by_author, search_by_keyword, find_similar_articles, search_by_title
-import sys
 from bs4 import BeautifulSoup
-import os
 import math
 from pandas import json_normalize
 
-cache_file = 'cache_doi.json'
-if os.path.exists(cache_file):
-    with open(cache_file, 'r', encoding='utf-8') as f:
-        cache_data = json.load(f)
-else:
-    cache_data = {}  # If the cache doesn't exist, initialize an empty dictionary
+import subprocess
+
 
 def ajout_script():
     # Add custom script for handling node clicks and displaying the publication title
@@ -219,7 +252,7 @@ def show_graphique_node(primaryKey):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = 'Bokeh/bin/nx.html'
+    html_file_path = bokeh_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -310,7 +343,7 @@ def show_graphique(liste_key, dataUser):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = 'Bokeh/bin/nx.html'
+    html_file_path = bokeh_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -365,7 +398,6 @@ def show_graphique_author(liste_key):
     dfFinal = df.reindex(liste_key)
 
     noms = dfFinal.index  # Use the index (the keys)
-
     originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
     if len(originKeys) == 0:
         raise EmptyListError()
@@ -393,7 +425,7 @@ def show_graphique_author(liste_key):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = 'Bokeh/bin/nx.html'
+    html_file_path = bokeh_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -473,10 +505,12 @@ class BadDoiError(AppError):
 if __name__ == "__main__":
 
     #Get all the settings of the User in the file in paramater.
-    dataUser = getUserSetting("renderer/json/userSettings.json")
+    dataUser = getUserSetting(renderer_path + "/json/userSettings.json")
+    ## dataUser = getUserSetting("renderer/json/userSettings.json")
 
     #Il faut 2 argument dans le lancement du script, le premier c'est le sujet et le deuxième "true" si recherche par autheur, "false" sinon.
     try:
+        
         if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
             mot_cle = sys.argv[1]
 
@@ -525,7 +559,7 @@ if __name__ == "__main__":
                         except EmptyListError as e:
                             print(f"Erreur : {e.code}")
                             
-            readGraph_and_write("Bokeh/bin/nx.html", "renderer/test.html")
+            readGraph_and_write(bokeh_path + "/bin/nx.html", renderer_path + "/test.html")
 
         else:
             raise EmptyWordError()

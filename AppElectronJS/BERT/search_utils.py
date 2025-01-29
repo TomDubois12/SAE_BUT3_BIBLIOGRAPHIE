@@ -1,7 +1,21 @@
-import sys
-import pandas as pd
 import os
+import sys
 import json
+
+# Répertoire actuel du script (mainPyvis.py)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+cache_file = os.path.join(current_dir, '..', 'cache_doi.json')
+
+if not os.path.exists(cache_file):
+    print(f"Erreur : Le fichier {cache_file} est introuvable.")
+    sys.exit(1)
+
+with open(cache_file, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+
+import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
@@ -12,9 +26,9 @@ sys.stdout.reconfigure(encoding='utf-8')
 model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 
 # Charger le fichier JSON
-cache_doi = "cache_doi.json"
-with open(cache_doi, 'r', encoding='utf-8') as f:
-    data = json.load(f)
+#cache_doi = "cache_doi.json"
+#with open(cache_doi, 'r', encoding='utf-8') as f:
+#    data = json.load(f)
 
 # Transformer les données en une liste de dictionnaires avec DOI comme colonne
 records = []

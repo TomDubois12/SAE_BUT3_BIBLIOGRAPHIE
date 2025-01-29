@@ -1,8 +1,8 @@
 const fs = require("fs");
 const { contextBridge, ipcRenderer, dialog } = require('electron');
+const paths = require('node:path');
 
 let queue = Promise.resolve();
-
 // Fonction pour ajouter une tâche dans la file d'attente
 function addToQueue(task, callback) {
     queue = queue
@@ -15,7 +15,8 @@ function addToQueue(task, callback) {
 function readFile(path, callback) {
     addToQueue(() => {
       return new Promise((resolve, reject) => {
-        fs.readFile(path, 'utf-8', (err, data) => {
+
+        fs.readFile(paths.join(__dirname, path), 'utf-8', (err, data) => {
           if (err) return reject(err);
           resolve(data);
         });
@@ -26,7 +27,7 @@ function readFile(path, callback) {
 function writeFile(path, data, callback) {
     addToQueue(() => {
       return new Promise((resolve, reject) => {
-        fs.writeFile(path, data, (err) => {
+        fs.writeFile(paths.join(__dirname, path), data, (err) => {
           if (err) return reject(err);
           resolve();
         });
@@ -41,7 +42,7 @@ contextBridge.exposeInMainWorld('api', {
     openWindoColor: async () => {
         return await ipcRenderer.invoke('openWindoColor');
     },
-    readFile: (path, callback) => fs.readFile(path, 'utf-8', callback), // readFile(path, callback), fs.readFile(path, 'utf-8', callback),
+    readFile: (path, callback) => fs.readFile(paths.join(__dirname, path), 'utf-8', callback), // readFile(path, callback), fs.readFile(path, 'utf-8', callback),
     writeFile: (path, data, callback) => writeFile(path, data, callback), //fs.writeFile(path, data, callback),
     reloadGraph: async () => {
         return await ipcRenderer.invoke('reloadPage');
@@ -58,7 +59,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveCSVPath: async (file) => {
         try {
             // Lire les paramètres d'utilisateur
-            const settingFileData = await fs.promises.readFile("./renderer/json/userSettings.json", 'utf-8');
+            const settingFileData = await fs.promises.readFile(path.join(__dirname, "renderer/json/userSettings.json"), 'utf-8');
             const settings = JSON.parse(settingFileData);
             const pathDirectory = settings.pathDirectoryCSV;
 
@@ -79,7 +80,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
                         settings.CSVChoose = file.name;
 
                         // Mettre à jour userSettings.json
-                        await fs.promises.writeFile("./renderer/json/userSettings.json", JSON.stringify(settings));
+                        await fs.promises.writeFile(path.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
                     } catch (writeErr) {
                         console.error("Erreur lors de la création du fichier CSV :", writeErr);
                     }
@@ -92,7 +93,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
                 settings.CSVChoose = file.name;
 
                 // Mettre à jour userSettings.json
-                await fs.promises.writeFile("./renderer/json/userSettings.json", JSON.stringify(settings));
+                await fs.promises.writeFile(path.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
             }
         } catch (error) {
             console.error("Erreur lors de la lecture ou de l'écriture du fichier :", error);

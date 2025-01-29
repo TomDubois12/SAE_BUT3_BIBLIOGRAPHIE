@@ -307,7 +307,6 @@ function onHover(params){
 }
 
 function onBLur(params){
-
     const nodeId = params.node;
     if (!AS_CLICK){
         changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);

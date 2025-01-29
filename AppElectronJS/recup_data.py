@@ -12,6 +12,9 @@ Remerciements à CLEUZIOU Guillaume.
 
 import os
 import json
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 import re
 import time
 import requests
@@ -19,6 +22,11 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+userSettingFile = os.path.join(current_dir, 'renderer/json/userSettings.json')
+cache_file = os.path.join(current_dir, 'cache_doi.json')
+Data = os.path.join(current_dir, 'Data/')
 # Désactive les avertissements liés aux liens symboliques pour Hugging Face
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
@@ -33,7 +41,7 @@ def is_valid_doi(doi):
     Returns:
     - bool: True si le DOI est valide, sinon False.
     """
-    return bool(re.match(r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$", doi, re.IGNORECASE))
+    return bool(re.match(r"^10\.\d{4,9}/[-._;()/:A-Z0-9%]+$", doi, re.IGNORECASE))
 
 def is_valid_url(url):
     """
@@ -85,7 +93,7 @@ def get_response(doi_url):
     
     return None
 
-def get_suggestions(nb_citations_mini, cache_file='cache_doi.json'):
+def get_suggestions(nb_citations_mini, cache_fi='cache_doi.json'):
     """
     """
     # Vérifier si le fichier cache existe; sinon, créer un fichier cache vide
@@ -240,7 +248,7 @@ def semantic_scholar_research(doi=None, title=None):
     
     return extract_data_from_response(response)
 
-def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[],in_csv=True, cache_file='cache_doi.json'):
+def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citations=[], references_doi=[],in_csv=True, cache_fi='cache_doi.json'):
     """
     Enregistre les informations sur un article dans un fichier de cache.
 
@@ -267,14 +275,12 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
     doi_citations = doi_citations if doi_citations is not None else []
     references_doi = references_doi if references_doi is not None else []
 
-
     if not os.path.exists(cache_file):
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({}, f)
-
     with open(cache_file, 'r', encoding='utf-8') as f:
         cache_data = json.load(f)
-        
+
     if doi and is_valid_doi(doi):
         cache_data[doi] = {
             'title': title,
@@ -286,11 +292,10 @@ def cache(doi, title, abstract, authors, year, url, num_citations=0, doi_citatio
             'url': url,
             'in_csv': in_csv
         }
-
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
-def recuperate_data(cache_file='cache_doi.json'):
+def recuperate_data(cache_fi='cache_doi.json'):
     """
     Récupère les informations des articles à partir d'un fichier CSV et met à jour le cache.
 
@@ -300,12 +305,12 @@ def recuperate_data(cache_file='cache_doi.json'):
     Returns:
     - pd.DataFrame: Les données du fichier CSV sous forme de DataFrame pandas, ou None si des erreurs sont rencontrées.
     """
-    with open("./renderer/json/userSettings.json", "r", encoding="utf-8") as file:
+    with open(userSettingFile, "r") as file:
         settings = json.load(file)
             
     csv_name = settings.get("CSVChoose", None)
 
-    data = pd.read_csv("./Data/" + csv_name)
+    data = pd.read_csv(Data + csv_name)
 
     if 'DOI' not in data.columns:
         print("Erreur: Le fichier CSV ne contient pas de colonne 'DOI'")
@@ -341,7 +346,7 @@ def recuperate_data(cache_file='cache_doi.json'):
 
 #model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
 def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned-model', token="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"),
-                               embedding_file='cache_doi.json', title_weight=0.5, abstract_weight=0.5):
+                               embedding_file=cache_file, title_weight=0.5, abstract_weight=0.5):
     """
     Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.
 
@@ -422,14 +427,46 @@ def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned
 
     return data
 
-
 if __name__ == "__main__":
-    start_time = time.time()
-    recuperate_data()
-    end_time = time.time()
-    print(f"Temps d'exécution de recuperate_data: {end_time - start_time:.2f} secondes")
+   
 
-    start_time = time.time()
-    load_or_compute_embeddings()
-    end_time = time.time()
-    print(f"Temps d'exécution de load_or_compute_embeddings: {end_time - start_time:.2f} secondes")
+    try:
+            
+            if(len(sys.argv) > 2 and len(sys.argv[1]) > 0):
+
+                
+                args = [arg.replace("//", "/") for arg in sys.argv]
+                args = [arg.replace("\\", "/") for arg in sys.argv]
+
+                if args[2].startswith("https:/") and not args[2].startswith("https://"):
+                    args[2] = args[2].replace("https:/", "https://", 1)
+
+                if len(sys.argv) >= 2:
+                    #Si on fait appel a des fonction spécifique
+                    match sys.argv[1]:
+                        case "ajout_article":
+
+                            print(ajout_article(args[2]))
+
+                        case "get_suggestions":
+                            print(get_suggestions(args[2]))
+            else :
+
+                if not os.path.exists(cache_file):
+                    with open(cache_file, 'w', encoding='utf-8') as f:
+                        json.dump({}, f)
+
+                start_time = time.time()
+                recuperate_data()
+                end_time = time.time()
+                print(f"Temps d'exécution de recuperate_data: {end_time - start_time:.2f} secondes")
+
+                start_time = time.time()
+                load_or_compute_embeddings()
+                end_time = time.time()
+                print(f"Temps d'exécution de load_or_compute_embeddings: {end_time - start_time:.2f} secondes")
+
+                        
+
+    except Exception as e:
+        print(f"Erreur : {e}")

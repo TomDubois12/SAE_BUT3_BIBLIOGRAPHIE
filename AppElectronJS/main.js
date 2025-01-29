@@ -1,9 +1,41 @@
-const { app, BrowserWindow, ipcMain, Menu, nativeTheme, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog, Notification } = require('electron')
 const path = require('node:path');
-const { spawn, exec } = require('child_process');
+const { spawn, exec, spawnSync } = require('child_process');
 const fs = require("fs");
 const { stdout, stderr } = require('node:process');
 
+const isDev = process.env.NODE_ENV !== 'production';
+const logFilePath = path.join(__dirname, 'app.log');
+const pythonExecutable = path.join(__dirname, 'python', 'python-portable', 'python.exe');
+
+// Fonction utilitaire pour écrire dans le fichier de log
+function writeToLogFile(message) {
+  const formattedMessage = `[${new Date().toISOString()}] ${message}\n`;
+  fs.appendFileSync(logFilePath, formattedMessage, 'utf8'); // Écriture dans le fichier log
+}
+
+// Redéfinir console.error
+console.error = (...args) => {
+  const message = args.join(' ');
+  writeToLogFile(`ERROR: ${message}`);
+  process.stderr.write(`${message}\n`); // Affiche aussi dans la console
+};
+
+// Redéfinir console.log
+console.log = (...args) => {
+  const message = args.join(' ');
+  writeToLogFile(`LOG: ${message}`);
+  process.stdout.write(`${message}\n`); // Affiche aussi dans la console
+};
+
+
+function installPythonDependencies() {
+  // Vérifie que l'exécutable Python existe dans le virtualenv
+  if (!fs.existsSync(pythonExecutable)) {
+      console.error('Python executable not found in virtualenv:', pythonExecutable);
+      return;
+  }
+}
 
 let mainWindow;
 let graphWindo;
@@ -16,7 +48,7 @@ const webPref = {
   sandbox: false  // Ajoutez sandbox: false pour éviter des problèmes de compatibilité
 }
 
-const isDev = process.env.NODE_ENV !== 'production';
+//const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
 const createWindow = async () => {
@@ -33,21 +65,23 @@ const createWindow = async () => {
 
   try {
     // Utilisation de fs.promises.readFile pour lire le fichier de manière asynchrone
-    const data = await fs.promises.readFile('./renderer/json/userSettings.json', 'utf-8');
+    const data = await fs.promises.readFile(path.join(__dirname, 'renderer/json/userSettings.json'), 'utf-8');
     const parsedData = JSON.parse(data); // Analyse JSON
 
     // Vérifie si le chemin CSV existe dans le JSON
     const pathCSV = parsedData.CSVChoose;
+    console.log(`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`);
+    console.log(path.join(__dirname,`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`));
 
-    if (pathCSV && fs.existsSync(`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`)) {
-      mainWindow.loadFile('renderer/search.html');
+    if (pathCSV && fs.existsSync(path.join(__dirname,`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`))) {
+        mainWindow.loadFile(path.join(__dirname,'renderer/search.html'));
     } else {
-      mainWindow.loadFile('renderer/loadcsv.html');
+        mainWindow.loadFile(path.join(__dirname, 'renderer/loadcsv.html'));
     }
-  } catch (error) {
+} catch (error) {
     console.error("Erreur de lecture ou d'analyse du fichier JSON :", error);
-    mainWindow.loadFile('renderer/loadcsv.html'); // En cas d'erreur, charge une page de secours
-  }
+    mainWindow.loadFile(path.join(__dirname, 'renderer/loadcsv.html')); // En cas d'erreur, charge une page de secours
+}
 
 
 
@@ -57,106 +91,116 @@ const createWindow = async () => {
 
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
-  err = new Promise((resolve, reject) => {
-    const pythonProcess = spawn('python', ["-m", 'Bokeh.src.mainPyvis', ...params]);
-    console.log(...params);
-    let output = '';
+    err = new Promise((resolve, reject) => {
+      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Bokeh\\src\\mainPyvis.py') , ...params]);
+      console.log(...params);
+      let output = '';
 
-    //Cette fonction récupère les sortie du terminal, pour vérifier si une erreur est apparue je met toute la sortie en forme de 
-    //liste de ligne puis je regarde l'avant dernière ligne ou est sensé se trouver une erreur et si oui alors je la traite.
-    pythonProcess.stdout.on('data', (data) => {
-      data += data.toString();
-      data = data.split("\n");
-      if (data[data.length - 2].split(" : ")[1] == 1001) {
-        dialog.showMessageBox({
-          type: 'warning',
-          title: 'Mot clé vide',
-          message: "Il semblerait qu'il n'y ait pas de mot clé saisies ?",
-        });
-        reject("Processus terminé avec un code d'erreur");
-      }
-      if (data[data.length - 2].split(" : ")[1] == 1002) {
-        dialog.showMessageBox({
-          type: 'warning',
-          title: 'Aucun résultat',
-          message: "La recherche effectuée ne renvoie aucun résultat.",
-        });
-        reject("Processus terminé avec un code d'erreur");
-      }
-      if (data[data.length - 2].split(" : ")[1] == 1003) {
-        dialog.showMessageBox({
-          type: 'warning',
-          title: 'Mauvais DOI',
-          message: "Le DOI entrer ne figure pas dans vos données.",
-        });
-        reject("Processus terminé avec un code d'erreur");
-      }
-    });
-
-
-
-    pythonProcess.stderr.on('data', (data) => {
-      reject(data.toString());
-      console.error(`Python stderr: ${data}`);
-    });
+      //Cette fonction récupère les sortie du terminal, pour vérifier si une erreur est apparue je met toute la sortie en forme de 
+      //liste de ligne puis je regarde l'avant dernière ligne ou est sensé se trouver une erreur et si oui alors je la traite.
+      pythonProcess.stdout.on('data', (data) => {
+          data += data.toString();
+          data = data.split("\n");
+          if(data[data.length-2].split(" : ")[1] == 1001){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Mot clé vide',
+              message: "Il semblerait qu'il n'y ait pas de mot clé saisies ?",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
+          if(data[data.length-2].split(" : ")[1] == 1002){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Aucun résultat',
+              message: "La recherche effectuée ne renvoie aucun résultat.",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
+          if(data[data.length-2].split(" : ")[1] == 1003){
+            dialog.showMessageBox({
+              type: 'warning',
+              title: 'Mauvais DOI',
+              message: "Le DOI entrer ne figure pas dans vos données.",
+            });
+            reject("Processus terminé avec un code d'erreur");
+          }
+      });
 
 
 
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(output); // Processus terminé avec succès
-      } else {
-        dialog.showMessageBox({
-          type: 'error',
-          title: 'Erreur',
-          message: "Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche ",
-        });
-        reject(`Processus terminé avec un code d'erreur : ${code}`);
-      }
-    });
+      pythonProcess.stderr.on('data', (data) => {
+          reject(data.toString());
+          console.error(`Python stderr: ${data}`);
+      }); 
+
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+
+          resolve(output); // Processus terminé avec succès
+        } else {
+          dialog.showMessageBox({
+            type: 'error',
+            title: 'Erreur',
+            message: "Une erreur est survenue : Vérifier que vous avez entrez un mot de recherche ",
+          });
+          reject(`Processus terminé avec un code d'erreur : ${code}`);
+        }
+      });
   });
 
-
+    
 
   return err;
 }
 
-function openOtherWindow() {
+function openOtherWindow(){
   graphWindo = new BrowserWindow({
-    width: isDev ? 1000 : 500,
+    width: isDev ? 1000: 500,
     height: 600,
     icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
     webPreferences: webPref
   });
-  graphWindo.loadFile('./renderer/test.html');
+  graphWindo.loadFile(path.join(__dirname, 'renderer/test.html'));
 }
 
 ipcMain.handle('callFunctionSearch', (event, query) => {
 
-  if (query.length == 3 && query[2]) {
-
-    runPythonFunction(query).then(() => { openOtherWindow(); });
-
-  } else {
+  if(query.length == 3 && query[2]){
+    
+    runPythonFunction(query).then( () => {openOtherWindow();});
+    
+  }else{
 
     // Appel de la fonction Python avec les paramètres fournis
     return runPythonFunction(query)
-      .then((output) => {
+    .then((output) => {
         // Une fois le processus Python terminé, charger la nouvelle page HTML
-        mainWindow.loadFile('renderer/test.html');
+        mainWindow.loadFile(path.join(__dirname, 'renderer/test.html')); 
         return output;  // Renvoyer la sortie du script Python
-      })
-      .catch((error) => {
+    })
+    .catch((error) => {
         // En cas d'erreur, renvoyer l'erreur
         // !!! ne pas changer le texte Error en dessous, important pour la gestion d'erreur dans renderer.js
         return `Error: ${error}`;
-      });
+    });
   }
 });
 
-app.whenReady().then(() => {
-  createWindow();
+function showNotification() {
+  new Notification({
+    title: 'Notification Electron',
+    body: 'Votre application Electron est prête !'
+  }).show();
+}
 
+app.whenReady().then(() => {
+  // Vérifiez si les dépendances doivent être installées
+  installPythonDependencies();
+  
+  showNotification();
+  createWindow();
+  
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -167,7 +211,7 @@ app.whenReady().then(() => {
 //For mac users, close app 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit();
+    app.quit(); 
   }
 });
 
@@ -175,25 +219,25 @@ app.on('window-all-closed', () => {
 const mainMenuTemplates = [
   {
     label: 'File',
-    submenu: [
+    submenu:[
       {
-        label: 'Quit',
+        label:'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-        click() {
+        click(){
           app.quit();
         }
       },
       {
-        label: 'Open other CSV',
-        click() {
-          mainWindow.loadFile('./renderer/loadcsv.html');
+        label:'Open other CSV',
+        click(){
+          mainWindow.loadFile(path.join(__dirname, './renderer/loadcsv.html')); 
         }
       }
     ]
   },
   {
-    label: 'Settings',
-    submenu: [
+    label:'Settings',
+    submenu:[
       // {
       //   label: 'Gerer les couleurs',
       //   // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
@@ -209,9 +253,9 @@ const mainMenuTemplates = [
       //   }
       // },
       {
-        label: 'Ajouter un article',
-        click() {
-          mainWindow.loadFile('./renderer/ajout_article.html');
+        label:'Ajouter un article',
+        click(){
+          mainWindow.loadFile(path.join(__dirname, './renderer/ajout_article.html')); 
         }
       }
     ]
@@ -220,13 +264,13 @@ const mainMenuTemplates = [
 
 
 ipcMain.handle('openWindoColor', (event) => {
-  const fenetre = new BrowserWindow({
-    width: 800,
-    height: 600,
-    icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-    webPreferences: webPref
+    const fenetre = new BrowserWindow({
+      width: 800,
+      height: 600,
+      icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
+      webPreferences: webPref
   });
-  fenetre.loadFile('./renderer/colorSettings.html');
+  fenetre.loadFile(path.join(__dirname, './renderer/colorSettings.html'));
 });
 
 ipcMain.handle("reloadPage", (event) => {
@@ -236,32 +280,32 @@ ipcMain.handle("reloadPage", (event) => {
   } else {
     console.error("La fenêtre mainWindow n'est pas définie ou n'a pas de webContents");
   }
-
+  
 });
 
 ipcMain.handle("loadCSVpage", (event) => {
-  mainWindow.loadFile('./renderer/loadcsv.html');
+  mainWindow.loadFile(path.join(__dirname, './renderer/loadcsv.html')); 
 });
 
 // For mac user
-if (process.platform == 'darwin') {
-  mainMenuTemplates.unshift({});
+if (process.platform == 'darwin'){
+  mainMenuTemplates.unshift({}); 
 }
 
 // For product environement, add devTool menu and accelerator
-if (isDev) {
+if (isDev){
   mainMenuTemplates.push({
-    label: 'Developer Tools', // Ajout d'un menu si le dev ce connecte
-    submenu: [
+    label:'Developer Tools', // Ajout d'un menu si le dev ce connecte
+    submenu:[
       {
-        label: 'Toggle devTools',
+        label:'Toggle devTools',
         accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', // Différencier l'environnement mac des autres 
-        click(item, focusedWindow) {
+        click(item, focusedWindow){
           focusedWindow.toggleDevTools();
         }
       },
       {
-        role: 'reload'  // permet de refresh l'app
+        role:'reload'  // permet de refresh l'app
       }
     ]
   });
@@ -269,24 +313,24 @@ if (isDev) {
 
 ipcMain.on('load-search-page', (event) => {
   // Charge immédiatement la page de chargement
-  mainWindow.loadFile('renderer/loading.html');
+  mainWindow.loadFile(path.join(__dirname, 'renderer/loading.html'));
 
   // Exécute le script Python
-  exec('python recup_data.py', (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Erreur d'exécution: ${error.message}`);
-      event.sender.send('python-error', error.message);
-      return;
-    }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      event.sender.send('python-error', stderr);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
+  exec(pythonExecutable + ' '+path.join(__dirname, 'recup_data.py'), (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Erreur d'exécution: ${error.message}`);
+          event.sender.send('python-error', error.message);
+          return;
+      }
+      if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          event.sender.send('python-error', stderr);
+          return;
+      }
+      console.log(`stdout: ${stdout}`);
 
-    // Redirige vers la page finale après l'exécution
-    mainWindow.loadFile('renderer/search.html');
+      // Redirige vers la page finale après l'exécution
+      mainWindow.loadFile(path.join(__dirname, 'renderer/search.html'));
   });
 });
 
@@ -294,41 +338,45 @@ ipcMain.on('send-csv-path', (event, csvPath) => {
   console.log(`Chemin du CSV reçu : ${csvPath}`);
 
   // Appeler le script Python avec le chemin en paramètre
-  const command = `python recup_data.py ${csvPath}`;
+  const command = pythonExecutable + ' '+path.join(__dirname, `recup_data.py ${csvPath}`);
   exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Erreur standard : ${stderr}`);
-      return;
-    }
-    console.log(`Sortie du script Python : ${stdout}`);
+      if (error) {
+          console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+          return;
+      }
+      if (stderr) {
+          console.error(`Erreur standard : ${stderr}`);
+          return;
+      }
+      console.log(`Sortie du script Python : ${stdout}`);
   });
 });
 
 ipcMain.on('add-article', (event, newArticle) => {
   console.log(`Nouveau article: ${newArticle}`);
+  
+  // Ligne a changé pour adapter au __dirname
 
-  const command = `python -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
-  exec(command, (error, stdout, stderr) => {
+  const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py ajout_article ${newArticle}`);
+  //const command = pythonExecutable + ` -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
+
+  exec(command, { maxBuffer: 4096 * 4096  },(error, stdout, stderr) => {
     if (error) {
-      console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
-      event.reply('article-response', 'Impossible d\'ajouter l\'article');
-      return;
+        console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
+        return;
     }
     if (stderr) {
-      console.error(`Erreur standard : ${stderr}`);
-      event.reply('article-response', 'Impossible d\'ajouter l\'article');
-      return;
+        console.error(`Erreur standard : ${stderr}`);
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
+        return;
     }
 
     // Si stdout est 'None' ou vide
     if (!stdout || stdout.trim() === "None") {
-      event.reply('article-response', 'Impossible d\'ajouter l\'article');
+        event.reply('article-response', 'Impossible d\'ajouter l\'article');
     } else {
-      event.reply('article-response', 'Article ajouté avec succès');
+        event.reply('article-response', 'Article ajouté avec succès');
     }
 
     console.log(`Sortie du script Python : ${stdout}`);
@@ -338,10 +386,11 @@ ipcMain.on('add-article', (event, newArticle) => {
 ipcMain.handle('suggestions', async (event, nb_citations) => {
   console.log(`Recherche avec: ${nb_citations}`);
 
-  const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
+  const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py get_suggestions ${nb_citations}`);
+  //const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
 
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command,{ maxBuffer: 4096 * 4096  }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
         reject('Impossible d\'ajouter l\'article');
