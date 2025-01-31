@@ -82,7 +82,7 @@ const createWindow = async () => {
     console.log(path.join(__dirname,`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`));
 
     if (pathCSV && fs.existsSync(path.join(__dirname,`${parsedData.pathDirectoryCSV}/${parsedData.CSVChoose}`))) {
-        mainWindow.loadFile(path.join(__dirname,'renderer/search.html'));
+        mainWindow.loadFile(path.join(__dirname,'renderer/accueil.html'));
     } else {
         mainWindow.loadFile(path.join(__dirname, 'renderer/loadcsv.html'));
     }
@@ -100,7 +100,7 @@ const createWindow = async () => {
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
     err = new Promise((resolve, reject) => {
-      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Bokeh/src/mainPyvis.py') , ...params]);
+      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Pyvis/src/mainPyvis.py') , ...params]);
       console.log(...params);
       let output = '';
 
@@ -169,7 +169,7 @@ function openOtherWindow(){
     icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
     webPreferences: webPref
   });
-  graphWindo.loadFile(path.join(__dirname, 'renderer/test.html'));
+  graphWindo.loadFile(path.join(__dirname, 'renderer/graphe.html'));
 }
 
 ipcMain.handle('callFunctionSearch', (event, query) => {
@@ -184,7 +184,7 @@ ipcMain.handle('callFunctionSearch', (event, query) => {
     return runPythonFunction(query)
     .then((output) => {
         // Une fois le processus Python terminé, charger la nouvelle page HTML
-        mainWindow.loadFile(path.join(__dirname, 'renderer/test.html')); 
+        mainWindow.loadFile(path.join(__dirname, 'renderer/graphe.html')); 
         return output;  // Renvoyer la sortie du script Python
     })
     .catch((error) => {
@@ -257,7 +257,7 @@ const mainMenuTemplates = [
       //       icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
       //       webPreferences: webPref
       //   });
-      //   graphWindo.loadFile('./renderer/test.html');
+      //   graphWindo.loadFile('./renderer/graphe.html');
       //   }
       // },
       {
@@ -338,7 +338,7 @@ ipcMain.on('load-search-page', (event) => {
       console.log(`stdout: ${stdout}`);
 
       // Redirige vers la page finale après l'exécution
-      mainWindow.loadFile(path.join(__dirname, 'renderer/search.html'));
+      mainWindow.loadFile(path.join(__dirname, 'renderer/accueil.html'));
   });
 });
 

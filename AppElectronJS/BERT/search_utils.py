@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Fichier pour la recherche de similarité grâce à BERT
+
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 import os
 import sys
 import json

@@ -1,3 +1,14 @@
+/*
+ * Crédits :
+ * - Auteur : IUT Orléans Département Informatique
+ * - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+ * - Date de création : 11 septembre 2024
+ * - Version : 1.0
+ * - Description : Ce fichier sert à la gestion des clics sur le graphe
+ *
+ * Remerciements à CLEUZIOU Guillaume.
+ */
+
 let AS_ASIDE = false;
 let AS_CLICK = false;
 let idSelectedNode = "";
