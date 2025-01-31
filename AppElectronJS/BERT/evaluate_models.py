@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Fichier pour évaluer le modèle de BERT utilisé
+
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 import pandas as pd
 import torch
 from sentence_transformers import SentenceTransformer, util

@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Fichier pour le fine_tuning du modèle de BERT
+
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 from sentence_transformers import SentenceTransformer, models, losses
 from torch.utils.data import DataLoader
 from sentence_transformers import InputExample
