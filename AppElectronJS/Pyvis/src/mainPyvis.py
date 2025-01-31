@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Crédits:
+- Auteur : IUT Orléans Département Informatique
+- Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+- Date de création : 11 septembre 2024
+- Version : 1.0
+- Description : Ce fichier contient le code pour la génération des graphes
+
+Remerciements à CLEUZIOU Guillaume.
+"""
+
 import os
 import sys
 import json
@@ -13,10 +25,10 @@ bert_path = os.path.join(current_dir, '..', '..', 'BERT')
 if os.path.isdir(bert_path) and bert_path not in sys.path:
     sys.path.append(bert_path)
 
-# Ajouter le dossier Bokeh au chemin d'import
-bokeh_path = os.path.join(current_dir, '..', '..', 'Bokeh')
-if os.path.isdir(bokeh_path) and bokeh_path not in sys.path:
-    sys.path.append(bokeh_path)
+# Ajouter le dossier Pyvis au chemin d'import
+pyvis_path = os.path.join(current_dir, '..', '..', 'Pyvis')
+if os.path.isdir(pyvis_path) and pyvis_path not in sys.path:
+    sys.path.append(pyvis_path)
 
 # Ajouter le dossier Renderer au chemin d'import
 renderer_path = os.path.join(current_dir, '..', '..', 'renderer')
@@ -52,7 +64,7 @@ def ajout_script():
     # Add custom script for handling node clicks and displaying the publication title
     custom_script = """
     <div id="result"></div>
-    <script type="text/javascript" src="Bokeh/bin/lib/binding/utils.js"></script>
+    <script type="text/javascript" src="Pyvis/bin/lib/binding/utils.js"></script>
     <script src="js/EventNodeEdge.js"> </script>
     """
     return custom_script
@@ -251,7 +263,7 @@ def show_graphique_node(primaryKey):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = bokeh_path + '/bin/nx.html'
+    html_file_path = pyvis_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -342,7 +354,7 @@ def show_graphique(liste_key, dataUser):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = bokeh_path + '/bin/nx.html'
+    html_file_path = pyvis_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -424,7 +436,7 @@ def show_graphique_author(liste_key):
     nt.from_nx(G)
 
     # Create the HTML file
-    html_file_path = bokeh_path + '/bin/nx.html'
+    html_file_path = pyvis_path + '/bin/nx.html'
     nt.save_graph(html_file_path)
 
     # Manually modify the HTML to include the JavaScript functionality
@@ -558,7 +570,7 @@ if __name__ == "__main__":
                         except EmptyListError as e:
                             print(f"Erreur : {e.code}")
                             
-            readGraph_and_write(bokeh_path + "/bin/nx.html", renderer_path + "/test.html")
+            readGraph_and_write(pyvis_path + "/bin/nx.html", renderer_path + "/test.html")
 
         else:
             raise EmptyWordError()
@@ -571,7 +583,7 @@ if __name__ == "__main__":
 #Pas de node en résultat lors d'une recherche: 1002
 
 #Recherche pas par auteur donc par sujet, recherche sur le sujet carbon
-#python -m Bokeh.src.mainPyvis "a" "auteur"
+#python -m Pyvis.src.mainPyvis "a" "auteur"
 
 #Recherche par auteur.
-#python -m Bokeh.src.mainPyvis "10.1103/physrevb.54.8064" "reference"
+#python -m Pyvis.src.mainPyvis "10.1103/physrevb.54.8064" "reference"

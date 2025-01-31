@@ -100,7 +100,7 @@ const createWindow = async () => {
 // Fonction pour exécuter le script Python
 function runPythonFunction(params) {
     err = new Promise((resolve, reject) => {
-      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Bokeh/src/mainPyvis.py') , ...params]);
+      const pythonProcess = spawn(pythonExecutable, [path.join(__dirname, 'Pyvis/src/mainPyvis.py') , ...params]);
       console.log(...params);
       let output = '';
 
