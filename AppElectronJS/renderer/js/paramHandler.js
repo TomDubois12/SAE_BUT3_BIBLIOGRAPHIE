@@ -1,3 +1,14 @@
+/*
+ * Crédits :
+ * - Auteur : IUT Orléans Département Informatique
+ * - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+ * - Date de création : 11 septembre 2024
+ * - Version : 1.0
+ * - Description : Ce fichier sert à l'affichage et la gestion des paramètres des graphes
+ *
+ * Remerciements à CLEUZIOU Guillaume.
+ */
+
 const divLiaison = document.getElementById('listeContainer');
 
 window.api.readFile('renderer/json/userSettings.json', (err, data) => {

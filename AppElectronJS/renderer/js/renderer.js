@@ -1,4 +1,15 @@
-// Assurez-vous que le DOM est complètement chargé avant d'attacher des événements
+/*
+ * Crédits :
+ * - Auteur : IUT Orléans Département Informatique
+ * - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+ * - Date de création : 11 septembre 2024
+ * - Version : 1.0
+ * - Description : Ce fichier sert à l'affichage du graphe en prenant tout les paramètres (recherches, couleurs etc)
+ *
+ * Remerciements à CLEUZIOU Guillaume.
+ */
+
+
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener("keydown", function (event) {
         // console.log("Touche pressée : ", event.key); Vérifie si l'événement est détecté
