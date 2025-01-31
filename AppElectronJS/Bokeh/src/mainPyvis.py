@@ -44,19 +44,16 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
             # Add the edges based on similarity
             for key, keys in listeKeys:
                 for key2 in keys:
-                    G.add_edge(key, key2[0],title=key2[1], length=(G.nodes[key]['size'] + (700 - ((key2[1]) * 700))), color=liaison['color'], smooth=False)    
-
+                    G.add_edge(key, key2[0],arrows="",title=key2[1], length=(G.nodes[key]['size'] + (700 - ((key2[1]) * 700))), color=liaison['color'], smooth=False)    
         case 'Référence':
             for node in allTheKeys:
-                print(G.nodes[node]['size'] + 100)
                 premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
                 for ref in liste_references_du_node:
                     if ref[0] in allTheKeys:
                         deuxieme_node = ref[0]
-                        G.add_edge(premiere_node, deuxieme_node,length =(G.nodes[node]['size'] + 500), color=liaison['color'], arrows="to",smooth=False)
+                        G.add_edge(premiere_node, deuxieme_node,length =(G.nodes[node]['size'] + 500), color=liaison['color'], arrows="to",smooth=True)
 
-                        
         case 'Date de publication':
               # Group the articles by their publication year
               year_dict = {}
@@ -72,7 +69,7 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
                   for i in range(len(articles)):
                       for j in range(i + 1, len(articles)):
                           if articles[i] != articles[j]:
-                              G.add_edge(articles[i], articles[j], color=liaison['color'],smooth=False)
+                              G.add_edge(articles[i], articles[j], color=liaison['color'],smooth=False, arrows="")
 
 
     return G
@@ -83,7 +80,6 @@ def find_min_max_values(dico):
     liste = set()
     for nom in dico.keys():
         liste.add(dico[nom]['num_citations'])
-        print(liste)
 
     #return the min and max of a dico like this {"DOI": nbCitation}
     min_key = min(liste)
@@ -103,7 +99,6 @@ def transform_value_log(value, original_min, original_max, target_min=20, target
     
     # Transformation linéaire vers la plage cible
     transformed_value = target_min + log_transformed * (target_max - target_min)
-    print(transformed_value)
     return transformed_value
 
 
@@ -188,7 +183,6 @@ def show_graphique_node(primaryKey):
 
 
     if(not primaryKey in cache_data.keys()):
-        print(primaryKey, cache_data.keys())
         raise BadDoiError()
 
     # Create the graph
@@ -199,13 +193,12 @@ def show_graphique_node(primaryKey):
     
     allTheKeys, originKeys, _childKeys,liste_final = getListallKey()
     allTheKeys = [primaryKey] + allTheKeys
-    print(allTheKeys)
     # Reindexer le DataFrame selon les clés trouvées
     
     dfFinal = df.reindex(allTheKeys)
 
     noms = dfFinal.index  # Use the index (the keys)
-
+    allTheKeys = set(allTheKeys) #Important pour enlever tout les doublons
     G = setAllNode(G)
 
 
@@ -215,9 +208,8 @@ def show_graphique_node(primaryKey):
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_final)
 
-    nt = Network('100vh', '100vw')
-    nt.force_atlas_2based(central_gravity=0.001, spring_length=150, damping=0.99)
-    
+    nt = Network('100vh', '100vw',directed=True)
+    nt.force_atlas_2based(central_gravity=0.005, spring_length=150, damping=0.99)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
@@ -297,9 +289,8 @@ def show_graphique(liste_key, dataUser):
     infos = dfFinal.iloc[:, 0:3]  # Take the columns that contain the information
     
     originKeys = set(originKeys)#Transform the list in a set for faster reserch in the list
-
+    allTheKeys = set(allTheKeys)#Important pour enlever tout les doublons
     G = setAllNode(G)
-
 
     liaisons = dataUser["ColorPickerSettings"]
 
@@ -307,9 +298,9 @@ def show_graphique(liste_key, dataUser):
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, allTheKeys, liste_key)
 
-    nt = Network('100vh', '100vw')
-    nt.force_atlas_2based(central_gravity=0.001, spring_length=200,spring_strength=0.05)
-    # nt.show_buttons(filter_=['physics'])
+    nt = Network('100vh', '100vw',directed=True)
+    nt.force_atlas_2based(central_gravity=0.010, spring_length=150, damping=0.1 )
+    #nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
 
     # Create the HTML file
@@ -341,7 +332,6 @@ def show_graphique_author(liste_key):
             node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
-            print(node['authors'])
             G.add_node(
                 nom,
                 size=nodeTaille,
@@ -389,14 +379,11 @@ def show_graphique_author(liste_key):
     for liaison in liaisons:
         if liaison['check'] == 'true':
             G = setLiaison(G, liaison, liste_key, liste_cle1_cle2)
-
-
-    nt = Network('100vh', '100vw')
-    nt.force_atlas_2based(central_gravity=0.001, spring_length=150, damping=0.99)
-    
+            
+    nt = Network('100vh', '100vw',directed=True)
+    nt.force_atlas_2based(central_gravity=0.005, spring_length=150, damping=0.99)
     # nt.show_buttons(filter_=['physics'])
     nt.from_nx(G)
-
     # Create the HTML file
     html_file_path = 'Bokeh/bin/nx.html'
     nt.save_graph(html_file_path)
@@ -546,4 +533,4 @@ if __name__ == "__main__":
 #python -m Bokeh.src.mainPyvis "carbon" "sujet"
 
 #Recherche par auteur.
-#python -m Bokeh.src.mainPyvis "10.1103/physrevb.54.8064" "reference"
+#python -m Bokeh.src.mainPyvis "10.1149/1.2096650" "reference"  10.1063/1.2982585   10.1126/science.1171245
