@@ -362,6 +362,8 @@ ipcMain.on('send-csv-path', (event, csvPath) => {
 
 ipcMain.on('add-article', (event, newArticle) => {
   console.log(`Nouveau article: ${newArticle}`);
+  
+  // Ligne a changé pour adapter au __dirname
 
   const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py ajout_article ${newArticle}`);
   //const command = pythonExecutable + ` -c "from recup_data import ajout_article; ajout_article('${newArticle}')"`;
@@ -393,9 +395,10 @@ ipcMain.handle('suggestions', async (event, nb_citations) => {
   console.log(`Recherche avec: ${nb_citations}`);
 
   const command = pythonExecutable + ' ' + path.join(__dirname, `recup_data.py get_suggestions ${nb_citations}`);
+  //const command = `python -c "from recup_data import get_suggestions; print(get_suggestions('${nb_citations}'))"`;
 
   return new Promise((resolve, reject) => {
-    exec(command, { maxBuffer: 4096 * 4096 }, (error, stdout, stderr) => {
+    exec(command,{ maxBuffer: 4096 * 4096  }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Erreur lors de l'exécution du script Python : ${error.message}`);
         reject('Impossible d\'ajouter l\'article');
@@ -406,22 +409,28 @@ ipcMain.handle('suggestions', async (event, nb_citations) => {
         reject('Impossible d\'ajouter l\'article');
         return;
       }
-
+    
+      // Vérification de la sortie brute
+      console.log('Sortie brute:', stdout);
+    
       // Nettoyer les espaces, les nouvelles lignes et les caractères invisibles
-      const cleanedStdout = stdout.replace(/[\u200B-\u200D\uFEFF]/g, '')
-                                   .replace(/[\r\n]+/g, '');
-
+      const cleanedStdout = stdout.replace(/[\u200B-\u200D\uFEFF]/g, '')  // Supprimer les caractères invisibles
+                                   .replace(/[\r\n]+/g, '');  // Supprimer les retours à la ligne supplémentaires
+    
+      console.log('Sortie nettoyée:', cleanedStdout);
+    
       // Vérification de la validité du JSON
       try {
-        console.log('Sortie nettoyée:', cleanedStdout);
         const suggestions = JSON.parse(cleanedStdout);
-
         resolve(JSON.stringify(suggestions, null, 2));
       } catch (parseError) {
         console.error('Erreur lors de l\'analyse JSON:', parseError);
-        console.error('Contenu nettoyé de stdout:', cleanedStdout);
+        console.error('Contenu nettoyé de stdout:', cleanedStdout);  // Afficher stdout nettoyé pour le débogage
         reject('Impossible de traiter les suggestions.');
       }
     });
+    
+
   });
 });
+
