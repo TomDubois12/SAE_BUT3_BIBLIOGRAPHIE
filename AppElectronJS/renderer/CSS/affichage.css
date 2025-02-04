@@ -343,3 +343,51 @@ input[type="color"]:hover {
     text-align: center;
     transition: all 0.3s ease;
 }
+
+
+
+.wrapperNode{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.nodeMin{
+    width: 50px;
+    height: 50px;
+    background-color: gray;
+    border-radius: 100%;
+    margin-right: 1em;
+
+}
+
+.nodeMax{
+    background-color: gray;
+    border-radius: 100%;
+    width: 100px;
+    height: 100px;
+    margin-left: 1em;
+}
+.nodeMaxText{
+    margin-left: 1em ;
+    display: flex;
+    justify-content: center;
+}
+.nodeMinText{
+    margin-right: 1em ;
+    display: flex;
+    justify-content: center;
+}
+.echelleNode{
+    display: flex;
+    flex-direction:  column;
+    position: absolute;
+    bottom: 0px;
+    left:100%;
+    align-items: center;
+    justify-content: center;
+    transform: translate(0,-50%);
+    margin-left: 1em;
+    margin-bottom: 1em;
+}
