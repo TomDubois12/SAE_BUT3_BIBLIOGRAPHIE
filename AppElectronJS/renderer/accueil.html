@@ -94,8 +94,11 @@
 
     <div class="CSV">
         <div id="CSVInfo">
-            <p class="textsearch">Vous utilisez actuellement le CSV :</p>
-            <p id="textCSVChoose" class="title"></p>
+            <p class="textsearch">Vous utilisez actuellement le CSV : 
+                <span id="textCSVChoose" class="title"> </span> qui contient :  
+                <span id="nbArticle"> </span> articles
+            </p>
+
             <button id="buttonChangeCSV" class="input" onclick="changeCSV()">Charger un autre CSV</button>
         </div>
         <div class="exportCSV">
@@ -150,6 +153,37 @@
                     alert('Impossible de récupérer le fichier JSON');
                 });
         }
+        function getNbArticle() {
+            const filePath = '../cache_doi.json';
+
+            fetch(filePath)
+                .then(response => {
+                    // Vérification si la requête a réussi (statut 200)
+                    if (!response.ok) {
+                        throw new Error('Erreur de récupération du fichier JSON');
+                    }
+                    return response.json(); // Conversion de la réponse en JSON
+                })
+                .then(data => {
+                   
+                    let nbArticle = 0; 
+
+                    const keys = Object.keys(data);  // Obtenir toutes les clés de l'objet
+                    keys.forEach(key => {
+                        nbArticle += 1;
+                    });
+
+                    const textNbArticle = document.getElementById("nbArticle");
+                    textNbArticle.textContent = nbArticle;
+
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Impossible de récupérer le fichier JSON');
+                });
+        }
+
+        getNbArticle()
     </script>
 
     <script src="js/renderer.js"></script>
