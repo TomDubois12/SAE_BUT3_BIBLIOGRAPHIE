@@ -586,6 +586,41 @@ async function setAllNodeDeg() {
             legendE.textContent = `Date allant de (${minDateEnv} → ${maxDateEnv})`;
         }
 
+        let minSizeNode = null;
+        let minRefNode = null;
+        let maxSizeNode = null;
+        let maxRefNode = null;
+        network.body.data.nodes.forEach(node => {
+            console.log(node);
+            nb_citations = node.nb_citations;
+            if(minRefNode === null || nb_citations < minRefNode){
+                minSizeNode = node.size;
+                minRefNode = nb_citations;
+
+            }
+            if(maxRefNode === null || nb_citations > maxRefNode){
+                maxSizeNode = node.size;
+                maxRefNode = nb_citations
+            }
+        });
+        
+
+        const legendNodeMinText = document.querySelector(".nodeMinText");
+        legendNodeMinText.textContent = minRefNode;
+        const legendNodeMaxText = document.querySelector(".nodeMaxText");
+        legendNodeMaxText.textContent = maxRefNode;
+
+        const legendNodeMinSize = document.querySelector(".nodeMin");
+        legendNodeMinSize.style.width = minSizeNode*2+"px";
+        legendNodeMinSize.style.height = minSizeNode*2+"px";
+
+        const legendNodeMaxSize = document.querySelector(".nodeMax");
+        legendNodeMaxSize.style.width = maxSizeNode*2+"px";
+        legendNodeMaxSize.style.height = maxSizeNode*2+"px";
+
+        console.log(minSizeNode);
+        console.log(maxSizeNode);
+
         addDynamicCSS()
     } catch (error) {
         console.error("Error applying gradient or legend:", error);
