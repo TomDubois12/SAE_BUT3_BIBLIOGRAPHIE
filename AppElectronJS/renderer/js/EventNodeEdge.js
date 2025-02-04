@@ -790,6 +790,9 @@ function setWordSearch(){
             else if ((data.TypeChoose && data.TypeChoose === "Par doi")){
                 selectElement.value = "noeud";
             }
+            else if ((data.TypeChoose && data.TypeChoose === "Par reference")){
+                selectElement.value = "reference";
+            }
         }
     });
 }
