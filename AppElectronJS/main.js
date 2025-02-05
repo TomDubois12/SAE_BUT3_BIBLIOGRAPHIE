@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog, Notification,globalShortcut  } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog, Notification  } = require('electron')
 const path = require('node:path');
 const { spawn, exec, spawnSync } = require('child_process');
 const fs = require("fs");
@@ -208,9 +208,7 @@ app.whenReady().then(() => {
   
   showNotification();
   createWindow();
-    globalShortcut.register('CommandOrControl+F', () => {
-      mainWindow.webContents.send('trigger-search');
-  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
