@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog, Notification } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu ,nativeTheme, dialog, Notification  } = require('electron')
 const path = require('node:path');
 const { spawn, exec, spawnSync } = require('child_process');
 const fs = require("fs");
@@ -6,11 +6,14 @@ const { stdout, stderr } = require('node:process');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const logFilePath = path.join(__dirname, 'app.log');
-const os = require('os');
+
 
 let pythonExecutable;
 
-if (os.platform() === 'win32') {
+let mainWindow;
+let graphWindo;
+
+if (process.platform === 'win32') {
     pythonExecutable = path.join(__dirname, 'python', 'python-portable', 'python.exe');
 } else {
     pythonExecutable = path.join(__dirname, '../../venv', 'bin', 'python');
@@ -44,9 +47,6 @@ function installPythonDependencies() {
       return;
   }
 }
-
-let mainWindow;
-let graphWindo;
 
 const webPref = {
   preload: path.join(__dirname, 'preload.js'),  // Chemin vers votre script de preload
@@ -208,7 +208,7 @@ app.whenReady().then(() => {
   
   showNotification();
   createWindow();
-  
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -226,40 +226,32 @@ app.on('window-all-closed', () => {
 // Change the global menu
 const mainMenuTemplates = [
   {
-    label: 'File',
-    submenu:[
-      {
-        label:'Quit',
-        accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-        click(){
-          app.quit();
-        }
-      },
-      {
-        label:'Open other CSV',
-        click(){
-          mainWindow.loadFile(path.join(__dirname, './renderer/loadcsv.html')); 
-        }
-      }
-    ]
-  },
+      label: 'File',
+      submenu: [
+          {
+              label: 'Quit',
+              accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+              click() {
+                  app.quit();
+              },
+          },
+          {
+              label: 'Open other CSV',
+              click() {
+                  mainWindow.loadFile(path.join(__dirname, './renderer/loadcsv.html'));
+              },
+          },
+          {
+            label: 'Remplacer le cache DOI',
+            click() {
+                replaceCacheFile();
+            },
+          }
+      ],
+    },
   {
     label:'Settings',
     submenu:[
-      // {
-      //   label: 'Gerer les couleurs',
-      //   // accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
-      //   click(){
-      //     // Une fenêtre pour gerer les couleurs des noeuds 
-      //     graphWindo = new BrowserWindow({
-      //       width: 800,
-      //       height: 600,
-      //       icon: path.join(__dirname, 'renderer/images/logoWindow.png'),
-      //       webPreferences: webPref
-      //   });
-      //   graphWindo.loadFile('./renderer/graphe.html');
-      //   }
-      // },
       {
         label:'Ajouter un article',
         click(){
@@ -269,7 +261,52 @@ const mainMenuTemplates = [
     ]
   }
 ];
+function replaceCacheFile() {
+  const filePath = path.join(__dirname, 'cache_doi.json'); // Emplacement du cache actuel
 
+  // Ouvre une boîte de sélection pour choisir un fichier
+  const files = dialog.showOpenDialogSync({
+      title: 'Sélectionnez un fichier JSON pour remplacer le cache DOI',
+      filters: [{ name: 'JSON Files', extensions: ['json'] }], // Seuls les fichiers JSON sont affichés
+      properties: ['openFile'],
+  });
+
+  if (!files || files.length === 0) {
+      // Si l'utilisateur annule la sélection
+      dialog.showMessageBoxSync({
+          type: 'info',
+          title: 'Action annulée',
+          message: 'Aucun fichier n’a été sélectionné.',
+      });
+      return;
+  }
+
+  const selectedFile = files[0]; // Le fichier sélectionné
+
+  try {
+      // Lire le contenu du fichier sélectionné
+      const fileContent = fs.readFileSync(selectedFile, 'utf8');
+
+      // Vérifie si le fichier est un JSON valide
+      JSON.parse(fileContent);
+
+      // Remplace le fichier cache actuel
+      fs.writeFileSync(filePath, fileContent, 'utf8');
+
+      dialog.showMessageBoxSync({
+          type: 'info',
+          title: 'Succès',
+          message: `Le fichier ${selectedFile} a remplacé le cache DOI avec succès.`,
+      });
+  } catch (error) {
+      // Gérer les erreurs, par exemple si le fichier n'est pas un JSON valide
+      dialog.showMessageBoxSync({
+          type: 'error',
+          title: 'Erreur',
+          message: 'Le fichier sélectionné n’est pas un JSON valide ou une erreur est survenue.',
+      });
+  }
+}
 
 ipcMain.handle('openWindoColor', (event) => {
     const fenetre = new BrowserWindow({
@@ -341,6 +378,74 @@ ipcMain.on('load-search-page', (event) => {
       mainWindow.loadFile(path.join(__dirname, 'renderer/accueil.html'));
   });
 });
+ipcMain.on('save-articles', (event) => {
+  // On crée le fichier s'il n'existe pas
+  fs.writeFile(path.join(__dirname, "Data/AllSavedDOI.csv"), '', (err) => {
+    if (err) {
+      console.error('Erreur lors de la lecture du fichier:', err);
+      return;
+    }
+  });
+
+  // Lire le fichier cache_doi 
+  fs.readFile(path.join(__dirname, "cache_doi.json"), 'utf-8', (err, data) => {
+    if (err) {
+      console.error('Erreur lors de la lecture du fichier:', err);
+      return;
+    }
+  
+    try {
+      const jsonData = JSON.parse(data);  // Convertir en objet JSON
+      let csvContent = "DOI\n";  // En-tête du fichier CSV
+
+      // Ajouter chaque clé comme ligne dans le CSV
+      Object.keys(jsonData).forEach(key => {
+        csvContent += `${key}\n`;
+      });
+
+      fs.writeFile(path.join(__dirname, "Data/AllSavedDOI.csv"), csvContent, (err) => {
+        if (err) {
+          console.error('Erreur lors de l\'écriture du fichier:', err);
+          return;
+        }
+        console.log(csvContent);
+        console.log("Cache lu et sauvegardé dans AllSavedDOI.csv")
+      });
+
+    } catch (parseError) {
+      console.error('Erreur de parsing JSON:', parseError);
+    }
+  });
+
+  // Lire et modifier userSettings.json
+  fs.readFile(path.join(__dirname, "renderer/json/userSettings.json"), 'utf-8', (err, settingFileData) => {
+    if (err) {
+      console.error("Erreur lors de la lecture du fichier :", err);
+      return;
+    }
+
+    try {
+      const settings = JSON.parse(settingFileData);
+      settings.CSVChoose = "AllSavedDOI.csv";
+
+      fs.writeFile(path.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings, null, 2), 'utf-8', (err) => {
+        if (err) {
+          console.error("Erreur lors de l'écriture du fichier :", err);
+        } else {
+          console.log("Fichier de paramètres mis à jour avec succès.");
+        }
+
+        // 🔹 🔥 NOTIFIER QUE TOUT EST FINI 🔥 🔹
+        event.reply('save-articles-done');
+      });
+
+    } catch (error) {
+      console.error("Erreur lors du traitement des fichiers :", error);
+    }
+  });
+});
+
+
 
 ipcMain.on('send-csv-path', (event, csvPath) => {
   console.log(`Chemin du CSV reçu : ${csvPath}`);
