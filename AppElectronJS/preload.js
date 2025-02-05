@@ -50,16 +50,98 @@ contextBridge.exposeInMainWorld('api', {
 
     accesLoadCSV: () => ipcRenderer.invoke('loadCSVpage')
 
+    // removeCacheDOIFile: 
 });
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    accessBiblioLectio: () => ipcRenderer.send('load-search-page'),
-    
-    saveCSVPath: async (file) => {
+
+  miseAJourCache: async () => {
+    console.log("ça démarre");
+
+    try {
+        const csvPath = "Data/AllSavedDOI.csv";
+        const cachePath = "cache_doi.json";
+        const settingsPath = paths.join(__dirname, "renderer/json/userSettings.json");
+
+        // 1️⃣ 🔹 Réinitialiser le fichier AllSavedDOI.csv
+        writeFile(csvPath, 'DOI\n', (err) => {
+          if (err) {
+              console.error("❌ Erreur lors de la réinitialisation du fichier :", err);
+              return;
+            }
+          });        
+        console.log("✅ Fichier AllSavedDOI.csv réinitialisé.");
+
+        // 2️⃣ 📖 Lire le cache DOI
+        let jsonData = {};
+        try {
+            const data = await fs.promises.readFile(paths.join(__dirname,cachePath), 'utf-8');
+            jsonData = JSON.parse(data);
+            
+        } catch (err) {
+            console.warn("⚠️ Cache DOI vide ou invalide, il sera réinitialisé.");
+        }
+
+        // 3️⃣ ✍️ Écriture des DOI dans AllSavedDOI.csv
+        const csvContent = "DOI\n" + Object.keys(jsonData).join("\n") + "\n";
+        console.log(csvContent);
+
+
+        writeFile(csvPath, csvContent, (err) => {
+          if (err) {
+              console.error("❌ Erreur dans le save des keys", err);
+              return;
+            }
+          });        
+        console.log("✅ Cache DOI sauvegardé dans AllSavedDOI.csv.");
+
+        // 4️⃣ 🔄 Réinitialiser le cache_doi.json
+        writeFile(cachePath, '{}', (err) => {
+          if (err) {
+              console.error("❌ Erreur lors de la réinitialisation du fichier :", err);
+              return;
+            }
+          });        
+        console.log("✅ Cache DOI réinitialisé.");
+
+        // 5️⃣ 📌 Mettre à jour userSettings.json
+        const settingFileData = await fs.promises.readFile(settingsPath, 'utf-8');
+        const settings = JSON.parse(settingFileData);
+        settings.CSVChoose = "AllSavedDOI.csv";
+        console.log(settings.CSVChoose);
+        await fs.promises.writeFile("renderer/json/userSettings.json", JSON.stringify(settings, null, 2), 'utf8');
+        console.log("✅ Fichier userSettings.json mis à jour.");
+
+        // 6️⃣ 🚀 Lancer la page de recherche
+        ipcRenderer.send('load-search-page');
+        console.log("✅ Page de recherche lancée.");
+    } catch (error) {
+        console.error("❌ Erreur dans miseAJourCache :", error);
+    }
+},
+
+accessBiblioLectio: () => ipcRenderer.send('load-search-page'),
+
+removeCache: async () => {
+    try {
+        await fs.promises.writeFile("cache_doi.json", '{}', 'utf8');
+        console.log("✅ Cache réinitialisé !");
+    } catch (error) {
+        console.error("❌ Erreur lors de la réinitialisation du cache:", error);
+    }
+},
+
+saveDoiKeys: () => {
+    ipcRenderer.send('save-articles');
+    return new Promise((resolve) => {
+        ipcRenderer.once('save-articles-done', resolve);
+    });
+},
+saveCSVPath: async (file) => {
         try {
             // Lire les paramètres d'utilisateur
-            const settingFileData = await fs.promises.readFile(path.join(__dirname, "renderer/json/userSettings.json"), 'utf-8');
+            const settingFileData = await fs.promises.readFile(paths.join(__dirname, "renderer/json/userSettings.json"), 'utf-8');
             const settings = JSON.parse(settingFileData);
             const pathDirectory = settings.pathDirectoryCSV;
 
@@ -80,7 +162,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
                         settings.CSVChoose = file.name;
 
                         // Mettre à jour userSettings.json
-                        await fs.promises.writeFile(path.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
+                        await fs.promises.writeFile(paths.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
                     } catch (writeErr) {
                         console.error("Erreur lors de la création du fichier CSV :", writeErr);
                     }
@@ -93,7 +175,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
                 settings.CSVChoose = file.name;
 
                 // Mettre à jour userSettings.json
-                await fs.promises.writeFile(path.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
+                await fs.promises.writeFile(paths.join(__dirname, "renderer/json/userSettings.json"), JSON.stringify(settings));
             }
         } catch (error) {
             console.error("Erreur lors de la lecture ou de l'écriture du fichier :", error);
