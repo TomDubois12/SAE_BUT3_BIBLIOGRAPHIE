@@ -92,12 +92,14 @@ def setLiaison(G, liaison, allTheKeys, listeKeys):
 
         case 'Référence':
             for node in allTheKeys:
+               
                 premiere_node = node
                 liste_references_du_node = cache_data[node].get("doi_references", [])
                 for ref in liste_references_du_node:
-                    if ref[0] in allTheKeys:
-                        deuxieme_node = ref[0]
-                        G.add_edge(premiere_node, deuxieme_node,length =(G.nodes[node]['size'] + 500), color=liaison['color'], arrows="to",smooth=True)
+                    if ref[0] != None:
+                        if ref[0].lower() in allTheKeys:
+                            deuxieme_node = ref[0].lower()
+                            G.add_edge(premiere_node, deuxieme_node,length =(G.nodes[node]['size'] + 500), color=liaison['color'], arrows="to",smooth=True)
 
                         
         case 'Date de publication':
@@ -126,8 +128,7 @@ def find_min_max_values(dico):
     liste = set()
     for nom in dico.keys():
         liste.add(dico[nom]['num_citations'])
-        print(liste)
-
+        
     #return the min and max of a dico like this {"DOI": nbCitation}
     min_key = min(liste)
     max_key = max(liste)
@@ -146,7 +147,6 @@ def transform_value_log(value, original_min, original_max, target_min=20, target
     
     # Transformation linéaire vers la plage cible
     transformed_value = target_min + log_transformed * (target_max - target_min)
-    print(transformed_value)
     return transformed_value
 
 
@@ -231,7 +231,6 @@ def show_graphique_node(primaryKey):
 
 
     if(not primaryKey in cache_data.keys()):
-        print(primaryKey, cache_data.keys())
         raise BadDoiError()
 
     # Create the graph
@@ -382,7 +381,6 @@ def show_graphique_author(liste_key):
             node = cache_data[nom]
             nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
             color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
-            print(node['authors'])
             G.add_node(
                 nom,
                 size=nodeTaille,
@@ -398,6 +396,105 @@ def show_graphique_author(liste_key):
                 url=node['url'],
                 isOrigin="true"
             )
+        return G
+
+    # Create the graph
+    G = nx.MultiDiGraph()
+    
+    df = json_normalize(cache_data)
+
+    # Reindexer le DataFrame selon les clés trouvées
+    dfFinal = df.reindex(liste_key)
+
+    noms = dfFinal.index  # Use the index (the keys)
+    originKeys = set(liste_key)#Transform the list in a set for faster reserch in the list
+    if len(originKeys) == 0:
+        raise EmptyListError()
+    G = setAllNode(G)
+
+    liaisons = dataUser["ColorPickerSettings"]
+
+    liste_cle1_cle2 = []    
+    for key in liste_key:
+        articles_similaire = find_similar_articles(key, 3)
+        newList = [key]
+        tempList = []
+        for elem in articles_similaire:
+            if elem[0] in liste_key:
+                tempList.append(elem)
+        newList.append(tempList)
+        liste_cle1_cle2.append(newList)
+    for liaison in liaisons:
+        if liaison['check'] == 'true':
+            G = setLiaison(G, liaison, liste_key, liste_cle1_cle2)
+
+
+    nt = Network('100vh', '100vw',directed=True)
+    nt.force_atlas_2based(central_gravity=0.005, spring_length=150, damping=0.99)
+    nt.from_nx(G)
+
+    # Create the HTML file
+    html_file_path = pyvis_path + '/bin/nx.html'
+    nt.save_graph(html_file_path)
+
+    # Manually modify the HTML to include the JavaScript functionality
+    with open(html_file_path, 'r') as f:
+        html_content = f.read()
+    
+    # Insert the custom script just before the closing </body> tag
+    html_content = html_content.replace('</body>', ajout_script() + '</body>')
+
+    # Write the modified content back to the file
+    with open(html_file_path, 'w') as f:
+        f.write(html_content)
+        
+        
+def show_graphique_reference(liste_key):
+
+    def setAllNode(G):       
+
+        # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        minTaille, maxTaille = find_min_max_values(cache_data)
+        
+            # Add the nodes with attributes 'infos', 'title', and 'year', defining the color
+        for nom in noms:
+            node = cache_data[nom]
+            nodeTaille = transform_value_log(node['num_citations'], minTaille, maxTaille)
+            color = 'red' if nom in originKeys else 'blue'  # Red for origin nodes, blue otherwise
+            if nom == liste_key[0]:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=True,
+                    primaryNode= True
+                )
+            else:
+                G.add_node(
+                    nom,
+                    size=nodeTaille,
+                    label=node['authors'].split(",")[0] +" "+ str(node['year']),
+                    year=node['year'],
+                    title=node['title'],
+                    abstract=node['abstract'],
+                    author=node['authors'],
+                    doi=nom,
+                    color=color,
+                    nb_citations=node['num_citations'],
+                    #citations=node['doi_citations'],
+                    url=node['url'],
+                    isOrigin=nom in originKeys,
+                    primaryNode= False
+                )
         return G
 
     # Create the graph
@@ -562,9 +659,11 @@ if __name__ == "__main__":
       
                             for article in cache_data.keys():
                                 for reference in cache_data[article].get("doi_references", []):
-                                    if mot_cle.lower() == reference[0]:
-                                        liste.append(article)
-                            show_graphique_author(liste)
+                                    if(reference[0] != None):
+                                        if mot_cle.lower() == reference[0].lower():
+                                            
+                                            liste.append(article.lower())
+                            show_graphique_reference(liste)
                         except BadDoiError as e:
                             print(f"Erreur : {e.code}")
                         except EmptyListError as e:
@@ -586,4 +685,4 @@ if __name__ == "__main__":
 #python -m Pyvis.src.mainPyvis "a" "auteur"
 
 #Recherche par auteur.
-#python -m Pyvis.src.mainPyvis "10.1103/physrevb.54.8064" "reference"
+#python -m Pyvis.src.mainPyvis "10.1007/s12274-011-0148-3" "reference"
