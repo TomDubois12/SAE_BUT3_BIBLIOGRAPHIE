@@ -21,22 +21,22 @@ async function changeColorOnHover(nodeId, isOrigin) {
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
-        }
-    if(network.body.data.nodes.get(nodeId).primaryNode){
+    if (isOrigin) {
+        minD = minDateOrigin;
+        maxD = maxDateOrigin;
+    } else {
+        minD = minDateEnv;
+        maxD = maxDateEnv;
+    }
+    if (network.body.data.nodes.get(nodeId).primaryNode) {
         color = await getColorOrigineArticle();
         network.body.data.nodes.update({
             id: nodeId,
             color: getColorForDate(year, maxD, minD, color),
             borderWidth: 5,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5, y: 5 },
         });
-    }else{
+    } else {
         color = await getColorParamUser(isOrigin);
         network.body.data.nodes.update({
             id: nodeId,
@@ -49,104 +49,104 @@ async function changeColorOnHover(nodeId, isOrigin) {
 
 }
 
-async function changeBlurColor(nodeId, isOrigin){
+async function changeBlurColor(nodeId, isOrigin) {
 
-    if (nodeId == idSelectedNode) { return;} 
+    if (nodeId == idSelectedNode) { return; }
     // Obtenir la couleur associée au nœud (origine ou non)
     let color;
 
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
-        }
-        if(network.body.data.nodes.get(nodeId).primaryNode){
-            color = await getColorOrigineArticle();
-            network.body.data.nodes.update({
-                id: nodeId,
-                color: getColorForDate(year, maxD, minD, color),
-                borderWidth: 5,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
-            });
-        }else{
-            color = await getColorParamUser(isOrigin)
-            network.body.data.nodes.update({
-                id: nodeId,
-                color: getColorForDate(year, maxD, minD, color),
-                borderWidth: 1,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-            });
-        }
+    if (isOrigin) {
+        minD = minDateOrigin;
+        maxD = maxDateOrigin;
+    } else {
+        minD = minDateEnv;
+        maxD = maxDateEnv;
+    }
+    if (network.body.data.nodes.get(nodeId).primaryNode) {
+        color = await getColorOrigineArticle();
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5, y: 5 },
+        });
+    } else {
+        color = await getColorParamUser(isOrigin)
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 1,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+        });
+    }
 }
 
-async function changeColorOnClick(nodeId){
+async function changeColorOnClick(nodeId) {
 
-    const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;    
+    const isOrigin = network.body.data.nodes.get(nodeId).isOrigin;
     let color;
     let year = network.body.data.nodes.get(nodeId).year;
     let minD;
     let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
-        }
-        if(network.body.data.nodes.get(nodeId).primaryNode){
-            color = await getColorOrigineArticle();
-            network.body.data.nodes.update({
-                id: nodeId,
-                color: getColorForDate(year, maxD, minD, color),
-                borderWidth: 5,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
-            });
-        }else{
-            color = await getColorParamUser(isOrigin);
-            network.body.data.nodes.update({
-                id: nodeId,
-                color: getColorForDate(year, maxD, minD, color),
-                borderWidth: 3,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
-            });
-        }
+    if (isOrigin) {
+        minD = minDateOrigin;
+        maxD = maxDateOrigin;
+    } else {
+        minD = minDateEnv;
+        maxD = maxDateEnv;
+    }
+    if (network.body.data.nodes.get(nodeId).primaryNode) {
+        color = await getColorOrigineArticle();
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 5,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5, y: 5 },
+        });
+    } else {
+        color = await getColorParamUser(isOrigin);
+        network.body.data.nodes.update({
+            id: nodeId,
+            color: getColorForDate(year, maxD, minD, color),
+            borderWidth: 3,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 5, x: 2, y: 2 },
+        });
+    }
 }
 
-async function colorOnNodeSave(idNode){
+async function colorOnNodeSave(idNode) {
 
-    if (idNode === ""){return;}
+    if (idNode === "") { return; }
 
-    const isOrigin = network.body.data.nodes.get(idNode).isOrigin;    
+    const isOrigin = network.body.data.nodes.get(idNode).isOrigin;
     let color;
 
     let year = network.body.data.nodes.get(idNode).year;
     let minD;
     let maxD;
-        if (isOrigin){
-            minD = minDateOrigin;
-            maxD = maxDateOrigin;
-        }else {
-            minD = minDateEnv;
-            maxD = maxDateEnv;
-        }
-    if(network.body.data.nodes.get(idNode).primaryNode){
+    if (isOrigin) {
+        minD = minDateOrigin;
+        maxD = maxDateOrigin;
+    } else {
+        minD = minDateEnv;
+        maxD = maxDateEnv;
+    }
+    if (network.body.data.nodes.get(idNode).primaryNode) {
         color = await getColorOrigineArticle();
         network.body.data.nodes.update({
             id: idNode,
             color: getColorForDate(year, maxD, minD, color),
             borderWidth: 5,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5,y: 5},
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.7)', size: 8, x: 5, y: 5 },
         });
-    }else{
+    } else {
         color = await getColorParamUser(isOrigin);
         network.body.data.nodes.update({
             id: idNode,
-            color: getColorForDate(year,maxD,minD,color),
+            color: getColorForDate(year, maxD, minD, color),
             borderWidth: 1,
             shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
         });
@@ -156,13 +156,13 @@ async function colorOnNodeSave(idNode){
     }
 }
 
-function removeAsideOnNeutralClick(){
+function removeAsideOnNeutralClick() {
     const className = 'generated-div';
     const existingElements = document.getElementsByClassName(className);
-        if (existingElements.length > 0) {
-            existingElements[0].remove();
-            AS_ASIDE = false;
-        }
+    if (existingElements.length > 0) {
+        existingElements[0].remove();
+        AS_ASIDE = false;
+    }
 }
 
 function createAside(nodeId) {
@@ -239,9 +239,9 @@ function createAside(nodeId) {
                     data = JSON.parse(data);
                     data.WordChoose = nodeData.doi;
                     data.TypeChoose = "Par doi";
-                    window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                    window.api.writeFile('renderer/json/userSettings.json', JSON.stringify(data), (err) => {
                         if (err) {
-                        console.error('Erreur d’écriture :', err);
+                            console.error('Erreur d’écriture :', err);
                         }
                     });
                 }
@@ -254,20 +254,20 @@ function createAside(nodeId) {
             divInvisible.classList.remove("invisibleBackground");
             divInvisible.style.visibility = "hidden";
         });
-        
+
         window.api.readFile('renderer/json/userSettings.json', (err, data) => {
             if (data) {
                 data = JSON.parse(data);
                 data.asideDOI = nodeData.doi;
-                window.api.writeFile('renderer/json/userSettings.json',JSON.stringify(data), (err) => {
+                window.api.writeFile('renderer/json/userSettings.json', JSON.stringify(data), (err) => {
                     if (err) {
-                    console.error('Erreur d’écriture :', err);
+                        console.error('Erreur d’écriture :', err);
                     }
                 });
             }
         });
 
-        
+
         aside.appendChild(buttonCreateGraph);
 
         aside.classList.add(className);
@@ -287,7 +287,7 @@ function onClick(params) {
         colorOnNodeSave(idSelectedNode); // réinitialise la couleur de la dernière sélection
         removeAsideOnNeutralClick(); // cache le aside
         return;
-    }    
+    }
 
     // Vérifie si l'aside pour ce nodeId est déjà affiché avant de le créer
     const existingAside = document.getElementById(nodeId);
@@ -308,22 +308,22 @@ function onClick(params) {
     changeColorOnClick(nodeId);
 }
 
-function onHover(params){
+function onHover(params) {
     const nodeId = params.node;
-    if (!AS_CLICK){
+    if (!AS_CLICK) {
         createAside(nodeId)
     }
-    changeColorOnHover(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
+    changeColorOnHover(nodeId, network.body.data.nodes.get(nodeId).isOrigin);
 
 }
 
-function onBLur(params){
+function onBLur(params) {
     const nodeId = params.node;
-    if (!AS_CLICK){
-        changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
+    if (!AS_CLICK) {
+        changeBlurColor(nodeId, network.body.data.nodes.get(nodeId).isOrigin);
     } else {
-        if (nodeId !== idSelectedNode){
-            changeBlurColor(nodeId,network.body.data.nodes.get(nodeId).isOrigin);
+        if (nodeId !== idSelectedNode) {
+            changeBlurColor(nodeId, network.body.data.nodes.get(nodeId).isOrigin);
         }
     }
 }
@@ -342,7 +342,7 @@ function getColorParamUser(isOrigin) {
                 data = JSON.parse(data);  // Conversion du JSON en objet JavaScript
 
                 // Initialisation de la couleur par défaut
-                let colorToReturn = "#000000"; 
+                let colorToReturn = "#000000";
 
                 // Si recherche par auteur ou titre, on renvoi la couleur unique
                 if (data.TypeChoose === "Par titre" || data.TypeChoose === "Par auteur") {
@@ -412,16 +412,16 @@ network.on("hoverEdge", function (params) {
     if (isNaN(texte)) {
         suiviSouris.style.display = "none";
     }
-    if(texte < 0){texte = 0;}
+    if (texte < 0) { texte = 0; }
     texte = Math.round(texte * 100) + "%";
     suiviSouris.textContent = texte;
-    
-   
-  });
+
+
+});
 
 network.on("blurEdge", function (params) {
     const suiviSouris = document.getElementById('suivi-souris');
-    
+
     // Cacher l'élément de suivi de la souris
     suiviSouris.style.display = "none";
 });
@@ -429,26 +429,26 @@ network.on("blurEdge", function (params) {
 function adjustColorBrightness(hex, factor) {
     // Enlever le "#" du début si nécessaire
     hex = hex.replace('#', '');
-    
+
     // Convertir la couleur hex en RGB
     let r = parseInt(hex.substring(0, 2), 16);
     let g = parseInt(hex.substring(2, 4), 16);
     let b = parseInt(hex.substring(4, 6), 16);
-    
+
     // Ajuster la luminosité en fonction du facteur (valeur de 0 à 1)
     r = Math.min(255, Math.max(0, r + factor * (255 - r)));
     g = Math.min(255, Math.max(0, g + factor * (255 - g)));
     b = Math.min(255, Math.max(0, b + factor * (255 - b)));
-    
+
     // Convertir à nouveau en hexadécimal
     return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
 }
 
-function getColorForDate(date, minDate , maxDate, baseColor) {
+function getColorForDate(date, minDate, maxDate, baseColor) {
     //function getColorForDate(date, minDate = 1984, maxDate = 2015, baseColor = '#A62121') {
     // Normaliser l'année dans la plage de 0 à 1
     const normalizedYear = (date - minDate) / (maxDate - minDate);
-    if (isNaN(normalizedYear)){
+    if (isNaN(normalizedYear)) {
         return adjustColorBrightness(baseColor, 0.2);
     }
     // Calculer la luminosité en fonction de l'année : plus près de 1984, plus foncé, plus près de 2015, plus clair
@@ -464,7 +464,7 @@ let maxDateEnv;
 let minDateEnv;
 
 function loadNodesColor() {
-    network.body.data.nodes.forEach( (elem) => {
+    network.body.data.nodes.forEach((elem) => {
         const isOrigin = elem.isOrigin;
         if (isOrigin) {
             // Si le nœud est d'origine
@@ -509,7 +509,7 @@ function addDynamicCSS() {
         }
     `;
     document.head.appendChild(style); // Ajoute le style dans <head>
-  }
+}
 
 async function setAllNodeDeg() {
     // Mettre à jour les nœuds
@@ -517,18 +517,18 @@ async function setAllNodeDeg() {
         try {
             const isOrigin = elem.isOrigin;
             let color;
-            
+
             const { minD, maxD } = getDateRange(isOrigin);
-            if(elem.primaryNode){
+            if (elem.primaryNode) {
 
                 color = await getColorOrigineArticle()
                 network.body.data.nodes.update({
                     id: elem.id,
                     color: getColorForDate(elem.year, maxD, minD, color),
                     borderWidth: 5,
-                    shadow: { enabled: true, color: 'rgba(0,0,0,0.7', size: 10, x: 7,y: 7},
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.7', size: 10, x: 7, y: 7 },
                 });
-            }else{
+            } else {
                 color = await getColorParamUser(isOrigin)
                 network.body.data.nodes.update({
                     id: elem.id,
@@ -568,7 +568,7 @@ async function setAllNodeDeg() {
         } else {
             legend.textContent = `Date allant de (${minDateOrigin} → ${maxDateOrigin})`;
         }
-        
+
         const colorEnvMin = getColorForDate(maxDateEnv, maxDateEnv, minDateEnv, colorEnv);
         const colorEnvMax = getColorForDate(minDateEnv, maxDateEnv, minDateEnv, colorEnv);
 
@@ -576,7 +576,7 @@ async function setAllNodeDeg() {
         DivEnv.classList.add('dynamic-div');
 
         DivEnv.style.background = `linear-gradient(to left, ${colorEnvMin}, ${colorEnvMax})`;
-        
+
         const legendE = document.getElementById("legend-textEnv");
         if (minDateEnv === undefined || maxDateEnv === undefined) {
             legendE.textContent = "Node manquante";
@@ -593,30 +593,34 @@ async function setAllNodeDeg() {
         network.body.data.nodes.forEach(node => {
             console.log(node);
             nb_citations = node.nb_citations;
-            if(minRefNode === null || nb_citations < minRefNode){
+            if (minRefNode === null || nb_citations < minRefNode) {
                 minSizeNode = node.size;
                 minRefNode = nb_citations;
 
             }
-            if(maxRefNode === null || nb_citations > maxRefNode){
+            if (maxRefNode === null || nb_citations > maxRefNode) {
                 maxSizeNode = node.size;
                 maxRefNode = nb_citations
             }
         });
-        
+
+
+
+
 
         const legendNodeMinText = document.querySelector(".nodeMinText");
         legendNodeMinText.textContent = minRefNode;
-        const legendNodeMaxText = document.querySelector(".nodeMaxText");
-        legendNodeMaxText.textContent = maxRefNode;
-
         const legendNodeMinSize = document.querySelector(".nodeMin");
-        legendNodeMinSize.style.width = minSizeNode*2+"px";
-        legendNodeMinSize.style.height = minSizeNode*2+"px";
+        legendNodeMinSize.style.width = minSizeNode + "px";
+        legendNodeMinSize.style.height = minSizeNode + "px";
+        if (maxRefNode !== minRefNode) {
+            const legendNodeMaxText = document.querySelector(".nodeMaxText");
+            legendNodeMaxText.textContent = maxRefNode;
 
-        const legendNodeMaxSize = document.querySelector(".nodeMax");
-        legendNodeMaxSize.style.width = maxSizeNode*2+"px";
-        legendNodeMaxSize.style.height = maxSizeNode*2+"px";
+            const legendNodeMaxSize = document.querySelector(".nodeMax");
+            legendNodeMaxSize.style.width = maxSizeNode + "px";
+            legendNodeMaxSize.style.height = maxSizeNode + "px";
+        }
 
         console.log(minSizeNode);
         console.log(maxSizeNode);
@@ -655,9 +659,9 @@ function initializeColorChangeListener() {
     // Filtrer pour trouver celui avec le bon ID
 
     const colorOrigineChange = document.getElementById("color0");
-    const colorEnvironChange = document.getElementById("color1");  
-    const colorNodeChange = document.getElementById("colorEdit");  
-    const colorOriginNodeChange = document.getElementById("colorEditNodeDOI");  
+    const colorEnvironChange = document.getElementById("color1");
+    const colorNodeChange = document.getElementById("colorEdit");
+    const colorOriginNodeChange = document.getElementById("colorEditNodeDOI");
 
     if (colorOrigineChange) {  // Si l'élément est trouvé
         colorOrigineChange.addEventListener('change', (event) => {
@@ -768,7 +772,7 @@ function lightenColor(hexColor, factor = 0.5) {
 
 // On remet la valeur de la bar de recherche 
 // Init la valeur de la bar de recherche 
-function setWordSearch(){
+function setWordSearch() {
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {
         if (data) {
             // On récupère le fichier
@@ -781,16 +785,16 @@ function setWordSearch(){
             if (data.TypeChoose && data.TypeChoose === "Par auteur") {
                 selectElement.value = "auteur";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par titre")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par titre")) {
                 selectElement.value = "titre";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par sujet")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par sujet")) {
                 selectElement.value = "sujet";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par doi")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par doi")) {
                 selectElement.value = "noeud";
             }
-            else if ((data.TypeChoose && data.TypeChoose === "Par reference")){
+            else if ((data.TypeChoose && data.TypeChoose === "Par reference")) {
                 selectElement.value = "reference";
             }
         }
@@ -799,7 +803,7 @@ function setWordSearch(){
 setWordSearch();
 
 
-function setTextAJour(){
+function setTextAJour() {
     let texteAjour = document.getElementById("textRefresh");
     let estAJour;
 
@@ -808,7 +812,7 @@ function setTextAJour(){
             // On récupère le fichier
             data = JSON.parse(data);
             estAJour = data.estRecharger;
-            if (estAJour === "true"){
+            if (estAJour === "true") {
                 texteAjour.textContent = "Les paramètres et le graphes sont à jours !";
             }
             else {
