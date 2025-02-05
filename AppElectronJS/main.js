@@ -3,7 +3,6 @@ const path = require('node:path');
 const { spawn, exec, spawnSync } = require('child_process');
 const fs = require("fs");
 const { stdout, stderr } = require('node:process');
-const dialogs = require(path.join(__dirname, 'dialogs.js'));
 
 const isDev = process.env.NODE_ENV !== 'production';
 const logFilePath = path.join(__dirname, 'app.log');
