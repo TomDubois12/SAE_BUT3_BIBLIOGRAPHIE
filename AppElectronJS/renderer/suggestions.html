@@ -7,8 +7,7 @@
 
     Remerciements à CLEUZIOU Guillaume.
 -->
-
-<!DOCTYPE html>
+    
 <html lang="fr">
 
 <head>
@@ -18,7 +17,7 @@
 </head>
 
 <body>
-    <a href="accueil.html"><img src="images/retour.png" alt="flèche retour"></a>
+    <a href="search.html" id="fleche"><img src="images/retour.png" alt="flèche retour"></a>
     <div class="logo">
         <img src="images/logo.png" alt="logo de l'application" class="logo">
     </div>
@@ -42,6 +41,16 @@
 
     <script>
         async function afficher_suggestions() {
+            document.body.style.cursor = 'progress';
+
+            const buttonRechercher = document.getElementById('ajout-btn');
+            buttonRechercher.disabled = true;
+            buttonRechercher.style.border = 'solid gray';
+
+            const fleche = document.getElementById('fleche');
+            fleche.style.visibility = 'hidden';
+
+
             let div_suggest = document.getElementById('suggestions-container');
             var contenu = parseInt(document.getElementById('number-id').value);
             if (isNaN(contenu)) {
@@ -143,6 +152,12 @@
                 divInvisible.style.visibility = "hidden";
                 div_suggest.textContent = 'Erreur lors de la récupération des suggestions.';
             }
+
+            document.body.style.cursor = 'default';
+            buttonRechercher.disabled = false;
+            buttonRechercher.style.border = 'solid #F9CE72';
+
+            fleche.style.visibility = "visible";
         }
 
 
@@ -175,26 +190,36 @@
                 const doicontainer = document.getElementById(lookedDoi);
                 doicontainer.appendChild(buttonDOI);
 
+                const buttons = document.getElementsByClassName("suggestion-add-button");
+                for (i = 0; i < buttons.length; i++) {
+                    buttons[i].disabled = false;
+                    buttons[i].style.border = 'solid #F9CE72';
+                    buttons[i].disabled = false;
+                }
+
                 const button = document.getElementById(lookedDoi + "+1");
                 button.textContent = 'Article ajouté';
                 button.disabled = true;
                 button.style.border = 'solid green';
 
-
-                let divInvisible = document.getElementsByClassName("divInvisible")[0];
-                divInvisible.classList.add("invisibleBackground");
-                divInvisible.style.visibility = "hidden";
-                document.body.style.cursor = 'default';
+                const fleche = document.getElementById('fleche');
+                fleche.style.visibility = "visible";
             }
         });
 
 
         // Fonction pour ajouter l'article avec gestion du chargement
         async function ajouterArticle(doi) {
-            // Appel de l'API Electron pour ajouter l'article
-            let divInvisible = document.getElementsByClassName("divInvisible")[0];
-            divInvisible.classList.add("invisibleBackground");
-            divInvisible.style.visibility = "visible";
+
+            const fleche = document.getElementById('fleche');
+            fleche.style.visibility = 'hidden';
+            
+            const buttons = document.getElementsByClassName("suggestion-add-button");
+            for (i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = false;
+                buttons[i].style.border = 'solid gray';
+                buttons[i].disabled = true;
+            }
 
             // Désactiver le bouton pour éviter plusieurs clics
             const button = document.getElementById(doi + "+1");
