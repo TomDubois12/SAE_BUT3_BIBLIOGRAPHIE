@@ -1,0 +1,193 @@
+<!--
+    Crédits:
+    - Auteur : IUT Orléans Département Informatique
+    - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+    - Date de création : 11 septembre 2024
+    - Version : 1.0
+
+    Remerciements à CLEUZIOU Guillaume.
+-->
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="CSS/accueil.css">
+</head>
+
+<body>
+    <div class="logo">
+        <img src="images/logo.png" alt="logo de l'application" class="logo">
+    </div>
+    <div class="text">
+        <p class="title">Explorez les articles connectés sous forme de graphe</p>
+        <p class="textsearch">Pour commencer, saisissez un élement de recherche</p>
+    </div>
+
+
+    <nav class="navbar">
+        <input class="input" type="search" id="site-search" name="q" minlength="1"
+            placeholder="Indiquez un mot clé, un nom d’auteur, un titre ou encore un doi..." />
+        <select id="listBouton" onchange="changerChoix(this)">
+            <option class="auteur" value="auteur">Par auteur</option>
+            <option class="sujet" value="sujet">Par sujet</option>
+            <option class="titre" value="titre">Par titre</option>
+            <option class="noeud" value="noeud">Par doi</option>
+            <option class="reference" value="reference">Par reference</option>
+
+
+        </select>
+        <button id="search-btn">Rechercher</button>
+    </nav>
+
+    <div class="textIcons">
+        <p>Dans cette barre de recherche, vous pouvez essayer avec :</p>
+    </div>
+    <ul class="groupIcons">
+        <li>
+            <div>
+                <img src="images/Key_alt.png" alt="Un T" class="key">
+                <div class="text">
+                    <p>
+                        Un ou plusieurs mots clés
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div>
+                <img src="images/File_alt.png" alt="Un fichier" class="file">
+                <div class="text">
+                    <p>
+                        Un titre d'article
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div>
+                <img src="images/User_alt.png" alt="Un utilisateur" class="user">
+                <div class="text">
+                    <p>
+                        Un nom d'auteur
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div>
+                <img src="images/doi.png" alt="Un doi" class="doi">
+                <div class="text">
+                    <p>
+                        Un doi
+                    </p>
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="suggest">
+        <p class="biblio">Certains de vos articles font références à des articles qui n'apparaissent pas dans votre bibliographie.</p>
+        <button class="add" onclick="window.location.href='suggestions.html';">Voir ces articles</button>
+    </div>
+
+    <div class="CSV">
+        <div id="CSVInfo">
+            <p class="textsearch">Vous utilisez actuellement le CSV : 
+                <span id="textCSVChoose" class="title"> </span> qui contient :  
+                <span id="nbArticle"> </span> articles
+            </p>
+
+            <button id="buttonChangeCSV" class="input" onclick="changeCSV()">Charger un autre CSV</button>
+        </div>
+        <div class="exportCSV">
+            <p>Vous pouvez extraire ici tous les DOI des articles présents dans l'application.</p>
+            <button onclick=extract()>Extraire</button>
+        </div>
+        <div class="add-article">
+            <p class="biblio">Vous pouvez ajouter un article à votre bibliographie ici.</p>
+            <button class="add" onclick="window.location.href='ajout_article.html';">Ajouter un article</button>
+        </div>
+    </div>
+    <div class="divInvisible"></div>
+
+    <script>
+        function extract() {
+            const filePath = '../cache_doi.json';
+
+            fetch(filePath)
+                .then(response => {
+                    // Vérification si la requête a réussi (statut 200)
+                    if (!response.ok) {
+                        throw new Error('Erreur de récupération du fichier JSON');
+                    }
+                    return response.json(); // Conversion de la réponse en JSON
+                })
+                .then(data => {
+                    // Créer le contenu CSV
+                    let csvContent = "DOI\n"; // Entête du fichier CSV
+
+                    const keys = Object.keys(data);  // Obtenir toutes les clés de l'objet
+                    keys.forEach(key => {
+                        csvContent += `${key}\n`
+                        // Ici vous pouvez ajouter toute logique supplémentaire, comme afficher les DOI dans une liste
+                    });
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+                    const link = document.createElement('a');
+
+                    if (link.download !== undefined) {
+                        const url = URL.createObjectURL(blob);
+                        link.setAttribute('href', url);
+                        link.setAttribute('download', 'doi_list.csv');  // Nom du fichier CSV
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Impossible de récupérer le fichier JSON');
+                });
+        }
+        function getNbArticle() {
+            const filePath = '../cache_doi.json';
+
+            fetch(filePath)
+                .then(response => {
+                    // Vérification si la requête a réussi (statut 200)
+                    if (!response.ok) {
+                        throw new Error('Erreur de récupération du fichier JSON');
+                    }
+                    return response.json(); // Conversion de la réponse en JSON
+                })
+                .then(data => {
+                   
+                    let nbArticle = 0; 
+
+                    const keys = Object.keys(data);  // Obtenir toutes les clés de l'objet
+                    keys.forEach(key => {
+                        nbArticle += 1;
+                    });
+
+                    const textNbArticle = document.getElementById("nbArticle");
+                    textNbArticle.textContent = nbArticle;
+
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Impossible de récupérer le fichier JSON');
+                });
+        }
+
+        getNbArticle()
+    </script>
+
+    <script src="js/renderer.js"></script>
+
+</body>
+</html>
+

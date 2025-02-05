@@ -1,5 +1,14 @@
 
-
+/*
+ * Crédits :
+ * - Auteur : IUT Orléans Département Informatique
+ * - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+ * - Date de création : 11 septembre 2024
+ * - Version : 1.0
+ * - Description : Ce fichier sert à garder en mémoire la recherche
+ *
+ * Remerciements à CLEUZIOU Guillaume.
+ */
 
 function writeWordChoose(newWord){
     window.api.readFile('renderer/json/userSettings.json', (err, data) => {

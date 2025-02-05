@@ -1,3 +1,14 @@
+/*
+ * Crédits :
+ * - Auteur : IUT Orléans Département Informatique
+ * - Collaborateurs : BOISSAY Robin, BOISSAY Nathan, BRION Adèle, DUBOIS Tom
+ * - Date de création : 11 septembre 2024
+ * - Version : 1.0
+ * - Description : Ce fichier sert à afficher la barre de progression au chargement d'un csv
+ *
+ * Remerciements à CLEUZIOU Guillaume.
+ */
+
 export async function loadCSVName() {
     const response = await fetch('./json/userSettings.json');
     if (!response.ok) {
