@@ -64,9 +64,9 @@
         <div class="contenerButton">
             <button id="import-btn" onclick="document.getElementById('csv-input').click();">Ouvrir un fichier CSV</button>
         </div>
-        <p class="texttitle">Ou mettre à jours votre CSV</p>
+        <p class="texttitle">Ou mettre à jour votre CSV</p>
         
-        <button id="access-btn" onclick="window.electronAPI.miseAJourCache();">Mise à jours des données</button> <!--le but est de sauvegarder les donner actuel, supprimer le cache pour le remplacer avec les même données misent à jours-->
+        <button id="access-btn" onclick="window.electronAPI.miseAJourCache();">Mise à jour des données</button> <!--le but est de sauvegarder les donner actuel, supprimer le cache pour le remplacer avec les même données misent à jours-->
 
     </div>
 
@@ -79,7 +79,7 @@
         </div>
         <button id="access-btn" onclick="window.electronAPI.accessBiblioLectio();">Ajouter les données du CSV</button> <!-- le but est d'ajouter des données au données existante-->
 
-        <button id="access-btn" onclick="window.electronAPI.removeCache();window.electronAPI.accessBiblioLectio();">Remplacer les données actuel</button> <!-- le but est de remplacer les données actuel par ceux choisis par l'utilisateur-->
+        <button id="access-btn" onclick="window.electronAPI.removeCache();window.electronAPI.accessBiblioLectio();">Remplacer les données actuelles</button> <!-- le but est de remplacer les données actuel par ceux choisis par l'utilisateur-->
 
 
         <script>
