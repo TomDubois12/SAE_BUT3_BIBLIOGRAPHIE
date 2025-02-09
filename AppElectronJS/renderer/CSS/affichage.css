@@ -1,0 +1,391 @@
+html{
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    height: 100%;
+}
+
+
+.invisibleBackground{
+    visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #d3d3d309;
+    z-index: 100;
+    cursor: wait;
+    top:0%;
+    left:0%;
+}
+/* navbar */
+
+.contenerNavbar {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+}
+
+.logoNavbar {
+    display: flex;
+    justify-content: center;
+}
+
+.logoNavbar img {
+    max-width: 12vw;
+    max-height: 8vh;
+    margin-top: 2vh;
+    margin-left: 1vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+/* Recherche texte*/
+.navbar input {
+    flex-basis: 10%;
+    background-color: white;
+    color: black;
+    border: solid #F9CE72;
+    margin: 2.5vh 1vw;
+    border-radius: 25vh;
+    font-size: 1.5vh;
+    padding: 1vw;
+}
+
+.navbar input::placeholder {
+    color: #888;
+    padding-left: 1vh;
+}
+/*   _   */
+
+.navbar button, .add-article{
+    font-size: 1.5vh;
+    border-radius: 25vh;
+    background-color: white;
+    color: black;
+    border: solid;
+    border-color: #F9CE72;
+    justify-content: center;
+    margin: 2.5vh 1vw;
+    padding: 0vh 2vw;
+}
+
+/* Bouton rechercher */
+.navbar button{
+    flex-basis: 40%;
+    
+}
+
+.add-article {
+    position: absolute;
+    right: 0;
+    text-align: center;
+    padding: 1vw 4vh 1vw 4vh;
+}
+
+
+/* Effet hover pour les boutons */
+button:hover, .add-article:hover {
+    background-color: #F9CE72;
+    box-shadow: 0 5px 15px rgba(0, 122, 139, 0.3);
+}
+
+/*   _    */
+
+/* Select box */
+select{
+    max-height: 4em;
+    width: 10vw;
+    text-align: center;
+    display: flex;
+    margin: 2.5vh 1vw;
+    justify-content: center;
+}
+
+#listBouton{
+    background-color: white;
+    color: black;
+    border-radius: 3vh;
+    border: solid #F9CE72;
+    font-size: 1.5vh;
+}
+
+#listBouton:focus {
+    box-shadow: 0 0 1em #759BFF;
+    background-color: #F9CE72;
+}
+/*   _   */
+
+/*   _   */
+
+/* Style de base pour les boutons */
+.contenerCanvaAside button {
+    padding: 0.5vw 1vw;
+    font-size: 2vh;
+    border-radius: 0%;
+    border: none;
+    color: black;
+    margin-bottom: 4vh;
+}
+
+/* aside  */
+
+.contenerCanvaAside {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    max-width: 100%;
+    height: 90vh;
+}
+
+.legende{
+    position: absolute;
+    visibility: visible;
+    display: flex;
+    flex-wrap: nowrap;
+    top: 0%;
+    left:100%;
+    z-index: 10;
+}
+
+.echelle{
+    padding-left:2vh;
+    padding-top: 1vh;
+}
+
+.hide{
+    display: none;
+}
+
+/* Aside param */
+
+.criteres{
+    overflow-y: scroll;
+    height: 90vh;
+}
+
+.titleParam {
+    font-size: 4vh;
+    font-weight: bold;
+    margin-left: 1vw;
+}
+
+.subtitleParam {
+    font-size: 3vh;
+    font-weight: bold;
+    margin: 1vh 0vw;
+}
+
+.contenerListeParam {
+    border: 1px solid lightgray;
+    padding: 2vw;
+}
+
+.contenerListeParam ul {
+    list-style-type: none;
+    padding: 0;
+    display: inline;
+}
+
+#listeNbNoeuds li, #liste {
+    display: flex;
+}
+
+#listeContainer li, #liste {
+    display: flex;
+    align-items: center;
+}
+
+#listeContainer label{
+    margin-right: 2vh;
+}
+
+#listeNbNoeuds li p {
+    margin: 1vh 1vw;
+}
+
+#listeContainer .color-box {
+    margin-top: 2.5vh;
+}
+
+.color-box {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+    margin: 2vh 0.5vw;
+    border: 0.5px solid;
+}
+
+.contenerListeParam ul li p, label{
+    font-size: 1.5em;
+    margin: 0;
+    color: rgb(58, 56, 56);
+    font-weight: bolder;
+}
+
+.contenerListeParam ul li input {
+    margin: 2vh 0vw;
+    height: 2vh;
+    width: 4vh;
+}
+
+#listeContainer input {
+    margin: 1vh 0vw;
+}
+
+.asideParam {
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgray;
+    z-index: 10;
+    max-width: 25%; 
+    padding: 0.5vw;
+    height: 90vh;
+}
+
+/* Canva */
+
+.TargetDiv {
+    width: 100%;
+    height: 100%;
+}
+
+/* Aside infos */
+
+
+.generated-div {
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgray;
+    z-index: 10;
+    max-width: 25%;
+    top: 0;
+    right: 0;
+    padding: 1vh;
+    overflow-x: auto;  /* Pour activer le défilement horizontal si nécessaire */
+    overflow-y: scroll;  /* Pour activer le défilement vertical si nécessaire */
+    box-sizing: border-box; /* Inclut les bordures et le padding dans la hauteur */
+    flex-direction: column; /* Assurez-vous que la direction est en colonne */
+    height: 90vh; /* Limite la hauteur à 100% de la hauteur de l'écran */
+}
+
+
+
+
+.pTitle, .pYear, .pAuthor, .pAbstract, .pCitation, .pDOI, .buttonGenerateGraph {
+    margin-left: 0.5vw;
+}
+
+.pTitle {
+    font-size: 3.5vh;
+}
+
+.pYear, .pAuthor, .pAbstract, .pDOI, .pCitation, .buttonGenerateGraph {
+    font-size: 2vh;
+}
+
+
+input[type="color"] {
+    width: 3em;
+    height: 2em;
+    border: none;
+    border-radius: 25%;
+    background-color: transparent;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: 1px solid #363636;
+    border-radius: 15%;
+}
+
+input[type="color"]:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(99, 99, 99, 0.2);
+}
+
+/* Style quand tout est à jour */
+.textEstAJour {
+    color: #28a745;
+    background-color: #e6f9eb;
+    border: 1px solid #28a745;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Style quand ce n'est pas à jour */
+.textEstPasAJour {
+    color: #dc3545;
+    background-color: #fdecea;
+    border: 1px solid #dc3545;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+
+
+.wrapperNode{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.nodeMin{
+    width: 50px;
+    height: 50px;
+    background-color: gray;
+    border-radius: 100%;
+    margin-right: 1em;
+
+}
+
+.nodeMax{
+    background-color: gray;
+    border-radius: 100%;    
+    margin-left: 1em;
+}
+.nodeMaxText{
+    margin-left: 1em ;
+    display: flex;
+    justify-content: center;
+}
+.nodeMinText{
+    margin-right: 1em ;
+    display: flex;
+    justify-content: center;
+}
+.echelleNode{
+    display: flex;
+    flex-direction:  column;
+    position: absolute;
+    bottom: 0px;
+    left:100%;
+    align-items: center;
+    justify-content: center;
+    transform: translate(0,-50%);
+    margin-left: 1em;
+    margin-bottom: 1em;
+}

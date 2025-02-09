@@ -1,0 +1,73 @@
+{
+
+  "name": "BiblioLectIA",
+  "version": "1.0.0",
+  "description": "BiblioLectIA",
+  "productName": "BiblioLectIA",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build": "electron-builder"
+  },
+  "author": "IUT-Orleans",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.5.0",
+    "@electron-forge/maker-deb": "^7.5.0",
+    "@electron-forge/maker-rpm": "^7.5.0",
+    "@electron-forge/maker-squirrel": "^7.5.0",
+    "@electron-forge/maker-zip": "^7.5.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
+    "@electron-forge/plugin-fuses": "^7.5.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^32.3.0",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^17.1.2",
+    "parcel": "^2.12.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.2",
+    "child_process": "^1.0.2",
+    "electron-squirrel-startup": "^1.0.1",
+    "pouchdb-adapter-idb": "^9.0.0",
+    "python-shell": "^5.0.0",
+    "rxdb": "^12.7.16",
+    "rxjs": "^7.8.1"
+  },
+  "build": {
+    "appId": "com.example.yourapp",
+    "productName": "BiblioLectIA",
+    "directories": {
+      "output": "BiblioLectIA"
+    },
+    "files": [
+      "node_modules/**/*",
+      "**/*",
+      "/venv/**/*",
+      {
+        "from": "renderer/json/userSettings.json",
+        "to": "resources/renderer/json/userSettings.json"
+      },
+      {
+        "from": "cache_dio.json",
+        "to": "resources/cache_doi.json"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icons/icon.ico"
+    }
+  }
+}
