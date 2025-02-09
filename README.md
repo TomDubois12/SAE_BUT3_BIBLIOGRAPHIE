@@ -1,59 +1,74 @@
 # SAE_BUT3_BIBLIOGRAPHIE
 
+Guide d'installation et de lancement de l'application
 
+Ce guide vous explique étape par étape comment installer et lancer l'application.
 
-To start the app : 
+1. Cloner le dépôt GitHub
 
-    cd AppElectronJS
-    npm start
+Si vous êtes familier avec Git, vous pouvez cloner le dépôt en exécutant la commande suivante dans un terminal :
 
-// start app and autorestart on change.
-npx electromon .
+git clone <URL_DU_DEPOT>
 
-// Tuto sympa pour ElectronJS
-https://www.youtube.com/watch?v=ML743nrkMHw&t=288s
+Sinon, suivez ces étapes :
 
+Rendez-vous sur le lien du dépôt GitHub.
 
-https://www.electronjs.org/docs/latest/tutorial/tutorial-first-app
+Cliquez sur le bouton "Code".
 
-mkdir my-electron-app && cd my-electron-app
-npm init
+Sélectionnez "Télécharger ZIP".
+
+Une fois le fichier ZIP téléchargé, extrayez son contenu sur votre PC.
+
+2. Ouvrir un terminal dans le dossier du projet
+
+Après avoir obtenu le dossier du projet, placez-vous dans l'endroit où il est situé et ouvrez un terminal.
+
+3. Créer un environnement virtuel (venv)
+
+Avant d'installer les dépendances, il est recommandé d'utiliser un environnement virtuel Python :
+
+virtualenv venv
+
+Cette commande crée un environnement virtuel où seront installées les dépendances du projet.
+
+4. Activer l'environnement virtuel
+
+Sous Linux/macOS :
+
+source venv/bin/activate
+
+5. Accéder au dossier de l'application Electron
+
+Une fois l'environnement virtuel activé, accédez au dossier AppElectronJS de l'application :
+
+cd SAE_BUT3_BIBLIOGRAPHIE/AppElectronJS
+
+6. Installer les dépendances Python
+
+Assurez-vous d'avoir Python et pip installés. Si ce n'est pas le cas, consultez un tutoriel d'installation de Python.
+Ensuite, installez les dépendances en exécutant :
+
+pip install -r requirements.txt
+
+7. Vérifier l'installation de npm
+
+Assurez-vous que npm est installé sur votre machine en faisant npm -v. Si ce n'est pas le cas, installez-le en suivant les instructions sur le site officiel de Node.js.
+
+8. Lancer l'application
+
+Une fois tout installé, lancez l'application avec la commande suivante :
+
+npm start
+
+Si la commande ne fonctionne pas, essayez d'abord d'installer Electron avec :
 
 npm install electron --save-dev
 
+Puis relancez la commande :
 
-npm install --save @electron/remote
+npm start
 
-https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging
-
-npm install --save-dev @electron-forge/cli
-npx electron-forge import
+Votre application devrait maintenant être opérationnelle ! 🚀
 
 
-apt install rpm     ou rpmbuild
-npm run make
-
-
-
-voir ça https://www.youtube.com/watch?v=2inAo5aa_AU
-
-npm install python-shell
-
-
-
-
-{"userName":"Nathan",
-"ColorPickerSettings":
-[
-    {"liaisonName":"Similarité","color":"#3f0808","check":"false"},
-    {"liaisonName":"Citation","color":"#071c83","check":"true"},
-    {"liaisonName":"Nom de conférence","color":"#ab1212","check":"false"},
-    {"liaisonName":"Date de publication","color":"#6fff47","check":"true"}
-],
-"ListeNoeudSettings":
-[
-    {"NoeudsName":"nbOriginNodes","color":"#3f0808","value":"15"},
-    {"NoeudsName":"nbEnvironnentNodes","color":"#071c83","value":"3"}
-],
-"pathDirectoryCSV":"./Data",
-"CSVChoose":"Bibliographie.csv"}
