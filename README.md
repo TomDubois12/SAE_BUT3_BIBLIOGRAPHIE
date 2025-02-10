@@ -1,5 +1,19 @@
 # SAE_BUT3_BIBLIOGRAPHIE
 
+## Lancer via l'exécutable
+Attention : cette méthode ne fonctionne que sous Windows.
+
+Téléchargez le dossier compressé via le lien suivant :
+
+Extrayez le dossier à l'emplacement de votre choix sur votre ordinateur.
+
+L'exécutable se trouve dans "BiblioLectIA-exe-win32-x64/BiblioLectIA-exe".
+Cliquez dessus pour lancer l'application.
+
+Vous pouvez également créer un raccourci sur le bureau pour un accès plus rapide.
+
+## Lancer via un terminal
+
 Guide d'installation et de lancement de l'application
 
 Ce guide vous explique étape par étape comment installer et lancer l'application.
@@ -53,9 +67,19 @@ pip install -r requirements.txt
 
 7. Vérifier l'installation de npm
 
-Assurez-vous que npm est installé sur votre machine en faisant npm -v. Si ce n'est pas le cas, installez-le en suivant les instructions sur le site officiel de Node.js.
+Assurez-vous que npm est installé sur votre machine en faisant npm -v. Si ce n'est pas le cas, installez-le en suivant les instructions sur le site officiel de Node.js.pL
 
-8. Lancer l'application
+8. Placer correctement le venv
+
+Pour que l'application fonctionne correctement sous Linux, le venv doit être placé correctement par rapport au projet.
+
+Pour ce faire, vous avez deux possibilités :
+
+- Soit placer le dossier venv deux niveaux avant ./AppElectronJS (../../venv).
+- Soit modifier le chemin relatif à la ligne 19 du fichier ./AppElectronJS/main.js (en sachant que __dirname correspond à ./AppElectronJS).
+Si votre venv est au même niveau que le dossier ./AppElectronJS, la ligne 19 ressemblera à : "pythonExecutable = path.join(__dirname, 'venv', 'bin', 'python');"
+
+9. Lancer l'application
 
 Une fois tout installé, lancez l'application avec la commande suivante :
 
