@@ -3,7 +3,8 @@
 ## Lancer via l'exécutable
 Attention : cette méthode ne fonctionne que sous Windows.
 
-Téléchargez le dossier compressé via le lien suivant :
+Téléchargez le dossier compressé via le lien suivant : https://www.swisstransfer.com/d/d2de1357-567e-40c8-a831-5b3957fdd57a
+(Lien disponible jusqu'au 12/03/2025)
 
 Extrayez le dossier à l'emplacement de votre choix sur votre ordinateur.
 
