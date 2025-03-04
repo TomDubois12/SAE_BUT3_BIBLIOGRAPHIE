@@ -14,6 +14,7 @@ Remerciements à CLEUZIOU Guillaume.
 import os
 import sys
 import json
+from dotenv import load_dotenv
 
 # Répertoire actuel du script (mainPyvis.py)
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +37,8 @@ from sentence_transformers import SentenceTransformer, util
 sys.stdout.reconfigure(encoding='utf-8')
 
 # Charger le modèle pré-entraîné
-model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
+load_dotenv()
+model = SentenceTransformer('TomDubois12/fine-tuned-model', token=os.getenv("HF_TOKEN"))
 
 # Charger le fichier JSON
 #cache_doi = "cache_doi.json"

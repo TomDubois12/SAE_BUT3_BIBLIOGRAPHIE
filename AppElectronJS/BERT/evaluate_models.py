@@ -14,10 +14,13 @@ Remerciements à CLEUZIOU Guillaume.
 import pandas as pd
 import torch
 from sentence_transformers import SentenceTransformer, util
+from dotenv import load_dotenv
+import os
 
 # Charger le modèle
 # model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
-model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
+load_dotenv()
+model = SentenceTransformer('TomDubois12/fine-tuned-model', token=os.getenv("HF_TOKEN"))
 
 def evaluate_model(df):
     # Vérifier les colonnes disponibles

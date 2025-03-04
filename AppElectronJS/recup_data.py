@@ -21,6 +21,8 @@ import requests
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
+
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -344,8 +346,8 @@ def recuperate_data(cache_fi='cache_doi.json'):
 
     return data
 
-#model = SentenceTransformer('TomDubois12/fine-tuned-model', token="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")
-def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned-model', token="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"),
+load_dotenv()
+def load_or_compute_embeddings(model=SentenceTransformer('TomDubois12/fine-tuned-model', token=os.getenv("HF_TOKEN")),
                                embedding_file=cache_file, title_weight=0.5, abstract_weight=0.5):
     """
     Charge les titres et résumés depuis un fichier JSON, génère les embeddings si nécessaires, et les ajoute au fichier.

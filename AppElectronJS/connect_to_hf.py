@@ -11,7 +11,7 @@ repo_name = "fine-tuned-model"  # Remplace par le nom du dépôt sur Hugging Fac
 # Charger le modèle fine-tuné depuis le dossier local avec encodage explicite
 try:
     print(f"Chargement du modèle depuis {repo_name}...")
-    model = SentenceTransformer("BERT/fine_tuned_model")  # Assure-toi que le chemin est correct
+    model = SentenceTransformer("BERT/fine_tuned_model")
 
     # Pousser le modèle vers Hugging Face
     print(f"Envoi du modèle vers {repo_name} sur Hugging Face...")
@@ -25,5 +25,4 @@ except Exception as e:
 
 
 
-#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
 #TomDubois12/fine-tuned-model
